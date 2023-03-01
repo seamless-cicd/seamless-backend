@@ -27,4 +27,34 @@ async function getAll() {
   }
 }
 
-export default { getAll };
+async function getOne(pipelineID: string) {
+  try {
+    const allPipelines = await prisma.pipeline.findUnique({
+      where: {
+        id: pipelineID
+      },
+      include: {
+        services: {
+          include: {
+            runs: {
+              include: {
+                stages: {
+                  include: {
+                    log: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    await prisma.$disconnect();
+    return allPipelines;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAll, getOne };
