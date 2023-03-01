@@ -10,6 +10,7 @@ app.use(cors());
 
 app.use('/', homeRouter);
 app.use('/pipelines', pipelinesRouter);
+// app.use('/pipelines', pipelinesRouter);
 
 const PORT = process.env.PORT || 3001;
 
