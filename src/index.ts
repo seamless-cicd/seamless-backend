@@ -10,12 +10,10 @@ app.use(cors());
 
 app.use('/', homeRouter);
 app.use('/pipelines', pipelinesRouter);
-// app.use('/pipelines', pipelinesRouter);
 
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
   console.log(`Server listening on ${PORT}`);
 });
 
