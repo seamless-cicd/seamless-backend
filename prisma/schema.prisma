@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResourceType {
+  PIPELINE
+  SERVICE
+  RUN
+  STAGE
+  LOG
+}
+
+enum Status {
+  SUCCESS
+  FAILURE
+  IN_PROGRESS
+}
+
+enum TriggerType {
+  COMMIT
+  PR_OPEN
+  PR_SYNC
+}
+
+enum StageType {
+  PREPARE
+  CODE_QUALITY
+  UNIT_TEST
+  INTEGRATION_TEST
+  BUILD
+  DEPLOY_STAGING
+  DEPLOY_PROD
+}
+
+model EnvironmentVariable {
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  resourceId   String
+  resourceType ResourceType
+  name         String
+  value        String
+}
+
+model Pipeline {
+  id                 String    @id @default(uuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  name               String?
+  githubPat          String
+  awsAccessKey       String
+  awsSecretAccessKey String
+  awsFargateCluster  String
+  lastRunAt          DateTime?
+  services           Service[]
+}
+
+model Service {
+  id                 String    @id @default(uuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  name               String?
+  triggerOnCommit    Boolean   @default(true)
+  triggerOnPrOpen    Boolean   @default(false)
+  triggerOnPrSync    Boolean   @default(false)
+  useStaging         Boolean   @default(false)
+  githubRepository   String
+  awsEcrRepository   String
+  awsFargateService  String
+  testCommand        String?
+  codeQualityCommand String?
+  dockerfilePath     String?
+  Pipeline           Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  pipelineId         String?
+  runs               Run[]
+
+  @@index([pipelineId])
+}
+
+model Run {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  startedAt     DateTime
+  endedAt       DateTime?
+  duration      Int?
+  commitHash    String?
+  commitMessage String?
+  committer     String?
+  status        Status      @default(IN_PROGRESS)
+  triggerType   TriggerType
+  Service       Service?    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId     String?
+  stages        Stage[]
+
+  @@index([serviceId])
+}
+
+model Stage {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  type        StageType @default(PREPARE)
+  startedAt   DateTime
+  endedAt     DateTime?
+  duration    Int?
+  status      Status    @default(IN_PROGRESS)
+  containerId String?
+  Run         Run?      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  runId       String?
+  log         Log?
+
+  @@index([runId])
+}
+
+// Stage:Log 1:1
+model Log {
+  id      String  @id @default(uuid())
+  url     String?
+  data    Json?
+  stage   Stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  stageId String  @unique
+}
