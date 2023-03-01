@@ -12,8 +12,11 @@ pipelinesRouter.get('/:pipelineID', async (req: Request, res: Response) => {
   const { pipelineID } = req.params;
   const pipelineData = await pipelinesService.getOne(pipelineID);
   res.status(200).json(pipelineData);
+});
 
-  // pipelines/349-ekei2939
+pipelinesRouter.post('/:pipelineID', async (req: Request, res: Response) => {
+  // logic will kick off the step functions
+  // will use AWS SDK for JS
 });
 
 export default pipelinesRouter;
