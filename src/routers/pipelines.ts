@@ -1,10 +1,11 @@
 import express, { Request, Response } from 'express';
+import pipelinesService from '../services/pipelines';
 
 const pipelinesRouter = express.Router();
 
-pipelinesRouter.get('/', (req: Request, res: Response) => {
-  // use prism ORM to retrieve data from db
-  res.send('pipeline route');
+pipelinesRouter.get('/', async (req: Request, res: Response) => {
+  const pipelinesData = await pipelinesService.getAll();
+  res.status(200).json(pipelinesData);
 });
 
 export default pipelinesRouter;
