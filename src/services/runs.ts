@@ -16,4 +16,19 @@ async function getAllForService(serviceId: string) {
   }
 }
 
-export default { getAllForService };
+async function getOne(runId: string) {
+  try {
+    const run = await prisma.run.findUnique({
+      where: {
+        id: runId
+      }
+    });
+    await prisma.$disconnect();
+    return run;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAllForService, getOne };
