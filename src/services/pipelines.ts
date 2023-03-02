@@ -1,4 +1,6 @@
 import prisma from './prismaClient';
+import { ResourceType, EnvironmentVariable } from '@prisma/client';
+import envVarsService from './envVars';
 
 async function getAll() {
   try {
@@ -19,6 +21,27 @@ async function getAll() {
         },
       },
     });
+
+    // Retrieve env vars for all pipelines
+    const envVars = await envVarsService.getAll(ResourceType.PIPELINE);
+    // Group env vars by pipeline id
+    const groupedEnvVars = envVars?.reduce(
+      (entryMap, e) =>
+        entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
+      new Map(),
+    );
+    // Insert into the associated pipeline object inside allPipelines
+    allPipelines.forEach((pipeline) => {
+      const envVarsForPipeline: EnvironmentVariable[] = groupedEnvVars?.get(
+        pipeline.id,
+      );
+      const flattenedEnvVars: { [key: string]: string } = {};
+      envVarsForPipeline?.forEach((envVar) => {
+        flattenedEnvVars[envVar.name] = envVar.value;
+      });
+      Object.assign(pipeline, flattenedEnvVars);
+    });
+
     await prisma.$disconnect();
     return allPipelines;
   } catch (e) {
@@ -29,9 +52,9 @@ async function getAll() {
 
 async function getOne(pipelineID: string) {
   try {
-    const allPipelines = await prisma.pipeline.findUnique({
+    const pipeline = await prisma.pipeline.findUnique({
       where: {
-        id: pipelineID
+        id: pipelineID,
       },
       include: {
         services: {
@@ -49,8 +72,20 @@ async function getOne(pipelineID: string) {
         },
       },
     });
+
+    // Retrieve env vars for this pipeline
+    const envVars = await envVarsService.getOne(
+      ResourceType.PIPELINE,
+      pipelineID,
+    );
+    // Insert env vars into the pipeline object
+    const flattenedEnvVars: { [key: string]: string } = {};
+    envVars?.forEach((envVar) => {
+      flattenedEnvVars[envVar.name] = envVar.value;
+    });
+
     await prisma.$disconnect();
-    return allPipelines;
+    return { ...pipeline, ...flattenedEnvVars };
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
