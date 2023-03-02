@@ -11,4 +11,11 @@ runsRouter.get('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(serviceData);
 });
 
+// retrieves data for the header with run info
+runsRouter.get('/header/:runId', async (req: Request, res: Response) => {
+  const { runId } = req.params;
+  const runData = await runsService.getOne(runId);
+  res.status(200).json(runData);
+});
+
 export default runsRouter;
