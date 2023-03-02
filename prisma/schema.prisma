@@ -1,5 +1,7 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// npx prisma migrate dev --name migration_name
+// npx prisma migrate deploy
 
 generator client {
   provider = "prisma-client-js"
@@ -16,12 +18,14 @@ enum ResourceType {
   RUN
   STAGE
   LOG
+  OTHER
 }
 
 enum Status {
   SUCCESS
   FAILURE
   IN_PROGRESS
+  IDLE
 }
 
 enum TriggerType {
@@ -38,6 +42,7 @@ enum StageType {
   BUILD
   DEPLOY_STAGING
   DEPLOY_PROD
+  OTHER
 }
 
 model EnvironmentVariable {
@@ -58,7 +63,6 @@ model Pipeline {
   githubPat          String
   awsAccessKey       String
   awsSecretAccessKey String
-  awsFargateCluster  String
   lastRunAt          DateTime?
   services           Service[]
 }
@@ -73,8 +77,6 @@ model Service {
   triggerOnPrSync    Boolean   @default(false)
   useStaging         Boolean   @default(false)
   githubRepository   String
-  awsEcrRepository   String
-  awsFargateService  String
   testCommand        String?
   codeQualityCommand String?
   dockerfilePath     String?
