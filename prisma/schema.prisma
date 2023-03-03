@@ -75,6 +75,7 @@ model Service {
   triggerOnPrOpen        Boolean   @default(false)
   triggerOnPrSync        Boolean   @default(false)
   useStaging             Boolean   @default(false)
+  autoDeploy             Boolean   @default(false)
   githubRepoUrl          String
   unitTestCommand        String?
   integrationTestCommand String?
