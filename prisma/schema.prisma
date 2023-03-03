@@ -17,7 +17,6 @@ enum ResourceType {
   SERVICE
   RUN
   STAGE
-  LOG
   OTHER
 }
 
@@ -29,7 +28,7 @@ enum Status {
 }
 
 enum TriggerType {
-  COMMIT
+  MAIN
   PR_OPEN
   PR_SYNC
 }
@@ -38,8 +37,8 @@ enum StageType {
   PREPARE
   CODE_QUALITY
   UNIT_TEST
-  INTEGRATION_TEST
   BUILD
+  INTEGRATION_TEST
   DEPLOY_STAGING
   DEPLOY_PROD
   OTHER
@@ -63,26 +62,28 @@ model Pipeline {
   githubPat          String
   awsAccessKey       String
   awsSecretAccessKey String
-  lastRunAt          DateTime?
   services           Service[]
 }
 
 model Service {
-  id                 String    @id @default(uuid())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  name               String?
-  triggerOnCommit    Boolean   @default(true)
-  triggerOnPrOpen    Boolean   @default(false)
-  triggerOnPrSync    Boolean   @default(false)
-  useStaging         Boolean   @default(false)
-  githubRepository   String
-  testCommand        String?
-  codeQualityCommand String?
-  dockerfilePath     String?
-  Pipeline           Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
-  pipelineId         String?
-  runs               Run[]
+  id                     String    @id @default(uuid())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  name                   String?
+  lastRunAt              DateTime?
+  triggerOnMain          Boolean   @default(true)
+  triggerOnPrOpen        Boolean   @default(false)
+  triggerOnPrSync        Boolean   @default(false)
+  useStaging             Boolean   @default(false)
+  githubRepoUrl          String
+  unitTestCommand        String?
+  integrationTestCommand String?
+  codeQualityCommand     String?
+  dockerfilePath         String    @default(".")
+  dockerComposeFilePath  String?
+  Pipeline               Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  pipelineId             String?
+  runs                   Run[]
 
   @@index([pipelineId])
 }
@@ -90,7 +91,8 @@ model Service {
 model Run {
   id            String      @id @default(uuid())
   createdAt     DateTime    @default(now())
-  startedAt     DateTime
+  updatedAt     DateTime    @updatedAt
+  startedAt     DateTime    @default(now())
   endedAt       DateTime?
   duration      Int?
   commitHash    String?
@@ -106,26 +108,16 @@ model Run {
 }
 
 model Stage {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  type        StageType @default(PREPARE)
-  startedAt   DateTime
-  endedAt     DateTime?
-  duration    Int?
-  status      Status    @default(IN_PROGRESS)
-  containerId String?
-  Run         Run?      @relation(fields: [runId], references: [id], onDelete: Cascade)
-  runId       String?
-  log         Log?
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  type      StageType
+  startedAt DateTime?
+  endedAt   DateTime?
+  duration  Int?
+  status    Status    @default(IDLE)
+  Run       Run?      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  runId     String?
 
   @@index([runId])
-}
-
-// Stage:Log 1:1
-model Log {
-  id      String  @id @default(uuid())
-  url     String?
-  data    Json?
-  stage   Stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
-  stageId String  @unique
 }
