@@ -51,12 +51,35 @@ async function getOne(serviceId: string) {
 }
 
 async function createOne(serviceData: any) {
+  // split serviceData argument into what is needed for each create method
+  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceData;
+
   try {
     const service = await prisma.service.create({
-      data: serviceData
+      data: serviceTableData // change this to serviceTableData
     });
+
+    // handling of env
+
+    const envVarsCount = await prisma.environmentVariable.createMany({
+      data: [
+        {
+          name: 'awsEcrRepo',
+          value: awsEcrRepo,
+          resourceId: service.id,
+          resourceType: ResourceType.SERVICE,
+        },
+        {
+          name: 'awsEcsService',
+          value: awsEcsService,
+          resourceId: service.id,
+          resourceType: ResourceType.SERVICE,
+        }
+      ]
+    });
+
     await prisma.$disconnect();
-    return service;
+    return [service, envVarsCount];
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
