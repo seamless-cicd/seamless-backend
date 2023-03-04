@@ -9,4 +9,10 @@ servicesRouter.get('/', async (req: Request, res: Response) => {
   res.status(200).json(servicesData);
 });
 
+servicesRouter.get('/:serviceId', async (req: Request, res: Response) => {
+  const { serviceId } = req.params;
+  const serviceData = await servicesService.getOne(serviceId);
+  res.status(200).json(serviceData);
+});
+
 export default servicesRouter;
