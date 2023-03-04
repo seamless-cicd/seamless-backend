@@ -35,4 +35,19 @@ async function getAll() {
   }
 }
 
-export default { getAll };
+async function getOne(serviceId: string) {
+  try {
+    const service = await prisma.service.findUnique({
+      where: {
+        id: serviceId
+      }
+    });
+    await prisma.$disconnect();
+    return service;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAll, getOne };
