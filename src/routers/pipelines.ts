@@ -8,13 +8,13 @@ pipelinesRouter.get('/', async (req: Request, res: Response) => {
   res.status(200).json(pipelinesData);
 });
 
-pipelinesRouter.get('/:pipelineID', async (req: Request, res: Response) => {
-  const { pipelineID } = req.params;
-  const pipelineData = await pipelinesService.getOne(pipelineID);
+pipelinesRouter.get('/:pipelineId', async (req: Request, res: Response) => {
+  const { pipelineId } = req.params;
+  const pipelineData = await pipelinesService.getOne(pipelineId);
   res.status(200).json(pipelineData);
 });
 
-pipelinesRouter.post('/:pipelineID', async (req: Request, res: Response) => {
+pipelinesRouter.post('/:pipelineId', async (req: Request, res: Response) => {
   // logic will kick off the step functions
   // will use AWS SDK for JS
 });
