@@ -15,4 +15,11 @@ servicesRouter.get('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(serviceData);
 });
 
+// will post data when a new service is created via form
+servicesRouter.post('/', async (req: Request, res: Response) => {
+  const serviceData = req.body;
+  const dbResponse = await servicesService.createOne(serviceData);
+  res.status(200).json(dbResponse);
+});
+
 export default servicesRouter;

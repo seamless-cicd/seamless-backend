@@ -50,4 +50,17 @@ async function getOne(serviceId: string) {
   }
 }
 
-export default { getAll, getOne };
+async function createOne(serviceData: any) {
+  try {
+    const service = await prisma.service.create({
+      data: serviceData
+    });
+    await prisma.$disconnect();
+    return service;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAll, getOne, createOne };
