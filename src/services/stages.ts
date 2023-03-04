@@ -1,7 +1,7 @@
 import prisma from './prismaClient';
 
 // runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
-async function getAllForRun(runId: string) {
+async function getAllForRun(runId: any) {
   try {
     const allStages = await prisma.stage.findMany({
       where: {
