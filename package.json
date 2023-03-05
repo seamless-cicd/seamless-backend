@@ -13,6 +13,9 @@
   },
   "author": "Seamless",
   "license": "ISC",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^4.11.0",
     "babel-eslint": "^10.1.0",
