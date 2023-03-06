@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import runsService from '../services/runs';
+import stagesService from '../services/stages';
 
 const runsRouter = express.Router();
 
@@ -16,16 +17,16 @@ runsRouter.get('/:runId', async (req: Request, res: Response) => {
 });
 
 // post to runs router when run button is clicked on a service
+// this will create an empty run and corresponding empty stages for use since
+// a run has stages
 runsRouter.post('', async (req: Request, res: Response) => {
   const { serviceId } = req.query;
 
-  // create a new run in db
+  // create a new empty run in db
   const newRun: any = await runsService.createOne(serviceId);
-  console.log(newRun.id);
 
-
-  // create a new stages data in the db using the newRun id
-
+  // create new empty stages data in the db using the newRun id
+  await stagesService.createAll(newRun.id);
 
   res.status(200).json(newRun);
 });

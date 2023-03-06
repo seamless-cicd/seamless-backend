@@ -33,9 +33,7 @@ async function getOne(runId: string) {
 }
 
 
-// method to create a run - will be used to create empty run & stages
-// this is for state machine to use
-// serviceId has to already exist in service table to satisfy foreign key constraint
+// method to create a run - will be used to create empty run 
 async function createOne(serviceId: any) {
   try {
     const run = await prisma.run.create({
@@ -45,9 +43,6 @@ async function createOne(serviceId: any) {
         serviceId: serviceId,
       }
     });
-
-    // now add stages that are linked to this run
-
     await prisma.$disconnect();
     return run;
   } catch (e) {
