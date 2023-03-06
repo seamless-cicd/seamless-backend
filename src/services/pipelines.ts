@@ -11,9 +11,6 @@ async function getAll() {
             runs: {
               include: {
                 stages: {
-                  include: {
-                    log: true,
-                  },
                 },
               },
             },
@@ -62,9 +59,6 @@ async function getOne(pipelineID: string) {
             runs: {
               include: {
                 stages: {
-                  include: {
-                    log: true,
-                  },
                 },
               },
             },
