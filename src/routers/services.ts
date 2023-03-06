@@ -22,4 +22,10 @@ servicesRouter.post('/', async (req: Request, res: Response) => {
   res.status(200).json(dbResponse);
 });
 
+servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
+  const { serviceId } = req.params;
+  const deleteData = await servicesService.deleteOne(serviceId);
+  res.status(200).json(deleteData);
+});
+
 export default servicesRouter;

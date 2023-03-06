@@ -10,4 +10,10 @@ stagesRouter.get('', async (req: Request, res: Response) => {
   res.status(200).json(serviceData);
 });
 
+stagesRouter.delete('/:stageId', async (req: Request, res: Response) => {
+  const { stageId } = req.params;
+  const deleteData = await stagesService.deleteOne(stageId);
+  res.status(200).json(deleteData);
+});
+
 export default stagesRouter;
