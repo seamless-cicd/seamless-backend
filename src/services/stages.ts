@@ -16,6 +16,21 @@ async function getAllForRun(runId: any) {
   }
 }
 
+async function deleteOne(id: any) {
+  try {
+    const deleted = await prisma.stage.delete({
+      where: {
+        id: id
+      }
+    });
+    await prisma.$disconnect();
+    return deleted;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
 async function createAll(runId: any) {
   try {
     await Promise.all([
@@ -151,4 +166,4 @@ async function createDeployProd(runId: any) {
   }  
 }
 
-export default { getAllForRun, createAll };
+export default { getAllForRun, createAll, deleteOne };
