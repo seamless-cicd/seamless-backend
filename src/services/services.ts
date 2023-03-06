@@ -2,6 +2,7 @@ import prisma from './prismaClient';
 import { ResourceType, EnvironmentVariable } from '@prisma/client';
 import envVarsService from './envVars';
 
+
 // gets all services - only top level data - assumes one pipeline
 async function getAll() {
   try {
@@ -83,4 +84,19 @@ async function createOne(serviceData: any) {
   }
 }
 
-export default { getAll, getOne, createOne };
+async function deleteOne(id: any) {
+  try {
+    const deleted = await prisma.service.delete({
+      where: {
+        id: id
+      }
+    });
+    await prisma.$disconnect();
+    return deleted;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAll, getOne, createOne, deleteOne };
