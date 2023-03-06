@@ -39,7 +39,7 @@ async function createOne(serviceId: any) {
     const run = await prisma.run.create({
       data: {
         startedAt: new Date(),
-        triggerType: TriggerType.COMMIT,
+        triggerType: TriggerType.MAIN,
         serviceId: serviceId,
       }
     });
