@@ -51,4 +51,19 @@ async function createOne(serviceId: any) {
   }
 }
 
-export default { getAllForService, getOne, createOne };
+async function deleteOne(id: any) {
+  try {
+    const deleted = await prisma.run.delete({
+      where: {
+        id: id
+      }
+    });
+    await prisma.$disconnect();
+    return deleted;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAllForService, getOne, createOne, deleteOne };

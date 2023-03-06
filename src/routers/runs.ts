@@ -31,4 +31,10 @@ runsRouter.post('', async (req: Request, res: Response) => {
   res.status(200).json(newRun);
 });
 
+runsRouter.delete('/:runId', async (req: Request, res: Response) => {
+  const { runId } = req.params;
+  const deleteData = await runsService.deleteOne(runId);
+  res.status(200).json(deleteData);
+});
+
 export default runsRouter;
