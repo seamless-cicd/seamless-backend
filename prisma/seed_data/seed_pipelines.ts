@@ -34,7 +34,7 @@ export const seedPipelines = async () => {
                       {
                         type: StageType.PREPARE,
                         startedAt: '2022-02-28T11:00:00.000Z',
-                        status: Status.IN_PROGRESS,
+                        status: Status.IDLE,
                       },
                       {
                         type: StageType.CODE_QUALITY,
