@@ -13,12 +13,16 @@
   },
   "author": "Seamless",
   "license": "ISC",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^4.11.0",
     "babel-eslint": "^10.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "prisma-zod-generator": "^0.8.11"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.0",
