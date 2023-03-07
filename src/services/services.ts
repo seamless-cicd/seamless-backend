@@ -99,4 +99,20 @@ async function deleteOne(id: any) {
   }
 }
 
-export default { getAll, getOne, createOne, deleteOne };
+async function updateOne(id: any, data: any) {
+  try {
+    const updated = await prisma.service.update({
+      where: {
+        id: id
+      },
+      data: data
+    });
+    await prisma.$disconnect();
+    return updated;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAll, getOne, createOne, deleteOne, updateOne };
