@@ -28,4 +28,11 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(deleteData);
 });
 
+servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
+  const { serviceId } = req.params;
+  const data = req.body;
+  const updatedData = servicesService.updateOne(serviceId, data);
+  res.status(200).json(updatedData);
+});
+
 export default servicesRouter;
