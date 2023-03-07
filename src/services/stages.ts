@@ -6,7 +6,10 @@ async function getAllForRun(runId: any) {
     const allStages = await prisma.stage.findMany({
       where: {
         runId: runId
-      }
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
     await prisma.$disconnect();
     return allStages;
@@ -31,17 +34,16 @@ async function deleteOne(id: any) {
   }
 }
 
+// This replaced a promise.all - this below will create stages in order, this is important so they get a createdAt in the order of the stages, stages will then be displayed based off of this timestamp/order
 async function createAll(runId: any) {
   try {
-    await Promise.all([
-      createPrepare(runId),
-      createCodeQuality(runId),
-      createUnitTest(runId),
-      createIntegrationTest(runId),
-      createBuild(runId),
-      createDeployStaging(runId),
-      createDeployProd(runId),
-    ]);
+    await createPrepare(runId);
+    await createCodeQuality(runId);
+    await createUnitTest(runId);
+    await createIntegrationTest(runId);
+    await createBuild(runId);
+    await createDeployStaging(runId);
+    await createDeployProd(runId);
   } catch (error) {
     console.log(error);
   }
