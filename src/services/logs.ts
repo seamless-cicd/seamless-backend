@@ -1,3 +1,4 @@
+import { decodeTime } from 'ulidx';
 import axios from 'axios';
 import { Redis } from 'ioredis';
 import { REDIS_HOST, REDIS_PORT } from '../utils/config';
@@ -66,16 +67,13 @@ async function createOne(logData: LogData) {
   // Temporary Lambda
   const response = await axios.post(
     'https://ihly3zjagklnu5miik7jtifvqq0vatwl.lambda-url.us-east-1.on.aws',
+    { ...logData, score: decodeTime(logData.id) },
     {
-      method: 'POST',
       headers: {
         'x-api-key': '10ba2900-c0e0-44f1-a674-4bc6f1412554',
       },
-      data: JSON.stringify(logData),
-      responseType: 'json',
     },
   );
-  console.log(response);
   return await response.data;
 
   // For Redis
