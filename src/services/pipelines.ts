@@ -98,5 +98,19 @@ async function createOne(data: any) {
     await prisma.$disconnect();
   }  
 }
+async function deleteOne(id: string) {  
+  try {
+    const pipeline = await prisma.pipeline.delete({
+      where: {
+        id: id
+      }
+    });
+    await prisma.$disconnect();
+    return pipeline;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }  
+}
 
-export default { getAll, getOne, createOne };
+export default { getAll, getOne, createOne, deleteOne };
