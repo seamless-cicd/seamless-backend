@@ -1,5 +1,5 @@
 import { ResourceType } from '@prisma/client';
-import prisma from '../../src/services/prismaClient';
+import prisma from '../../src/clients/prisma-client';
 
 export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
   await prisma.environmentVariable.createMany({

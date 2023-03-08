@@ -1,7 +1,6 @@
-import prisma from './prismaClient';
+import prisma from '../clients/prisma-client';
 import { ResourceType, EnvironmentVariable } from '@prisma/client';
 import envVarsService from './envVars';
-
 
 // gets all services - only top level data - assumes one pipeline
 async function getAll() {
@@ -40,8 +39,8 @@ async function getOne(serviceId: string) {
   try {
     const service = await prisma.service.findUnique({
       where: {
-        id: serviceId
-      }
+        id: serviceId,
+      },
     });
     await prisma.$disconnect();
     return service;
@@ -56,7 +55,7 @@ async function createOne(serviceData: any) {
 
   try {
     const service = await prisma.service.create({
-      data: serviceTableData
+      data: serviceTableData,
     });
 
     const envVarsCount = await prisma.environmentVariable.createMany({
@@ -72,8 +71,8 @@ async function createOne(serviceData: any) {
           value: awsEcsService,
           resourceId: service.id,
           resourceType: ResourceType.SERVICE,
-        }
-      ]
+        },
+      ],
     });
 
     await prisma.$disconnect();
@@ -88,8 +87,8 @@ async function deleteOne(id: any) {
   try {
     const deleted = await prisma.service.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return deleted;
@@ -103,9 +102,9 @@ async function updateOne(id: any, data: any) {
   try {
     const updated = await prisma.service.update({
       where: {
-        id: id
+        id: id,
       },
-      data: data
+      data: data,
     });
     await prisma.$disconnect();
     return updated;

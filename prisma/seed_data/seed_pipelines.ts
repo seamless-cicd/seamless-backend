@@ -1,5 +1,5 @@
 import { Status, TriggerType, StageType } from '@prisma/client';
-import prisma from '../../src/services/prismaClient';
+import prisma from '../../src/clients/prisma-client';
 
 export const seedPipelines = async () => {
   await prisma.pipeline.create({

@@ -2,6 +2,7 @@ import { decodeTime } from 'ulidx';
 import axios from 'axios';
 import { API_KEY, GET_LAMBDA, SET_LAMBDA } from '../utils/config';
 import { StageId, LogData } from '../routers/logs';
+// import { redisClient } from '../clients/redis-client';
 
 async function getAllForStage(stageId: StageId) {
   // Temporary Lambda

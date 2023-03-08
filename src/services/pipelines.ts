@@ -1,4 +1,4 @@
-import prisma from './prismaClient';
+import prisma from '../clients/prisma-client';
 import { ResourceType, EnvironmentVariable } from '@prisma/client';
 import envVarsService from './envVars';
 
@@ -10,8 +10,7 @@ async function getAll() {
           include: {
             runs: {
               include: {
-                stages: {
-                },
+                stages: {},
               },
             },
           },
@@ -58,8 +57,7 @@ async function getOne(pipelineID: string) {
           include: {
             runs: {
               include: {
-                stages: {
-                },
+                stages: {},
               },
             },
           },
@@ -86,31 +84,31 @@ async function getOne(pipelineID: string) {
   }
 }
 
-async function createOne(data: any) {  
+async function createOne(data: any) {
   try {
     const pipeline = await prisma.pipeline.create({
-      data: data
+      data: data,
     });
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
-async function deleteOne(id: string) {  
+async function deleteOne(id: string) {
   try {
     const pipeline = await prisma.pipeline.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
 export default { getAll, getOne, createOne, deleteOne };
