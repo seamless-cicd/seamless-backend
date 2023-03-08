@@ -1,13 +1,13 @@
-import prisma from './prismaClient';
-import { TriggerType  } from '@prisma/client';
+import prisma from '../clients/prisma-client';
+import { TriggerType } from '@prisma/client';
 
 // runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
 async function getAllForService(serviceId: any) {
   try {
     const allRuns = await prisma.run.findMany({
       where: {
-        serviceId: serviceId
-      }
+        serviceId: serviceId,
+      },
     });
     await prisma.$disconnect();
     return allRuns;
@@ -21,8 +21,8 @@ async function getOne(runId: string) {
   try {
     const run = await prisma.run.findUnique({
       where: {
-        id: runId
-      }
+        id: runId,
+      },
     });
     await prisma.$disconnect();
     return run;
@@ -32,8 +32,7 @@ async function getOne(runId: string) {
   }
 }
 
-
-// method to create a run - will be used to create empty run 
+// method to create a run - will be used to create empty run
 async function createOne(serviceId: any) {
   try {
     const run = await prisma.run.create({
@@ -41,7 +40,7 @@ async function createOne(serviceId: any) {
         startedAt: new Date(),
         triggerType: TriggerType.MAIN,
         serviceId: serviceId,
-      }
+      },
     });
     await prisma.$disconnect();
     return run;
@@ -55,8 +54,8 @@ async function deleteOne(id: any) {
   try {
     const deleted = await prisma.run.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return deleted;
