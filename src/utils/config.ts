@@ -6,6 +6,9 @@ import { z } from 'zod';
 const envSchema = z.object({
   REDIS_HOST: z.string(),
   REDIS_PORT: z.string().transform(Number),
+  API_KEY: z.string(),
+  GET_LAMBDA: z.string(),
+  SET_LAMBDA: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -20,4 +23,5 @@ if (!parsedEnv.success) {
   process.exit(1);
 }
 
-export const { REDIS_HOST, REDIS_PORT } = parsedEnv.data;
+export const { REDIS_HOST, REDIS_PORT, API_KEY, GET_LAMBDA, SET_LAMBDA } =
+  parsedEnv.data;
