@@ -6,6 +6,7 @@ import pipelinesRouter from './routers/pipelines';
 import servicesRouter from './routers/services';
 import runsRouter from './routers/runs';
 import stagesRouter from './routers/stages';
+import logsRouter from './routers/logs';
 import webhooksRouter from './routers/webhooks';
 
 const app = express();
@@ -17,6 +18,7 @@ app.use('/pipelines', pipelinesRouter);
 app.use('/services', servicesRouter);
 app.use('/runs', runsRouter);
 app.use('/stages', stagesRouter);
+app.use('/logs', logsRouter);
 app.use('/webhooks', webhooksRouter);
 
 const PORT = process.env.PORT || 3001;
@@ -24,4 +26,3 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
-
