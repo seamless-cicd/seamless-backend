@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import servicesService from '../services/services';
+import stepFunctionsService from '../services/step-functions';
 
 const servicesRouter = express.Router();
 
@@ -27,6 +28,16 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
   const deleteData = await servicesService.deleteOne(serviceId);
   res.status(200).json(deleteData);
 });
+
+// Start a Step Function run for this service
+servicesRouter.post(
+  '/:serviceId/start',
+  async (req: Request, res: Response) => {
+    const { serviceId } = req.params;
+    const stepFunction = stepFunctionsService.start(serviceId);
+    res.status(200).json(stepFunction);
+  },
+);
 
 servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   const { serviceId } = req.params;

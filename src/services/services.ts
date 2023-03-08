@@ -1,6 +1,14 @@
 import prisma from '../clients/prisma-client';
-import { ResourceType, EnvironmentVariable } from '@prisma/client';
+import { ResourceType, EnvironmentVariable, Service } from '@prisma/client';
 import envVarsService from './envVars';
+
+export interface ServiceWithEnvVars extends Service {
+  awsEcsService?: string;
+  awsEcsTaskDefinition?: string;
+  awsEcrRepository?: string;
+  awsEcrSnsTopic?: string;
+  dockerBaseImage?: string;
+}
 
 // gets all services - only top level data - assumes one pipeline
 async function getAll() {
@@ -42,8 +50,20 @@ async function getOne(serviceId: string) {
         id: serviceId,
       },
     });
+
+    // Retrieve env vars for this service
+    const envVars = await envVarsService.getOne(
+      ResourceType.SERVICE,
+      serviceId,
+    );
+    // Insert env vars into the pipeline object
+    const flattenedEnvVars: { [key: string]: string } = {};
+    envVars?.forEach((envVar) => {
+      flattenedEnvVars[envVar.name] = envVar.value;
+    });
+
     await prisma.$disconnect();
-    return service;
+    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

@@ -1,6 +1,15 @@
 import prisma from '../clients/prisma-client';
-import { ResourceType, EnvironmentVariable } from '@prisma/client';
+import { ResourceType, EnvironmentVariable, Pipeline } from '@prisma/client';
 import envVarsService from './envVars';
+
+export interface PipelineWithEnvVars extends Pipeline {
+  awsRegion: string;
+  awsAvailabilityZone?: string;
+  awsAccountId: string;
+  awsEcsCluster: string;
+  awsStepFunction: string;
+  awsRds: string;
+}
 
 async function getAll() {
   try {
@@ -52,17 +61,17 @@ async function getOne(pipelineID: string) {
       where: {
         id: pipelineID,
       },
-      include: {
-        services: {
-          include: {
-            runs: {
-              include: {
-                stages: {},
-              },
-            },
-          },
-        },
-      },
+      // include: {
+      //   services: {
+      //     include: {
+      //       runs: {
+      //         include: {
+      //           stages: {},
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
     });
 
     // Retrieve env vars for this pipeline
@@ -77,7 +86,7 @@ async function getOne(pipelineID: string) {
     });
 
     await prisma.$disconnect();
-    return { ...pipeline, ...flattenedEnvVars };
+    return { ...pipeline, ...flattenedEnvVars } as PipelineWithEnvVars;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
