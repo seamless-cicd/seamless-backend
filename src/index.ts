@@ -6,6 +6,7 @@ import pipelinesRouter from './routers/pipelines';
 import servicesRouter from './routers/services';
 import runsRouter from './routers/runs';
 import stagesRouter from './routers/stages';
+import logsRouter from './routers/logs';
 
 const app = express();
 app.use(express.json());
@@ -16,10 +17,10 @@ app.use('/pipelines', pipelinesRouter);
 app.use('/services', servicesRouter);
 app.use('/runs', runsRouter);
 app.use('/stages', stagesRouter);
+app.use('/logs', logsRouter);
 
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
-
