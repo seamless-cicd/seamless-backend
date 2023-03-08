@@ -43,6 +43,8 @@ const RunDataSchema = z.object({
   }),
 });
 
+type RunData = z.infer<typeof RunDataSchema>;
+
 const ContainerVariablesSchema = z.object({
   awsRegion: z.string(),
   awsAccountId: z.string(),
@@ -50,8 +52,8 @@ const ContainerVariablesSchema = z.object({
   awsSecretAccessKey: z.string(),
   githubPat: z.string(),
   githubRepoUrl: z.string().url(),
-  codeQualityCommand: z.string(),
-  unitTestCommand: z.string(),
+  codeQualityCommand: z.string().optional(),
+  unitTestCommand: z.string().optional(),
   dockerfilePath: z.string(),
   awsEcsCluster: z.string(),
   awsEcsService: z.string(),
@@ -59,8 +61,11 @@ const ContainerVariablesSchema = z.object({
   logSubscriberUrl: z.string().url(),
 });
 
+type ContainerVariables = z.infer<typeof ContainerVariablesSchema>;
+
 // Schema for validating the input data required for the Step Function to run
 const SfnInputSchema = z.object({
+  awsStepFunction: z.string(),
   serviceId: z.string().uuid(),
   runId: z.string().uuid(),
   stageIds: StageIdsSchema,
@@ -72,4 +77,11 @@ const SfnInputSchema = z.object({
 
 type SfnInput = z.infer<typeof SfnInputSchema>;
 
-export { SfnInputSchema, SfnInput, StageIds, Stage };
+export {
+  SfnInputSchema,
+  SfnInput,
+  StageIds,
+  Stage,
+  RunData,
+  ContainerVariables,
+};

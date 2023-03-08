@@ -1,12 +1,13 @@
 import {
   SfnInputSchema,
-  SfnInput,
   Stage,
   StageIds,
+  RunData,
+  ContainerVariables,
 } from '../clients/step-function/input-schema';
-import { StageType, Status } from '@prisma/client';
-import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { createSfnClient } from '../clients/step-function';
+import { StageType, Status, TriggerType } from '@prisma/client';
+// import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+// import { createSfnClient } from '../clients/step-function';
 import servicesService from './services';
 import runsService from './runs';
 import stagesService from './stages';
@@ -25,10 +26,10 @@ const stageEnumToId = {
 
 // Assumes a new Run and associated Stage have already been created
 async function gatherInput(
-  runId: string,
+  serviceId: string,
   runFull = true,
   autoDeploy = false,
-): Promise<SfnInput> {
+) {
   try {
     // Query db for all associated entities
     const run = await runsService.getOne(runId);
@@ -61,17 +62,18 @@ async function gatherInput(
     });
 
     const sfnInput = {
+      awsStepFunction: pipeline.awsStepFunction,
       serviceId: service.id,
       runId: run.id,
-      stageIds,
+      stageIds: stageIds as StageIds,
       runData: {
         status: 'IDLE',
-        commitHash: run.commitHash,
-        commitMessage: run.commitMessage,
-        committer: run.committer,
-        triggerType: run.triggerType,
+        commitHash: run.commitHash || '',
+        commitMessage: run.commitMessage || '',
+        committer: run.committer || '',
+        triggerType: run.triggerType || TriggerType.MAIN,
         ...runDataStages,
-      },
+      } as RunData,
       runFull,
       autoDeploy,
       containerVariables: {
@@ -85,10 +87,10 @@ async function gatherInput(
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
         awsEcsCluster: pipeline.awsEcsCluster,
-        awsEcsService: pipeline.awsEcsService,
-        awsEcrRepo: pipeline.awsEcsRepo,
+        awsEcsService: service.awsEcsService,
+        awsEcrRepo: service.awsEcrRepository,
         logSubscriberUrl: 'https://abc123.m.pipedream.net',
-      },
+      } as ContainerVariables,
     };
 
     // Validate data shape
@@ -106,30 +108,39 @@ async function gatherInput(
   }
 }
 
-async function start(stateMachineArn: string, serviceId: string) {
+async function start(serviceId: string) {
   try {
     const sfnInput = await gatherInput(serviceId);
+    if (!sfnInput)
+      throw new Error('Failed to retrieve Step Function input data');
 
-    const { awsRegion, awsAccessKey, awsSecretAccessKey } =
-      sfnInput.containerVariables;
-    const sfnClient = createSfnClient(
-      awsRegion,
-      awsAccessKey,
-      awsSecretAccessKey,
-    );
+    // const { awsRegion, awsAccessKey, awsSecretAccessKey } =
+    //   sfnInput.containerVariables;
+    // const sfnClient = createSfnClient(
+    //   awsRegion,
+    //   awsAccessKey,
+    //   awsSecretAccessKey,
+    // );
 
-    const sfnCommand = new StartExecutionCommand({
-      stateMachineArn,
-      input: JSON.stringify(sfnInput),
-    });
+    // const sfnCommand = new StartExecutionCommand({
+    //   stateMachineArn: sfnInput.awsStepFunction,
+    //   input: JSON.stringify(sfnInput),
+    // });
 
-    const response = await sfnClient.send(sfnCommand);
+    // const response = await sfnClient.send(sfnCommand);
 
     // Update RDS
     // Notify user of state machine start
+
+    // Placeholder return value for debugging
+    return sfnInput;
   } catch (error) {
-    console.error('Failed to start Step Function. Check input data.');
+    if (error instanceof Error) {
+      console.error(
+        error.message || 'Failed to start Step Function. Check input data.',
+      );
+    }
   }
 }
 
-export { start };
+export default { gatherInput, start };

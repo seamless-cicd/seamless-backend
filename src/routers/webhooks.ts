@@ -1,14 +1,6 @@
-import { z } from 'zod';
 import express, { Request, Response } from 'express';
 
 const webhooksRouter = express.Router();
-
-// Fields required by the state machine
-const webhookSchema = z.object({
-  commitHash: z.string(),
-  commitMessage: z.string(),
-  committer: z.string(),
-});
 
 webhooksRouter.post('', async (req: Request, res: Response) => {
   const event = req.headers['x-github-event'];
@@ -29,7 +21,7 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
     console.log('sync pr => trigger pipeline');
   }
 
-  // Format webhook data using required schema
+  // Store webhook data in database
 
   res.status(200).send();
 });
