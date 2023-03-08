@@ -26,4 +26,10 @@ pipelinesRouter.post('/:pipelineId', async (req: Request, res: Response) => {
   // will use AWS SDK for JS
 });
 
+pipelinesRouter.delete('/:pipelineId', async (req: Request, res: Response) => {
+  const { pipelineId } = req.params;
+  const deleted = pipelinesService.deleteOne(pipelineId);
+  res.status(200).json(deleted);
+});
+
 export default pipelinesRouter;
