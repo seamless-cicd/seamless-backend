@@ -86,4 +86,17 @@ async function getOne(pipelineID: string) {
   }
 }
 
-export default { getAll, getOne };
+async function createOne(data: any) {  
+  try {
+    const pipeline = await prisma.pipeline.create({
+      data: data
+    });
+    await prisma.$disconnect();
+    return pipeline;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }  
+}
+
+export default { getAll, getOne, createOne };
