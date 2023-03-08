@@ -19,7 +19,6 @@ const LogDataSchema = z.object({
   log: z.string(),
   stageId: z.string(),
   timestamp: z.string().datetime(),
-  score: z.number(),
 });
 
 export type LogData = z.infer<typeof LogDataSchema>;
