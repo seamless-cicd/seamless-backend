@@ -31,6 +31,10 @@
         "id": "182801d8-st2d-11ed-afa1-0242ac120004",
         "status": "IDLE"
       },
+      "deployStaging": {
+        "id": "182801d8-st2d-11ed-afa1-0242ac120005",
+        "status": "IDLE"
+      },
       "deployProduction": {
         "id": "182801d8-st2d-11ed-afa1-0242ac120006",
         "status": "IDLE"
@@ -38,17 +42,20 @@
     }
   },
   "runFull": "true",
+  "useStaging": "true",
   "autoDeploy": "false",
   "containerVariables": {
     "awsRegion": "us-east-1",
     "awsAccountId": "01234567912",
-    "awsAccessKey": "012345679",
-    "awsSecretAccessKey": "01234567912-ABCDEFG",
-    "githubPat": "pat_abc123",
-    "githubRepoUrl": "https://github.com/user-org/repo-name.git",
+    "awsAccessKey": "012345679ABC",
+    "awsSecretAccessKey": "012345679ABC",
+    "githubPat": "ghp_012345679abc",
+    "githubRepoUrl": "https://github.com/user-org/repo-name",
     "codeQualityCommand": "npm run lint",
     "unitTestCommand": "npm run test",
     "dockerfilePath": ".",
+    "awsEcsClusterStaging": "my-staging-ecs-cluster-name",
+    "awsEcsServiceStaging": "my-staging-ecs-service-name",
     "awsEcsCluster": "my-ecs-cluster-name",
     "awsEcsService": "my-ecs-service-name",
     "awsEcrRepo": "my-ecr-repo-name",
