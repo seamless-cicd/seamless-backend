@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import pipelinesService from '../services/pipelines';
+import pipelinesService from '../../services/pipelines';
 
 const pipelinesRouter = express.Router();
 
@@ -18,12 +18,6 @@ pipelinesRouter.post('', async (req: Request, res: Response) => {
   const data = req.body;
   const pipeline = await pipelinesService.createOne(data);
   res.status(200).json(pipeline);
-});
-
-// this is potentially needed by Ethan to start step functions
-pipelinesRouter.post('/:pipelineId', async (req: Request, res: Response) => {
-  // logic will kick off the step functions
-  // will use AWS SDK for JS
 });
 
 pipelinesRouter.delete('/:pipelineId', async (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import stagesService from '../services/stages';
+import stagesService from '../../services/stages';
 
 const stagesRouter = express.Router();
 

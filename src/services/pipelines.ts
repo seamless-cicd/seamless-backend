@@ -63,17 +63,17 @@ async function getOne(pipelineID: string) {
       where: {
         id: pipelineID,
       },
-      // include: {
-      //   services: {
-      //     include: {
-      //       runs: {
-      //         include: {
-      //           stages: {},
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+      include: {
+        services: {
+          include: {
+            runs: {
+              include: {
+                stages: {},
+              },
+            },
+          },
+        },
+      },
     });
 
     // Retrieve env vars for this pipeline

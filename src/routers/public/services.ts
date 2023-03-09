@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import servicesService from '../services/services';
+import servicesService from '../../services/services';
 
 const servicesRouter = express.Router();
 

@@ -8,11 +8,11 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
   console.log(event);
   console.log(ref);
   console.log(action);
-
+  
   if (event === 'push' && /\/main$/.test(ref)) {
     console.log('push on main => trigger pipeline actions');
   }
-
+  
   if (event === 'pull_request' && action === 'opened') {
     console.log('open pr => trigger pipeline');
   }
@@ -20,9 +20,7 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
   if (event === 'pull_request' && action === 'synchronize') {
     console.log('sync pr => trigger pipeline');
   }
-
-  // Store webhook data in database
-
+  
   res.status(200).send();
 });
 

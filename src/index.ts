@@ -1,25 +1,35 @@
 import express from 'express';
 import cors from 'cors';
 
-import homeRouter from './routers/home';
-import pipelinesRouter from './routers/pipelines';
-import servicesRouter from './routers/services';
-import runsRouter from './routers/runs';
-import stagesRouter from './routers/stages';
-import logsRouter from './routers/logs';
-import webhooksRouter from './routers/webhooks';
+import homeRouter from './routers/public/home';
+import pipelinesRouter from './routers/public/pipelines';
+import servicesRouter from './routers/public/services';
+import runsRouter from './routers/public/runs';
+import stagesRouter from './routers/public/stages';
+import logsRouter from './routers/public/logs';
+import webhooksRouter from './routers/public/webhooks';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/', homeRouter);
-app.use('/pipelines', pipelinesRouter);
-app.use('/services', servicesRouter);
-app.use('/runs', runsRouter);
-app.use('/stages', stagesRouter);
-app.use('/logs', logsRouter);
-app.use('/webhooks', webhooksRouter);
+const publicRouter = express.Router();
+
+publicRouter.use('/', homeRouter);
+publicRouter.use('/pipelines', pipelinesRouter);
+publicRouter.use('/services', servicesRouter);
+publicRouter.use('/runs', runsRouter);
+publicRouter.use('/stages', stagesRouter);
+publicRouter.use('/logs', logsRouter);
+publicRouter.use('/webhooks', webhooksRouter);
+
+const privateRouter = express.Router();
+
+// Consumed by the frontend
+app.use('/api', publicRouter);
+
+// AWS infra hits this internally
+app.use('/internal', privateRouter);
 
 const PORT = process.env.PORT || 3001;
 
