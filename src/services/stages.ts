@@ -1,11 +1,11 @@
-import prisma from './prismaClient';
+import prisma from '../clients/prisma-client';
 import { StageType } from '@prisma/client';
 
 async function getAllForRun(runId: any) {
   try {
     const allStages = await prisma.stage.findMany({
       where: {
-        runId: runId
+        runId: runId,
       },
       orderBy: {
         createdAt: 'asc',
@@ -23,8 +23,8 @@ async function deleteOne(id: any) {
   try {
     const deleted = await prisma.stage.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return deleted;
@@ -49,123 +49,123 @@ async function createAll(runId: any) {
   }
 }
 
-async function createPrepare(runId: any) {  
+async function createPrepare(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.PREPARE,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createCodeQuality(runId: any) {  
+async function createCodeQuality(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.CODE_QUALITY,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createUnitTest(runId: any) {  
+async function createUnitTest(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.UNIT_TEST,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createIntegrationTest(runId: any) {  
+async function createIntegrationTest(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.INTEGRATION_TEST,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createBuild(runId: any) {  
+async function createBuild(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.BUILD,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createDeployStaging(runId: any) {  
+async function createDeployStaging(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.DEPLOY_STAGING,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
-async function createDeployProd(runId: any) {  
+async function createDeployProd(runId: any) {
   try {
     const stage = await prisma.stage.create({
       data: {
         startedAt: new Date(),
         type: StageType.DEPLOY_PROD,
         runId: runId,
-      }
+      },
     });
     await prisma.$disconnect();
     return stage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
 export default { getAllForRun, createAll, deleteOne };

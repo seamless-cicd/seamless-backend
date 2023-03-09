@@ -1,6 +1,17 @@
-import prisma from './prismaClient';
-import { ResourceType, EnvironmentVariable } from '@prisma/client';
+import prisma from '../clients/prisma-client';
+import { ResourceType, EnvironmentVariable, Pipeline } from '@prisma/client';
 import envVarsService from './envVars';
+
+export interface PipelineWithEnvVars extends Pipeline {
+  awsRegion: string;
+  awsAvailabilityZone?: string;
+  awsAccountId: string;
+  awsEcsCluster: string;
+  awsStepFunction: string;
+  awsRds: string;
+  awsElastiCache: string;
+  logSubscriberUrl: string;
+}
 
 async function getAll() {
   try {
@@ -10,8 +21,7 @@ async function getAll() {
           include: {
             runs: {
               include: {
-                stages: {
-                },
+                stages: {},
               },
             },
           },
@@ -58,8 +68,7 @@ async function getOne(pipelineID: string) {
           include: {
             runs: {
               include: {
-                stages: {
-                },
+                stages: {},
               },
             },
           },
@@ -79,38 +88,38 @@ async function getOne(pipelineID: string) {
     });
 
     await prisma.$disconnect();
-    return { ...pipeline, ...flattenedEnvVars };
+    return { ...pipeline, ...flattenedEnvVars } as PipelineWithEnvVars;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function createOne(data: any) {  
+async function createOne(data: any) {
   try {
     const pipeline = await prisma.pipeline.create({
-      data: data
+      data: data,
     });
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
-async function deleteOne(id: string) {  
+async function deleteOne(id: string) {
   try {
     const pipeline = await prisma.pipeline.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
-  }  
+  }
 }
 
 export default { getAll, getOne, createOne, deleteOne };

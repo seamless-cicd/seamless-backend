@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import {
   seedPipelineEnvironmentVariables,
-  seeedServiceEnvironmentVariables,
+  seedServiceEnvironmentVariables,
 } from './seed_data/seed_envvars';
 import { deleteAllData } from './seed_data/delete_all_data';
 import { queryTimer } from './seed_data/query_timer';
@@ -24,7 +24,7 @@ prisma.$use(queryTimer);
 
     // Seed env vars for first pipeline only
     await seedPipelineEnvironmentVariables(pipelineId);
-    await seeedServiceEnvironmentVariables(serviceId);
+    await seedServiceEnvironmentVariables(serviceId);
 
     await prisma.$disconnect();
   } catch (error) {
