@@ -36,7 +36,7 @@ async function createOne(logData: LogData) {
   // Temporary Lambda
   const response = await axios.post(
     SET_LAMBDA,
-    { ...logData, score: decodeTime(logData.id) },
+    { ...logData, score: logData.score || decodeTime(logData.id) },
     {
       headers: {
         'x-api-key': API_KEY,

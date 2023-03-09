@@ -20,6 +20,8 @@ export const LogDataSchema = z.object({
   log: z.string(),
   stageId: z.string(),
   timestamp: z.string().datetime(),
+  score: z.number().optional(),
+  type: z.string(),
 });
 
 export type LogData = z.infer<typeof LogDataSchema>;
