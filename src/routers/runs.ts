@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import runsService from '../services/runs';
 import stagesService from '../services/stages';
+import stepFunctionsService from '../services/step-functions';
 
 const runsRouter = express.Router();
 
@@ -19,16 +20,35 @@ runsRouter.get('/:runId', async (req: Request, res: Response) => {
 // post to runs router when run button is clicked on a service
 // this will create an empty run and corresponding empty stages for use since
 // a run has stages
-runsRouter.post('', async (req: Request, res: Response) => {
+runsRouter.post('/', async (req: Request, res: Response) => {
   const { serviceId } = req.query;
 
   // create a new empty run in db
-  const newRun: any = await runsService.createOne(serviceId);
+  const newRun = await runsService.createOne(serviceId);
+
+  if (!newRun)
+    return res
+      .status(500)
+      .json({ message: 'There was a problem creating the run' });
 
   // create new empty stages data in the db using the newRun id
   await stagesService.createAll(newRun.id);
 
   res.status(200).json(newRun);
+});
+
+// Start a Step Function for this Run
+// Run and Stages must first be created by POSTing to /runs
+runsRouter.post('/:runId/start', async (req: Request, res: Response) => {
+  const { runId } = req.params;
+  try {
+    await stepFunctionsService.start(runId);
+    res.status(200).json({ message: 'Step function started' });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'There was a problem executing the Step Function' });
+  }
 });
 
 runsRouter.delete('/:runId', async (req: Request, res: Response) => {

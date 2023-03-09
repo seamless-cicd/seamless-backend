@@ -1,11 +1,5 @@
 import { z } from 'zod';
-import {
-  SfnInputSchema,
-  Stage,
-  StageIds,
-  RunStatus,
-  ContainerVariables,
-} from '../clients/step-function/input-schema';
+import { SfnInputSchema, Stage } from '../clients/step-function/input-schema';
 import { StageType, Status } from '@prisma/client';
 // import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 // import { createSfnClient } from '../clients/step-function';
@@ -123,11 +117,8 @@ async function start(runId: string) {
 
     // const response = await sfnClient.send(sfnCommand);
 
-    // POST to Express routes that write to RDS, notifications, etc.
-    // Update RDS
-    // Notify user of state machine start
+    // Call other services to write to RDS and send notifications
 
-    // Placeholder return value for debugging
     return sfnInput;
   } catch (error) {
     if (error instanceof Error) {

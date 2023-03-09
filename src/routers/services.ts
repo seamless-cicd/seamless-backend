@@ -1,8 +1,5 @@
 import express, { Request, Response } from 'express';
 import servicesService from '../services/services';
-import runsService from '../services/runs';
-import stagesService from '../services/stages';
-import stepFunctionsService from '../services/step-functions';
 
 const servicesRouter = express.Router();
 
@@ -30,25 +27,6 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
   const deleteData = await servicesService.deleteOne(serviceId);
   res.status(200).json(deleteData);
 });
-
-// Start a Step Function run for this service
-servicesRouter.post(
-  '/:serviceId/start',
-  async (req: Request, res: Response) => {
-    const { serviceId } = req.params;
-    try {
-      // const newRun = await runsService.createOne(serviceId);
-      // if (!newRun) throw new Error('Error creating the new Run');
-      // await stagesService.createAll(newRun.id);
-      const stepFunction = await stepFunctionsService.start(serviceId);
-      res.status(200).json(stepFunction);
-    } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'There was a problem executing the Step Function' });
-    }
-  },
-);
 
 servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   const { serviceId } = req.params;
