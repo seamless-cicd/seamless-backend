@@ -1,7 +1,15 @@
-import prisma from './prismaClient';
-import { ResourceType, EnvironmentVariable } from '@prisma/client';
+import prisma from '../clients/prisma-client';
+import { ResourceType, EnvironmentVariable, Service } from '@prisma/client';
 import envVarsService from './envVars';
 
+export interface ServiceWithEnvVars extends Service {
+  awsEcsService?: string;
+  awsEcsTaskDefinition?: string;
+  awsEcrRepository?: string;
+  awsEcrSnsTopic?: string;
+  logSubscriberUrl?: string;
+  dockerBaseImage?: string;
+}
 
 // gets all services - only top level data - assumes one pipeline
 async function getAll() {
@@ -40,11 +48,23 @@ async function getOne(serviceId: string) {
   try {
     const service = await prisma.service.findUnique({
       where: {
-        id: serviceId
-      }
+        id: serviceId,
+      },
     });
+
+    // Retrieve env vars for this service
+    const envVars = await envVarsService.getOne(
+      ResourceType.SERVICE,
+      serviceId,
+    );
+    // Insert env vars into the pipeline object
+    const flattenedEnvVars: { [key: string]: string } = {};
+    envVars?.forEach((envVar) => {
+      flattenedEnvVars[envVar.name] = envVar.value;
+    });
+
     await prisma.$disconnect();
-    return service;
+    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -56,7 +76,7 @@ async function createOne(serviceData: any) {
 
   try {
     const service = await prisma.service.create({
-      data: serviceTableData
+      data: serviceTableData,
     });
 
     const envVarsCount = await prisma.environmentVariable.createMany({
@@ -72,8 +92,8 @@ async function createOne(serviceData: any) {
           value: awsEcsService,
           resourceId: service.id,
           resourceType: ResourceType.SERVICE,
-        }
-      ]
+        },
+      ],
     });
 
     await prisma.$disconnect();
@@ -88,8 +108,8 @@ async function deleteOne(id: any) {
   try {
     const deleted = await prisma.service.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     await prisma.$disconnect();
     return deleted;
@@ -103,9 +123,9 @@ async function updateOne(id: any, data: any) {
   try {
     const updated = await prisma.service.update({
       where: {
-        id: id
+        id: id,
       },
-      data: data
+      data: data,
     });
     await prisma.$disconnect();
     return updated;

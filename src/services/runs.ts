@@ -1,4 +1,4 @@
-import prisma from './prismaClient';
+import prisma from '../clients/prisma-client';
 import { TriggerType } from '@prisma/client';
 import { pipelineStatusUpdateSchema } from '../schemas';
 
