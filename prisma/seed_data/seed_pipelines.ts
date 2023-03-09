@@ -19,7 +19,7 @@ export const seedPipelines = async () => {
             githubRepoUrl: 'my_github_repository',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
-            dockerfilePath: './Dockerfile',
+            dockerfilePath: '.',
             runs: {
               create: [
                 // Most stages idle

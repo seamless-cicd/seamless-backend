@@ -1,11 +1,12 @@
+import { z } from 'zod';
 import {
   SfnInputSchema,
   Stage,
   StageIds,
-  RunData,
+  RunStatus,
   ContainerVariables,
 } from '../clients/step-function/input-schema';
-import { StageType, Status, TriggerType } from '@prisma/client';
+import { StageType, Status } from '@prisma/client';
 // import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 // import { createSfnClient } from '../clients/step-function';
 import servicesService from './services';
@@ -25,11 +26,7 @@ const stageEnumToId = {
 };
 
 // Assumes a new Run and associated Stage have already been created
-async function gatherInput(
-  serviceId: string,
-  runFull = true,
-  autoDeploy = false,
-) {
+async function gatherInput(runId: string, runFull = true, autoDeploy = false) {
   try {
     // Query db for all associated entities
     const run = await runsService.getOne(runId);
@@ -48,15 +45,14 @@ async function gatherInput(
 
     // Assemble the Step Function input object
     const stageIds: Record<string, string> = {};
-    const runDataStages: Record<string, Stage> = {};
+    const runStatusStages: Record<string, Stage> = {};
 
     stages.forEach((stage) => {
       const stageType = stage.type;
       const stageFieldName = stageEnumToId[stageType];
       stageIds[stageFieldName] = stage.id;
-      runDataStages[stageFieldName] = {
+      runStatusStages[stageFieldName] = {
         id: stage.id,
-        type: stageType,
         status: Status.IDLE,
       };
     });
@@ -65,15 +61,14 @@ async function gatherInput(
       awsStepFunction: pipeline.awsStepFunction,
       serviceId: service.id,
       runId: run.id,
-      stageIds: stageIds as StageIds,
-      runData: {
-        status: 'IDLE',
-        commitHash: run.commitHash || '',
-        commitMessage: run.commitMessage || '',
-        committer: run.committer || '',
-        triggerType: run.triggerType || TriggerType.MAIN,
-        ...runDataStages,
-      } as RunData,
+      stageIds: stageIds,
+      runStatus: {
+        run: {
+          id: run.id,
+          status: Status.IDLE,
+        },
+        stages: runStatusStages,
+      },
       runFull,
       autoDeploy,
       containerVariables: {
@@ -89,28 +84,27 @@ async function gatherInput(
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
         awsEcrRepo: service.awsEcrRepository,
-        logSubscriberUrl: 'https://abc123.m.pipedream.net',
-      } as ContainerVariables,
+        logSubscriberUrl: service.logSubscriberUrl,
+      },
     };
 
     // Validate data shape
-    if (!SfnInputSchema.safeParse(sfnInput).success) {
-      throw new Error('Invalid input data');
-    }
+    const validatedSfnInput = SfnInputSchema.parse(sfnInput);
 
-    return sfnInput;
+    return validatedSfnInput;
   } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(
-        error.message || 'Failed to retrieve Step Function input data',
-      );
+    if (error instanceof z.ZodError) {
+      console.error(error.issues);
+    } else {
+      console.error('Failed to retrieve Step Function input data');
     }
+    return null;
   }
 }
 
-async function start(serviceId: string) {
+async function start(runId: string) {
   try {
-    const sfnInput = await gatherInput(serviceId);
+    const sfnInput = await gatherInput(runId);
     if (!sfnInput)
       throw new Error('Failed to retrieve Step Function input data');
 
@@ -129,6 +123,7 @@ async function start(serviceId: string) {
 
     // const response = await sfnClient.send(sfnCommand);
 
+    // POST to Express routes that write to RDS, notifications, etc.
     // Update RDS
     // Notify user of state machine start
 

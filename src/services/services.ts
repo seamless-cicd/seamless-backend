@@ -7,6 +7,7 @@ export interface ServiceWithEnvVars extends Service {
   awsEcsTaskDefinition?: string;
   awsEcrRepository?: string;
   awsEcrSnsTopic?: string;
+  logSubscriberUrl?: string;
   dockerBaseImage?: string;
 }
 
