@@ -63,7 +63,7 @@ logsRouter.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// Initiate log streaming connection
+// Client initiates log streaming connection
 logsRouter.get('/stream', (req: Request, res: Response) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Content-Type', 'text/event-stream');
@@ -90,7 +90,9 @@ logsRouter.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid log data' });
     }
 
+    // Store log in Redis
     await logsService.createOne(validatedLogData.data);
+    // Emit log data to frontend
     await streamLogsToClients(validatedLogData.data.stageId);
     res.status(201).send('Log stored');
   } catch (e) {

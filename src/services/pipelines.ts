@@ -9,6 +9,8 @@ export interface PipelineWithEnvVars extends Pipeline {
   awsEcsCluster: string;
   awsStepFunction: string;
   awsRds: string;
+  awsElastiCache: string;
+  logSubscriberUrl: string;
 }
 
 async function getAll() {
