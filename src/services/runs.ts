@@ -1,5 +1,6 @@
 import prisma from '../clients/prisma-client';
 import { TriggerType } from '@prisma/client';
+import { pipelineStatusUpdateSchema } from '../schemas';
 
 // runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
 async function getAllForService(serviceId: any) {
@@ -64,5 +65,23 @@ async function deleteOne(id: any) {
     await prisma.$disconnect();
   }
 }
+
+// async function updateRunStatus(
+//   id: any,
+//   data: Zod.infer<typeof pipelineStatusUpdateSchema>,
+// ) {
+//   try {
+//     const updated = await prisma.run.update({
+//       where: {
+//         id: id,
+//       },
+//     });
+//     await prisma.$disconnect();
+//     return updated;
+//   } catch (e) {
+//     console.error(e);
+//     await prisma.$disconnect();
+//   }
+// }
 
 export default { getAllForService, getOne, createOne, deleteOne };

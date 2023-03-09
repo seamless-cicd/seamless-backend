@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import runsService from '../services/runs';
-import stagesService from '../services/stages';
-import stepFunctionsService from '../services/step-functions';
+import runsService from '../../services/runs';
+import stagesService from '../../services/stages';
+import stepFunctionsService from '../../services/step-functions';
 
 const runsRouter = express.Router();
 

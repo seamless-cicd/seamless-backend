@@ -1,7 +1,7 @@
 import { ulid } from 'ulidx';
 import { z } from 'zod';
 import express, { Request, Response } from 'express';
-import logsService from '../services/logs';
+import logsService from '../../services/logs';
 
 const logsRouter = express.Router();
 
