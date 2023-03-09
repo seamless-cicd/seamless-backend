@@ -20,6 +20,12 @@ pipelinesRouter.post('', async (req: Request, res: Response) => {
   res.status(200).json(pipeline);
 });
 
+pipelinesRouter.delete('/:pipelineId', async (req: Request, res: Response) => {
+  const { pipelineId } = req.params;
+  const deleted = pipelinesService.deleteOne(pipelineId);
+  res.status(200).json(deleted);
+});
+
 pipelinesRouter.post('/:pipelineId', async (req: Request, res: Response) => {
   // logic will kick off the step functions
   // will use AWS SDK for JS
