@@ -53,6 +53,8 @@ const ContainerVariablesSchema = z.object({
   codeQualityCommand: z.string().optional(),
   unitTestCommand: z.string().optional(),
   dockerfilePath: z.string(),
+  awsEcsClusterStaging: z.string(),
+  awsEcsServiceStaging: z.string(),
   awsEcsCluster: z.string(),
   awsEcsService: z.string(),
   awsEcrRepo: z.string(),
@@ -69,6 +71,7 @@ const SfnInputSchema = z.object({
   stageIds: StageIdsSchema,
   runStatus: RunStatusSchema,
   runFull: z.boolean(),
+  useStaging: z.boolean(),
   autoDeploy: z.boolean(),
   containerVariables: ContainerVariablesSchema,
 });

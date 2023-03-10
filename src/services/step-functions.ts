@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
 import { StageType, Status } from '@prisma/client';
-// import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-// import { createSfnClient } from '../clients/step-function';
+import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { createSfnClient } from '../clients/step-function';
 import servicesService from './services';
 import runsService from './runs';
 import stagesService from './stages';
@@ -20,7 +20,7 @@ const stageEnumToId = {
 };
 
 // Assumes a new Run and associated Stage have already been created
-async function gatherInput(runId: string, runFull = true, autoDeploy = false) {
+async function gatherInput(runId: string) {
   try {
     // Query db for all associated entities
     const run = await runsService.getOne(runId);
@@ -63,8 +63,9 @@ async function gatherInput(runId: string, runFull = true, autoDeploy = false) {
         },
         stages: runStatusStages,
       },
-      runFull,
-      autoDeploy,
+      runFull: service.triggerOnMain,
+      useStaging: service.useStaging,
+      autoDeploy: service.autoDeploy,
       containerVariables: {
         awsRegion: pipeline.awsRegion,
         awsAccountId: pipeline.awsAccountId,
@@ -75,6 +76,8 @@ async function gatherInput(runId: string, runFull = true, autoDeploy = false) {
         codeQualityCommand: service.codeQualityCommand,
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
+        awsEcsClusterStaging: pipeline.awsEcsClusterStaging,
+        awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
         awsEcrRepo: service.awsEcrRepository,
@@ -102,24 +105,24 @@ async function start(runId: string) {
     if (!sfnInput)
       throw new Error('Failed to retrieve Step Function input data');
 
-    // const { awsRegion, awsAccessKey, awsSecretAccessKey } =
-    //   sfnInput.containerVariables;
-    // const sfnClient = createSfnClient(
-    //   awsRegion,
-    //   awsAccessKey,
-    //   awsSecretAccessKey,
-    // );
+    const { awsRegion, awsAccessKey, awsSecretAccessKey } =
+      sfnInput.containerVariables;
+    const sfnClient = createSfnClient(
+      awsRegion,
+      awsAccessKey,
+      awsSecretAccessKey,
+    );
 
-    // const sfnCommand = new StartExecutionCommand({
-    //   stateMachineArn: sfnInput.awsStepFunction,
-    //   input: JSON.stringify(sfnInput),
-    // });
+    const sfnCommand = new StartExecutionCommand({
+      stateMachineArn: sfnInput.awsStepFunction,
+      input: JSON.stringify(sfnInput),
+    });
 
-    // const response = await sfnClient.send(sfnCommand);
+    const response = await sfnClient.send(sfnCommand);
 
     // Call other services to write to RDS and send notifications
 
-    return sfnInput;
+    return response;
   } catch (error) {
     if (error instanceof Error) {
       console.error(

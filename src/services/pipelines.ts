@@ -6,6 +6,7 @@ export interface PipelineWithEnvVars extends Pipeline {
   awsRegion: string;
   awsAvailabilityZone?: string;
   awsAccountId: string;
+  awsEcsClusterStaging?: string;
   awsEcsCluster: string;
   awsStepFunction: string;
   awsRds: string;

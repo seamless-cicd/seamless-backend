@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { ResourceType } from '@prisma/client';
 import prisma from '../../src/clients/prisma-client';
 
@@ -6,38 +9,46 @@ export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
     data: [
       {
         resourceType: ResourceType.PIPELINE,
+        resourceId: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
         name: 'awsRegion',
         value: 'us-east-1',
       },
       {
         resourceType: ResourceType.PIPELINE,
+        resourceId: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
         name: 'awsAvailabilityZone',
         value: 'us-east-1a',
       },
       {
         resourceType: ResourceType.PIPELINE,
+        resourceId: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
         name: 'awsAccountId',
-        value: '12345789012',
+        value: process.env.AWS_ACCOUNT_ID || '',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsEcsCluster',
-        value: 'my_ecs_cluster',
+        value: 'demo-cluster',
+      },
+      {
+        resourceType: ResourceType.PIPELINE,
+        name: 'awsEcsClusterStaging',
+        value: 'demo-cluster',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsStepFunction',
-        value: 'my_stepfunction',
+        value: process.env.AWS_STEP_FUNCTION_ARN || '',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsRds',
-        value: 'my_rds_connection_string',
+        value: process.env.DATABASE_URL || '',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsElastiCache',
-        value: 'my_elasticache_endpoint',
+        value: process.env.REDIS_HOST || '',
       },
     ].map((envVarData) => ({
       ...envVarData,
@@ -54,27 +65,32 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcsService',
-        value: 'my_ecs_service',
+        value: 'seamless-demo-notification',
+      },
+      {
+        resourceType: ResourceType.SERVICE,
+        name: 'awsEcsServiceStaging',
+        value: 'seamless-demo-notification',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcsTaskDefinition',
-        value: 'my_task_definition',
+        value: 'seamless-demo-notification',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcrRepository',
-        value: 'my_ecr_repository',
+        value: 'seamless-demo-notification',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsSnsTopic',
-        value: 'my_sns_topic',
+        value: 'seamless-pipeline-topic',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'logSubscriberUrl',
-        value: 'my_logging_service_url',
+        value: process.env.LOG_SUBSCRIBER_URL || '',
       },
       {
         resourceType: ResourceType.SERVICE,

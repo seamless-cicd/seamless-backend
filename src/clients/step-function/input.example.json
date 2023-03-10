@@ -42,7 +42,7 @@
     }
   },
   "runFull": "true",
-  "useStaging": "true",
+  "useStaging": "false",
   "autoDeploy": "false",
   "containerVariables": {
     "awsRegion": "us-east-1",

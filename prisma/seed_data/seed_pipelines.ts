@@ -1,97 +1,64 @@
-import { Status, TriggerType, StageType } from '@prisma/client';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { TriggerType, StageType } from '@prisma/client';
 import prisma from '../../src/clients/prisma-client';
 
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
     data: {
-      name: 'Pipeline 01',
-      githubPat: 'my_github_pat',
-      awsAccessKey: 'my_aws_access_key',
-      awsSecretAccessKey: 'my_aws_secret_access_key',
+      id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
+      name: 'Demo Pipeline',
+      githubPat: process.env.GITHUB_PAT || '',
+      awsAccessKey: process.env.AWS_ACCESS_KEY || '',
+      awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
       services: {
         create: [
           {
-            name: 'Service01',
+            id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
+            name: 'Demo Service',
             triggerOnMain: true,
-            triggerOnPrOpen: true,
-            triggerOnPrSync: true,
+            triggerOnPrOpen: false,
+            triggerOnPrSync: false,
             useStaging: false,
-            githubRepoUrl: 'my_github_repository',
+            autoDeploy: false,
+            githubRepoUrl: process.env.GITHUB_REPO_URL || '',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
             runs: {
               create: [
-                // Most stages idle
                 {
-                  startedAt: '2022-02-28T11:00:00.000Z',
-                  commitHash: 'abc234',
-                  commitMessage: 'My commit message',
+                  id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
+                  commitHash: 'abc123',
+                  commitMessage: 'feat: add notification feature',
                   committer: 'Jason Wang',
                   triggerType: TriggerType.MAIN,
                   stages: {
                     create: [
                       {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
                         type: StageType.PREPARE,
-                        startedAt: '2022-02-28T11:00:00.000Z',
-                        status: Status.IDLE,
                       },
                       {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
                         type: StageType.CODE_QUALITY,
-                        startedAt: '2022-02-28T11:01:00.000Z',
-                        status: Status.IDLE,
                       },
                       {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
                         type: StageType.UNIT_TEST,
-                        startedAt: '2022-02-28T11:02:00.000Z',
-                        status: Status.IDLE,
                       },
                       {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
                         type: StageType.BUILD,
-                        startedAt: '2022-02-28T11:03:00.000Z',
-                        status: Status.IDLE,
                       },
                       {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e8',
+                        type: StageType.DEPLOY_STAGING,
+                      },
+                      {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e9',
                         type: StageType.DEPLOY_PROD,
-                        startedAt: '2022-02-28T11:04:00.000Z',
-                        status: Status.IDLE,
-                      },
-                    ],
-                  },
-                },
-                // Failure
-                {
-                  startedAt: '2022-02-28T10:00:00.000Z',
-                  commitHash: 'abc123',
-                  commitMessage: 'My commit message',
-                  committer: 'Jason Wang',
-                  triggerType: TriggerType.PR_OPEN,
-                  stages: {
-                    create: [
-                      {
-                        type: StageType.PREPARE,
-                        startedAt: '2022-02-28T10:00:00.000Z',
-                        status: Status.SUCCESS,
-                      },
-                      {
-                        type: StageType.CODE_QUALITY,
-                        startedAt: '2022-02-28T10:01:00.000Z',
-                        status: Status.SUCCESS,
-                      },
-                      {
-                        type: StageType.UNIT_TEST,
-                        startedAt: '2022-02-28T10:02:00.000Z',
-                        status: Status.FAILURE,
-                      },
-                      {
-                        type: StageType.BUILD,
-                        startedAt: '2022-02-28T10:00:00.000Z',
-                        status: Status.IDLE,
-                      },
-                      {
-                        type: StageType.DEPLOY_PROD,
-                        startedAt: '2022-02-28T10:00:00.000Z',
-                        status: Status.IDLE,
                       },
                     ],
                   },
