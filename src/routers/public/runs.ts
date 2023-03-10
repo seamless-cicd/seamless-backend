@@ -42,8 +42,8 @@ runsRouter.post('/', async (req: Request, res: Response) => {
 runsRouter.post('/:runId/start', async (req: Request, res: Response) => {
   const { runId } = req.params;
   try {
-    await stepFunctionsService.start(runId);
-    res.status(200).json({ message: 'Step function started' });
+    const response = await stepFunctionsService.start(runId);
+    res.status(200).json(response);
   } catch (error) {
     res
       .status(500)

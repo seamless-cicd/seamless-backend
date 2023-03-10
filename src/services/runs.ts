@@ -1,6 +1,5 @@
 import prisma from '../clients/prisma-client';
 import { TriggerType } from '@prisma/client';
-import { pipelineStatusUpdateSchema } from '../schemas';
 
 // runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
 async function getAllForService(serviceId: any) {
