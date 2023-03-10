@@ -14,9 +14,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use('/', homeRouter);
+
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
-publicRouter.use('/', homeRouter);
 publicRouter.use('/pipelines', pipelinesRouter);
 publicRouter.use('/services', servicesRouter);
 publicRouter.use('/runs', runsRouter);
