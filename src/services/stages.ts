@@ -168,4 +168,23 @@ async function createDeployProd(runId: any) {
   }
 }
 
-export default { getAllForRun, createAll, deleteOne };
+// needed to test status updates for polling, with postman can update status
+// then can see if the front end polls and displays new data
+async function updateOne(id: any, data: any) {
+  try {
+    const updated = await prisma.stage.update({
+      where: {
+        id: id,
+      },
+      data: data,
+    });
+    await prisma.$disconnect();
+    return updated;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAllForRun, createAll, deleteOne, updateOne };
+
