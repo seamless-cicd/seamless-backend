@@ -99,11 +99,12 @@ model Run {
   updatedAt     DateTime    @updatedAt
   startedAt     DateTime    @default(now())
   endedAt       DateTime?
+  // Number in seconds
   duration      Int?
   commitHash    String?
   commitMessage String?
   committer     String?
-  status        Status      @default(IN_PROGRESS)
+  status        Status      @default(IDLE)
   triggerType   TriggerType
   Service       Service?    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId     String?
