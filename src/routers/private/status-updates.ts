@@ -7,7 +7,11 @@ const statusUpdatesRouter = express.Router();
 
 statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   // Assumes req.body contains "runStatus"
-  const { run, stages } = RunStatusSchema.parse(req.body);
+  let data = req.body;
+  if (typeof req.body === 'string') {
+    data = JSON.parse(data);
+  }
+  const { run, stages } = RunStatusSchema.parse(data);
 
   try {
     // Update run
