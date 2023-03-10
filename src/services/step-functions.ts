@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SfnInputSchema, Stage } from '../clients/step-function/input-schema';
+import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
 import { StageType, Status } from '@prisma/client';
 // import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 // import { createSfnClient } from '../clients/step-function';

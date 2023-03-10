@@ -82,4 +82,5 @@ export {
   Stage,
   RunStatus,
   ContainerVariables,
+  RunStatusSchema,
 };
