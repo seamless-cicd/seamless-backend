@@ -57,4 +57,13 @@ runsRouter.delete('/:runId', async (req: Request, res: Response) => {
   res.status(200).json(deleteData);
 });
 
+
+// added to test with postman updating run status so that it can be polled from the front end
+runsRouter.patch('/:runId', async (req: Request, res: Response) => {
+  const { runId } = req.params;
+  const data = req.body;
+  const updatedData = runsService.updateOne(runId, data);
+  res.status(200).json(updatedData);
+});
+
 export default runsRouter;

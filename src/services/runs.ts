@@ -83,4 +83,22 @@ async function deleteOne(id: any) {
 //   }
 // }
 
-export default { getAllForService, getOne, createOne, deleteOne };
+// similar to above but this function taken from service and reused to update data points
+// used to update data from postman to test long polling
+async function updateOne(id: any, data: any) {
+  try {
+    const updated = await prisma.run.update({
+      where: {
+        id: id,
+      },
+      data: data,
+    });
+    await prisma.$disconnect();
+    return updated;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default { getAllForService, getOne, createOne, deleteOne, updateOne };
