@@ -12,8 +12,15 @@ Seamless's backend is comprised of an Express server connected to a Postgres dat
 
 Create an ECR repository on AWS with the name `seamless-backend`. Click "View push commands" and follow the instructions to build and push the image to ECR. In order to deploy Seamless's infrastructure using this image for the backend. The service should automatically connect to the RDS instance created with the CDK.
 
-## Database
+### Deployment Commands
 
+`aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/p6x2h7y7`
+`docker build --no-cache -t seamless-backend .`
+`docker tag seamless-backend:latest public.ecr.aws/p6x2h7y7/seamless-backend:latest`
+`docker push public.ecr.aws/p6x2h7y7/seamless-backend:latest`
+
+## Database
+`
 ### Deploying the Database
 
 Run `npx prisma migrate deploy` to setup the schema and perform subsequent schema migrations.
@@ -24,7 +31,4 @@ Run `prisma db seed` to manually seed prisma.
 
 Running `prisma migrate dev` or `primsa migrate reset` automatically seeds the database. To skip seeding, pass the `--skip-seeed` flag.
 
-### Schemas
-
-The Seamless Backiend uses Prisma and the prisma-zod-generateor package to manage schemas. Run `npx prisma generate` to generate the schemas, and import Typescript-converted schemas from `prisma/generated/schemas` to use them in code.
 
