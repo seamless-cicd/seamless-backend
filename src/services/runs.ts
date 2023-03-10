@@ -1,6 +1,5 @@
 import prisma from '../clients/prisma-client';
-import { TriggerType } from '@prisma/client';
-import { pipelineStatusUpdateSchema } from '../schemas';
+import { Status, TriggerType } from '@prisma/client';
 
 // runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
 async function getAllForService(serviceId: any) {
@@ -66,22 +65,47 @@ async function deleteOne(id: any) {
   }
 }
 
-// async function updateRunStatus(
-//   id: any,
-//   data: Zod.infer<typeof pipelineStatusUpdateSchema>,
-// ) {
-//   try {
-//     const updated = await prisma.run.update({
-//       where: {
-//         id: id,
-//       },
-//     });
-//     await prisma.$disconnect();
-//     return updated;
-//   } catch (e) {
-//     console.error(e);
-//     await prisma.$disconnect();
-//   }
-// }
+async function updateRunStatus(id: string, status: Status) {
+  try {
+    const originalRun = await prisma.run.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-export default { getAllForService, getOne, createOne, deleteOne };
+    if (!originalRun) {
+      throw new Error('Original run is non-existent');
+    }
+
+    const endedAt = new Date();
+    const runEnded = status === Status.FAILURE || Status.SUCCESS;
+
+    const duration = Math.floor(
+      (endedAt.getTime() - originalRun.startedAt.getTime()) / 1000,
+    );
+
+    const updated = await prisma.run.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status,
+        endedAt: runEnded ? endedAt : null,
+        duration: runEnded ? duration : null,
+      },
+    });
+    await prisma.$disconnect();
+    return updated;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default {
+  getAllForService,
+  getOne,
+  createOne,
+  deleteOne,
+  updateRunStatus,
+};

@@ -22,7 +22,7 @@ const StatusSchema = z.enum([
 ]);
 
 const StageSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   status: StatusSchema,
 });
 

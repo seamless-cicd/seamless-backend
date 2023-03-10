@@ -8,13 +8,14 @@ import runsRouter from './routers/public/runs';
 import stagesRouter from './routers/public/stages';
 import logsRouter from './routers/public/logs';
 import webhooksRouter from './routers/public/webhooks';
+import statusUpdatesRouter from './routers/private/status-updates';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Public routes, consumed by the frontend
 const publicRouter = express.Router();
-
 publicRouter.use('/', homeRouter);
 publicRouter.use('/pipelines', pipelinesRouter);
 publicRouter.use('/services', servicesRouter);
@@ -23,12 +24,11 @@ publicRouter.use('/stages', stagesRouter);
 publicRouter.use('/logs', logsRouter);
 publicRouter.use('/webhooks', webhooksRouter);
 
-const privateRouter = express.Router();
-
-// Consumed by the frontend
 app.use('/api', publicRouter);
 
-// AWS infra hits this internally
+// Private routes, hit by AWS infra
+const privateRouter = express.Router();
+privateRouter.use('/status-updates', statusUpdatesRouter);
 app.use('/internal', privateRouter);
 
 const PORT = process.env.PORT || 3001;
