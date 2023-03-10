@@ -20,7 +20,7 @@ Create an ECR repository on AWS with the name `seamless-backend`. Click "View pu
 `docker push public.ecr.aws/p6x2h7y7/seamless-backend:latest`
 
 ## Database
-
+`
 ### Deploying the Database
 
 Run `npx prisma migrate deploy` to setup the schema and perform subsequent schema migrations.
