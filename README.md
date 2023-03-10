@@ -12,6 +12,13 @@ Seamless's backend is comprised of an Express server connected to a Postgres dat
 
 Create an ECR repository on AWS with the name `seamless-backend`. Click "View push commands" and follow the instructions to build and push the image to ECR. In order to deploy Seamless's infrastructure using this image for the backend. The service should automatically connect to the RDS instance created with the CDK.
 
+### Deployment Commands
+
+`aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/p6x2h7y7`
+`docker build --no-cache -t seamless-backend .`
+`docker tag seamless-backend:latest public.ecr.aws/p6x2h7y7/seamless-backend:latest`
+`docker push public.ecr.aws/p6x2h7y7/seamless-backend:latest`
+
 ## Database
 
 ### Deploying the Database
