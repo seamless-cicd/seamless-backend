@@ -24,6 +24,7 @@ export const seedPipelines = async () => {
               create: [
                 // Most stages idle
                 {
+                  id: 'runId',
                   startedAt: '2022-02-28T11:00:00.000Z',
                   commitHash: 'abc234',
                   commitMessage: 'My commit message',
@@ -32,26 +33,37 @@ export const seedPipelines = async () => {
                   stages: {
                     create: [
                       {
+                        id: 'prepareId',
                         type: StageType.PREPARE,
                         startedAt: '2022-02-28T11:00:00.000Z',
                         status: Status.IDLE,
                       },
                       {
+                        id: 'codeQualityId',
                         type: StageType.CODE_QUALITY,
                         startedAt: '2022-02-28T11:01:00.000Z',
                         status: Status.IDLE,
                       },
                       {
+                        id: 'unitTestId',
                         type: StageType.UNIT_TEST,
                         startedAt: '2022-02-28T11:02:00.000Z',
                         status: Status.IDLE,
                       },
                       {
+                        id: 'buildId',
                         type: StageType.BUILD,
                         startedAt: '2022-02-28T11:03:00.000Z',
                         status: Status.IDLE,
                       },
                       {
+                        id: 'deployStagingId',
+                        type: StageType.DEPLOY_STAGING,
+                        startedAt: '2022-02-28T11:04:00.000Z',
+                        status: Status.IDLE,
+                      },
+                      {
+                        id: 'deployProdId',
                         type: StageType.DEPLOY_PROD,
                         startedAt: '2022-02-28T11:04:00.000Z',
                         status: Status.IDLE,
@@ -61,6 +73,7 @@ export const seedPipelines = async () => {
                 },
                 // Failure
                 {
+                  id: 'runId2',
                   startedAt: '2022-02-28T10:00:00.000Z',
                   commitHash: 'abc123',
                   commitMessage: 'My commit message',
@@ -69,28 +82,39 @@ export const seedPipelines = async () => {
                   stages: {
                     create: [
                       {
+                        id: 'prepareId2',
                         type: StageType.PREPARE,
-                        startedAt: '2022-02-28T10:00:00.000Z',
+                        startedAt: '2022-02-28T11:00:00.000Z',
                         status: Status.SUCCESS,
                       },
                       {
+                        id: 'codeQualityId2',
                         type: StageType.CODE_QUALITY,
-                        startedAt: '2022-02-28T10:01:00.000Z',
+                        startedAt: '2022-02-28T11:01:00.000Z',
                         status: Status.SUCCESS,
                       },
                       {
+                        id: 'unitTestId2',
                         type: StageType.UNIT_TEST,
-                        startedAt: '2022-02-28T10:02:00.000Z',
+                        startedAt: '2022-02-28T11:02:00.000Z',
                         status: Status.FAILURE,
                       },
                       {
+                        id: 'buildId2',
                         type: StageType.BUILD,
-                        startedAt: '2022-02-28T10:00:00.000Z',
+                        startedAt: '2022-02-28T11:03:00.000Z',
                         status: Status.IDLE,
                       },
                       {
+                        id: 'deployStagingId2',
+                        type: StageType.DEPLOY_STAGING,
+                        startedAt: '2022-02-28T11:04:00.000Z',
+                        status: Status.IDLE,
+                      },
+                      {
+                        id: 'deployProdId2',
                         type: StageType.DEPLOY_PROD,
-                        startedAt: '2022-02-28T10:00:00.000Z',
+                        startedAt: '2022-02-28T11:04:00.000Z',
                         status: Status.IDLE,
                       },
                     ],
