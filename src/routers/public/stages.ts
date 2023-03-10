@@ -16,4 +16,13 @@ stagesRouter.delete('/:stageId', async (req: Request, res: Response) => {
   res.status(200).json(deleteData);
 });
 
+// added to test with postman updating stage status so that it can be polled from the front end
+stagesRouter.patch('/:stageId', async (req: Request, res: Response) => {
+  const { stageId } = req.params;
+  const data = req.body;
+  const updatedData = stagesService.updateOne(stageId, data);
+  res.status(200).json(updatedData);
+});
+
 export default stagesRouter;
+
