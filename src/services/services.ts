@@ -3,6 +3,7 @@ import { ResourceType, EnvironmentVariable, Service } from '@prisma/client';
 import envVarsService from './envVars';
 
 export interface ServiceWithEnvVars extends Service {
+  awsEcsServiceStaging?: string;
   awsEcsService?: string;
   awsEcsTaskDefinition?: string;
   awsEcrRepository?: string;
