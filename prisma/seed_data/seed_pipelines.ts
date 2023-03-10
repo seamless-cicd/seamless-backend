@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { TriggerType, StageType } from '@prisma/client';
+import { StageType, TriggerType } from '@prisma/client';
 import prisma from '../../src/clients/prisma-client';
 
 export const seedPipelines = async () => {

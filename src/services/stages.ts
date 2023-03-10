@@ -1,5 +1,5 @@
+import { StageType, Status } from '@prisma/client';
 import prisma from '../clients/prisma-client';
-import { StageType } from '@prisma/client';
 
 async function getAllForRun(runId: any) {
   try {
@@ -186,5 +186,29 @@ async function updateOne(id: any, data: any) {
   }
 }
 
-export default { getAllForRun, createAll, deleteOne, updateOne };
+// TODO: Update duration
+async function updateStageStatus(id: string, status: Status) {
+  try {
+    const stage = await prisma.stage.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: status,
+      },
+    });
+    await prisma.$disconnect();
+    return stage;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
 
+export default {
+  getAllForRun,
+  createAll,
+  deleteOne,
+  updateOne,
+  updateStageStatus,
+};
