@@ -1,10 +1,10 @@
+import { Octokit } from '@octokit/rest';
+import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
-import { Octokit } from "@octokit/rest";
-import { config } from 'dotenv'
 config();
 // PAT for testing if you don't want to use submitted PAT from form
 // const PAT = process.env.PAT
-const NGROK = process.env.NGROK
+const NGROK = process.env.NGROK;
 
 const webhooksRouter = express.Router();
 
@@ -14,11 +14,11 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
   console.log(event);
   console.log(ref);
   console.log(action);
-  
+
   if (event === 'push' && /\/main$/.test(ref)) {
     console.log('push on main => trigger pipeline actions');
   }
-  
+
   if (event === 'pull_request' && action === 'opened') {
     console.log('open pr => trigger pipeline');
   }
@@ -26,13 +26,17 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
   if (event === 'pull_request' && action === 'synchronize') {
     console.log('sync pr => trigger pipeline');
   }
-  
+
   res.status(200).send();
 });
 
 webhooksRouter.post('/create', async (req: Request, res: Response) => {
-  const { 
-    triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubPat, githubRepoUrl 
+  const {
+    triggerOnMain,
+    triggerOnPrSync,
+    triggerOnPrOpen,
+    githubPat,
+    githubRepoUrl,
   } = req.body;
   const urlSections = githubRepoUrl.split('/');
   const owner = urlSections[urlSections.length - 2];
@@ -45,7 +49,7 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
   if (triggerOnPrOpen || triggerOnPrSync) {
     events.push('pull_request');
   }
-  
+
   const octokit = new Octokit({
     auth: githubPat,
   });
@@ -60,12 +64,12 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
     config: {
       url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok
       content_type: 'json',
-      insecure_ssl: '0'
+      insecure_ssl: '0',
     },
     headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  });
 
   // HARDCODED DATA SAVE TEMPORARILY FOR REFERENCE
   /*
@@ -88,7 +92,7 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
     }
   })
   */
-  
+
   res.status(200).json(data);
 });
 
