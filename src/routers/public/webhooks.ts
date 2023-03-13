@@ -66,35 +66,13 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
       'X-GitHub-Api-Version': '2022-11-28'
     }
   })
-
-  // HARDCODED DATA SAVE TEMPORARILY FOR REFERENCE
-  /*
-  const { data } = await octokit.request('POST /repos/{owner}/{repo}/hooks', {
-    owner: 'ls-jre',
-    repo: 'webhook-generator',
-    name: 'web', // this is default to create webhook
-    active: true,
-    events: [
-      'push',
-      'pull_request'
-    ],
-    config: {
-      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok this back to above route I believe
-      content_type: 'json',
-      insecure_ssl: '0'
-    },
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  */
   
   res.status(200).json(data);
 });
 
 webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
   const { 
-    triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubPat, githubRepoUrl, hookId
+    triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubPat, githubRepoUrl
   } = req.body;
   const urlSections = githubRepoUrl.split('/');
   const owner = urlSections[urlSections.length - 2];
@@ -107,14 +85,12 @@ webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
   if (triggerOnPrOpen || triggerOnPrSync) {
     events.push('pull_request');
   }
-
-  console.log(events, '< new events here');
   
   const octokit = new Octokit({
     auth: githubPat,
   });
 
-  // first find the existing webhook - the id is needed to patch it. Can't do this through state and pass it to backend
+  // first find the existing webhooks - necessary to find the one that needs patching
   const webhooks = await octokit.request('GET /repos/{owner}/{repo}/hooks', {
     owner: owner,
     repo: repo,
@@ -123,17 +99,14 @@ webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
     }
   });
 
-
-  console.log(webhooks.data, 'webhooks config for service');
+  // filter based off of the webhook with defined endpoint here
   const webhook = webhooks.data.filter(webhook => {
     return webhook.config.url === (NGROK + '/api/webhooks');
   });
-
+  // save id
   const webhookId = webhook[0].id
-  console.log(webhookId);
-  console.log(webhookId === 404873959);
 
-  // URL will eventually have to be updated to that of user
+  // patch it here with octokit - hook_id is what determines the hook
   const { data } = await octokit.request('PATCH /repos/{owner}/{repo}/hooks/{hook_id}', {
     owner: owner,
     repo: repo,
@@ -150,28 +123,6 @@ webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
       'X-GitHub-Api-Version': '2022-11-28'
     }
   })
-
-  // HARDCODED DATA SAVE TEMPORARILY FOR REFERENCE
-  /*
-  const { data } = await octokit.request('POST /repos/{owner}/{repo}/hooks', {
-    owner: 'ls-jre',
-    repo: 'webhook-generator',
-    name: 'web', // this is default to create webhook
-    active: true,
-    events: [
-      'push',
-      'pull_request'
-    ],
-    config: {
-      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok this back to above route I believe
-      content_type: 'json',
-      insecure_ssl: '0'
-    },
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  */
   
   res.status(200).json(data);
 });
