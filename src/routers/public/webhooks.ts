@@ -114,11 +114,30 @@ webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
     auth: githubPat,
   });
 
+  // first find the existing webhook - the id is needed to patch it. Can't do this through state and pass it to backend
+  const webhooks = await octokit.request('GET /repos/{owner}/{repo}/hooks', {
+    owner: owner,
+    repo: repo,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+
+
+  console.log(webhooks.data, 'webhooks config for service');
+  const webhook = webhooks.data.filter(webhook => {
+    return webhook.config.url === (NGROK + '/api/webhooks');
+  });
+
+  const webhookId = webhook[0].id
+  console.log(webhookId);
+  console.log(webhookId === 404873959);
+
   // URL will eventually have to be updated to that of user
   const { data } = await octokit.request('PATCH /repos/{owner}/{repo}/hooks/{hook_id}', {
     owner: owner,
     repo: repo,
-    hook_id: hookId,
+    hook_id: webhookId,
     name: 'web', // this is default to create webhook
     active: true,
     events: events,
