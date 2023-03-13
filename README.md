@@ -14,10 +14,7 @@ Create an ECR repository on AWS with the name `seamless-backend`. Click "View pu
 
 ### Deployment Commands
 
-`aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/p6x2h7y7`
-`docker build --no-cache -t seamless-backend .`
-`docker tag seamless-backend:latest public.ecr.aws/p6x2h7y7/seamless-backend:latest`
-`docker push public.ecr.aws/p6x2h7y7/seamless-backend:latest`
+Run `./deploy.sh` as an authenticated user.
 
 ## Database
 `
