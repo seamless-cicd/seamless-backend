@@ -92,4 +92,69 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
   res.status(200).json(data);
 });
 
+webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
+  const { 
+    triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubPat, githubRepoUrl, hookId
+  } = req.body;
+  const urlSections = githubRepoUrl.split('/');
+  const owner = urlSections[urlSections.length - 2];
+  const repo = urlSections[urlSections.length - 1];
+  const events = [];
+
+  if (triggerOnMain) {
+    events.push('push');
+  }
+  if (triggerOnPrOpen || triggerOnPrSync) {
+    events.push('pull_request');
+  }
+
+  console.log(events, '< new events here');
+  
+  const octokit = new Octokit({
+    auth: githubPat,
+  });
+
+  // URL will eventually have to be updated to that of user
+  const { data } = await octokit.request('PATCH /repos/{owner}/{repo}/hooks/{hook_id}', {
+    owner: owner,
+    repo: repo,
+    hook_id: hookId,
+    name: 'web', // this is default to create webhook
+    active: true,
+    events: events,
+    config: {
+      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok
+      content_type: 'json',
+      insecure_ssl: '0'
+    },
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+
+  // HARDCODED DATA SAVE TEMPORARILY FOR REFERENCE
+  /*
+  const { data } = await octokit.request('POST /repos/{owner}/{repo}/hooks', {
+    owner: 'ls-jre',
+    repo: 'webhook-generator',
+    name: 'web', // this is default to create webhook
+    active: true,
+    events: [
+      'push',
+      'pull_request'
+    ],
+    config: {
+      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok this back to above route I believe
+      content_type: 'json',
+      insecure_ssl: '0'
+    },
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+  */
+  
+  res.status(200).json(data);
+});
+
 export default webhooksRouter;
