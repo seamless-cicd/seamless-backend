@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import 'express-async-errors';
 
 import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
