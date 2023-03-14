@@ -10,6 +10,7 @@ const envSchema = z.object({
   GET_LAMBDA: z.string(),
   SET_LAMBDA: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
+  GITHUB_CLIENT_ID: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -31,4 +32,5 @@ export const {
   GET_LAMBDA,
   SET_LAMBDA,
   GITHUB_CLIENT_SECRET,
+  GITHUB_CLIENT_ID,
 } = parsedEnv.data;
