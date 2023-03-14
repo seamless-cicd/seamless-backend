@@ -13,6 +13,10 @@ export const authMiddleware = async (
     // Authenticate with Octokit before proceeding
     const token = req.get('Authorization')?.split(' ')[1];
 
+    if (!token) {
+      return res.status(401).send('Authentication error');
+    }
+
     const octokit = new Octokit({
       authStrategy: createOAuthUserAuth,
       auth: {
@@ -22,6 +26,9 @@ export const authMiddleware = async (
         token,
       },
     });
+
+    // Try to make a request; will fail if user is unauthenticated
+    await octokit.request('GET /user');
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
