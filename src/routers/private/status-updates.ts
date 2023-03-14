@@ -6,11 +6,11 @@ import stagesService from '../../services/stages';
 const statusUpdatesRouter = express.Router();
 
 statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
-  // Assumes req.body contains "runStatus"
   let data = req.body;
-  if (typeof req.body === 'string') {
+  if (typeof data === 'string') {
     data = JSON.parse(data);
   }
+
   const { run, stages } = RunStatusSchema.parse(data);
 
   try {

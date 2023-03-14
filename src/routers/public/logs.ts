@@ -46,82 +46,84 @@ const streamLogsToClients = async (redisClient: Redis, stageId: string) => {
 };
 
 // Routes
-// Get logs for stageId
-logsRouter.get('/', async (req: Request, res: Response) => {
-  try {
-    //@ts-ignore
-    const redisClient = req.redisClient;
-    if (!redisClient) {
-      return res.status(500).json({ message: 'Redis is unavailable' });
-    }
+const createLogsRouter = (redisClient: Redis) => {
+  // Get logs for stageId
+  logsRouter.get('/', async (req: Request, res: Response) => {
+    try {
+      if (!redisClient) {
+        return res.status(500).json({ message: 'Redis is unavailable' });
+      }
 
-    const { stageId } = req.query;
-    const validatedStageId = StageIdSchema.safeParse(stageId);
+      const { stageId } = req.query;
+      const validatedStageId = StageIdSchema.safeParse(stageId);
 
-    if (!validatedStageId.success) {
-      console.error(validatedStageId.error);
-      return res.status(400).json({ message: 'Invalid stageId' });
-    }
+      if (!validatedStageId.success) {
+        console.error(validatedStageId.error);
+        return res.status(400).json({ message: 'Invalid stageId' });
+      }
 
-    const logsData = await logsService.getAllForStage(
-      redisClient,
-      validatedStageId.data,
-    );
-    res.status(200).json(logsData);
-  } catch (e) {
-    if (e instanceof Error) {
-      return res.status(500).json({ message: e.message });
-    }
-  }
-});
-
-// Client initiates log streaming connection
-logsRouter.get('/stream', (req: Request, res: Response) => {
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Connection', 'keep-alive');
-
-  // Add the Response (representing a client) to our array
-  logStreamingClients.push({ id: ulid(), res });
-
-  // Remove the client when the connection is closed
-  req.on('close', () => {
-    const index = logStreamingClients.findIndex((client) => client.res === res);
-    if (index > -1) {
-      logStreamingClients.splice(index, 1);
+      const logsData = await logsService.getAllForStage(
+        redisClient,
+        validatedStageId.data,
+      );
+      res.status(200).json(logsData);
+    } catch (e) {
+      if (e instanceof Error) {
+        return res.status(500).json({ message: e.message });
+      }
     }
   });
-});
 
-// Add a log
-logsRouter.post('/', async (req: Request, res: Response) => {
-  try {
-    //@ts-ignore
-    const redisClient = req.redisClient;
-    if (!redisClient) {
-      return res.status(500).json({ message: 'Redis is unavailable' });
+  // Client initiates log streaming connection
+  logsRouter.get('/stream', (req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Connection', 'keep-alive');
+
+    // Add the Response (representing a client) to our array
+    logStreamingClients.push({ id: ulid(), res });
+
+    // Remove the client when the connection is closed
+    req.on('close', () => {
+      const index = logStreamingClients.findIndex(
+        (client) => client.res === res,
+      );
+      if (index > -1) {
+        logStreamingClients.splice(index, 1);
+      }
+    });
+  });
+
+  // Add a log
+  logsRouter.post('/', async (req: Request, res: Response) => {
+    try {
+      if (!redisClient) {
+        return res.status(500).json({ message: 'Redis is unavailable' });
+      }
+
+      let logData = req.body;
+      if (typeof logData === 'string') logData = JSON.parse(logData);
+
+      const validatedLogData = LogDataSchema.safeParse(logData);
+
+      if (!validatedLogData.success) {
+        console.error(validatedLogData.error);
+        return res.status(400).json({ message: 'Invalid log data' });
+      }
+
+      // Store log in Redis
+      await logsService.createOne(redisClient, validatedLogData.data);
+      // Emit log data to frontend
+      await streamLogsToClients(redisClient, validatedLogData.data.stageId);
+      res.status(200).send('Log stored');
+    } catch (e) {
+      if (e instanceof Error) {
+        return res.status(500).json({ message: e.message });
+      }
     }
+  });
 
-    let logData = req.body;
-    if (typeof logData === 'string') logData = JSON.parse(logData);
+  return logsRouter;
+};
 
-    const validatedLogData = LogDataSchema.safeParse(logData);
-
-    if (!validatedLogData.success) {
-      console.error(validatedLogData.error);
-      return res.status(400).json({ message: 'Invalid log data' });
-    }
-
-    // Store log in Redis
-    await logsService.createOne(redisClient, validatedLogData.data);
-    // Emit log data to frontend
-    await streamLogsToClients(redisClient, validatedLogData.data.stageId);
-    res.status(200).send('Log stored');
-  } catch (e) {
-    if (e instanceof Error) {
-      return res.status(500).json({ message: e.message });
-    }
-  }
-});
-
-export default logsRouter;
+export default createLogsRouter;
