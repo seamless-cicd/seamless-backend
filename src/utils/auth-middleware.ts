@@ -1,0 +1,34 @@
+import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
+import { Octokit } from '@octokit/rest';
+import { NextFunction, Request, Response } from 'express';
+import { GITHUB_CLIENT_SECRET } from '../utils/config';
+import { GITHUB_CLIENT_ID } from '../utils/constants';
+
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // Authenticate with Octokit before proceeding
+    const token = req.get('Authorization')?.split(' ')[1];
+
+    const octokit = new Octokit({
+      authStrategy: createOAuthUserAuth,
+      auth: {
+        clientId: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_CLIENT_SECRET,
+        clientType: 'oauth-app',
+        token,
+      },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    req.octokit = octokit;
+
+    next();
+  } catch (error) {
+    return res.status(401).send('Authentication error');
+  }
+};

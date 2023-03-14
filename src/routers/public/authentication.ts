@@ -5,15 +5,16 @@ import { GITHUB_CLIENT_ID } from '../../utils/constants';
 
 const authRouter = express.Router();
 
+// Get access token originally
 authRouter.get('/access-token', async (req: Request, res: Response) => {
   // Temporary code supplied to the frontend by GitHub OAuth that we can use to
-  // get an access token
   const code = req.query.code;
 
   if (!code || typeof code !== 'string' || code.length === 0) {
     return res.status(400).send('No code provided');
   }
 
+  // Authenticate with Github
   const auth = createOAuthUserAuth({
     clientId: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
@@ -23,12 +24,7 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
   const { token } = await auth();
 
   // Pass access token back to frontend
-  return res.json({ token }).send(200);
-});
-
-// Test we can access user data
-authRouter.get('/user-data', async (req: Request, res: Response) => {
-  // Make an authorized request with OAuth
+  return res.json({ token }).sendStatus(200);
 });
 
 export default authRouter;
