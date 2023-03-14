@@ -50,7 +50,6 @@ const streamLogsToClients = async (redisClient: Redis, stageId: string) => {
 // Get logs for stageId
 logsRouter.get('/', async (req: Request, res: Response) => {
   try {
-    //@ts-ignore
     const redisClient = req.redisClient;
     if (!redisClient) {
       return res.status(500).json({ message: 'Redis is unavailable' });
@@ -97,7 +96,6 @@ logsRouter.get('/stream', (req: Request, res: Response) => {
 // Add a log
 logsRouter.post('/', async (req: Request, res: Response) => {
   try {
-    //@ts-ignore
     const redisClient = req.redisClient;
     if (!redisClient) {
       return res.status(500).json({ message: 'Redis is unavailable' });
