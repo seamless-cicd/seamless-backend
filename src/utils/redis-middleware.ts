@@ -2,17 +2,18 @@ import { NextFunction, Request, Response } from 'express';
 import Redis from 'ioredis';
 import { REDIS_HOST, REDIS_PORT } from './config';
 
-// const redisClient = new Redis(REDIS_PORT, REDIS_HOST, {
-//   connectTimeout: 2000,
-//   lazyConnect: true,
-//   reconnectOnError: (err) => err.message.includes('READONLY'),
-// });
-
-const redisClient = new Redis(6379, '127.0.0.1', {
+const redisClient = new Redis(REDIS_PORT, REDIS_HOST, {
   connectTimeout: 2000,
   lazyConnect: true,
   reconnectOnError: (err) => err.message.includes('READONLY'),
 });
+
+// SAVE FOR LOCAL TESTING
+// const redisClient = new Redis(6379, '127.0.0.1', {
+//   connectTimeout: 2000,
+//   lazyConnect: true,
+//   reconnectOnError: (err) => err.message.includes('READONLY'),
+// });
 
 // Status messages
 redisClient
