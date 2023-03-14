@@ -1,7 +1,6 @@
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
 import express, { Request, Response } from 'express';
-import { GITHUB_CLIENT_SECRET } from '../../utils/config';
-import { GITHUB_CLIENT_ID } from '../../utils/constants';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../../utils/config';
 
 const authRouter = express.Router();
 

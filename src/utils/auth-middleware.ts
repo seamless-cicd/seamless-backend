@@ -1,8 +1,7 @@
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
 import { Octokit } from '@octokit/rest';
 import { NextFunction, Request, Response } from 'express';
-import { GITHUB_CLIENT_SECRET } from '../utils/config';
-import { GITHUB_CLIENT_ID } from '../utils/constants';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../utils/config';
 
 export const authMiddleware = async (
   req: Request,
@@ -30,8 +29,6 @@ export const authMiddleware = async (
     // Try to make a request; will fail if user is unauthenticated
     await octokit.request('GET /user');
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     req.octokit = octokit;
 
     next();
