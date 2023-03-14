@@ -70,20 +70,57 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
       'X-GitHub-Api-Version': '2022-11-28',
     },
   });
+  
+  res.status(200).json(data);
+});
 
-  // HARDCODED DATA SAVE TEMPORARILY FOR REFERENCE
-  /*
-  const { data } = await octokit.request('POST /repos/{owner}/{repo}/hooks', {
-    owner: 'ls-jre',
-    repo: 'webhook-generator',
+
+webhooksRouter.patch('/patch', async (req: Request, res: Response) => {
+  const { 
+    triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubPat, githubRepoUrl
+  } = req.body;
+  const urlSections = githubRepoUrl.split('/');
+  const owner = urlSections[urlSections.length - 2];
+  const repo = urlSections[urlSections.length - 1];
+  const events = [];
+
+  if (triggerOnMain) {
+    events.push('push');
+  }
+  if (triggerOnPrOpen || triggerOnPrSync) {
+    events.push('pull_request');
+  }
+  
+  const octokit = new Octokit({
+    auth: githubPat,
+  });
+
+  // first find the existing webhooks - necessary to find the one that needs patching
+  const webhooks = await octokit.request('GET /repos/{owner}/{repo}/hooks', {
+    owner: owner,
+    repo: repo,
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+
+  // filter based off of the webhook with defined endpoint here
+  const webhook = webhooks.data.filter(webhook => {
+    return webhook.config.url === (NGROK + '/api/webhooks');
+  });
+  // save id
+  const webhookId = webhook[0].id
+
+  // patch it here with octokit - hook_id is what determines the hook
+  const { data } = await octokit.request('PATCH /repos/{owner}/{repo}/hooks/{hook_id}', {
+    owner: owner,
+    repo: repo,
+    hook_id: webhookId,
     name: 'web', // this is default to create webhook
     active: true,
-    events: [
-      'push',
-      'pull_request'
-    ],
+    events: events,
     config: {
-      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok this back to above route I believe
+      url: NGROK + '/api/webhooks', // url to deliver payloads so can ngrok
       content_type: 'json',
       insecure_ssl: '0'
     },
@@ -91,7 +128,6 @@ webhooksRouter.post('/create', async (req: Request, res: Response) => {
       'X-GitHub-Api-Version': '2022-11-28'
     }
   })
-  */
 
   res.status(200).json(data);
 });
