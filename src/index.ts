@@ -14,6 +14,8 @@ import webhooksRouter from './routers/public/webhooks';
 import { authMiddleware } from './utils/auth-middleware';
 import { redisClient } from './utils/redisClient';
 
+import { BACKEND_PORT } from './utils/config';
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -38,7 +40,7 @@ const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
 app.use('/internal', privateRouter);
 
-const PORT = process.env.BACKEND_PORT || 3001;
+const PORT = BACKEND_PORT || 3001;
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
