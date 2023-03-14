@@ -5,7 +5,10 @@ declare global {
   namespace Express {
     interface Request {
       redisClient: Redis;
-      octokit: Octokit;
+      octokit: Octokit & {
+        paginate: PaginateInterface;
+      } & RestEndpointMethods &
+        Api;
     }
   }
 }
