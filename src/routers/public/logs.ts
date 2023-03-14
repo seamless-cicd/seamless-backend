@@ -42,6 +42,7 @@ const streamLogsToClients = async (redisClient: Redis, stageId: string) => {
   for (const client of logStreamingClients) {
     client.res.write('event: logs\n');
     client.res.write(`data: ${JSON.stringify(logsData)}\n\n`);
+    client.res.write(`data: ${JSON.stringify(logsData)}\n\n`);
   }
 };
 
