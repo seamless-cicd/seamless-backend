@@ -42,7 +42,6 @@ export const redisMiddleware = async (
   next: NextFunction,
 ) => {
   try {
-    //@ts-ignore
     req.redisClient = redisClient;
     await next();
   } catch (error) {
