@@ -1,20 +1,7 @@
-// import { decodeTime } from 'ulidx';
-// import axios from 'axios';
-// import { API_KEY, GET_LAMBDA, SET_LAMBDA } from '../utils/config';
 import { Redis } from 'ioredis';
 import { LogData, StageId } from '../routers/public/logs';
 
 async function getAllForStage(redisClient: Redis, stageId: StageId) {
-  // Temporary Lambda
-  // const response = await axios.get(GET_LAMBDA, {
-  //   params: { stageId },
-  //   headers: {
-  //     'x-api-key': API_KEY,
-  //   },
-  //   responseType: 'json',
-  // });
-  // return await response.data;
-
   try {
     const logs = await redisClient.zrange(stageId, 0, -1);
     const parsedLogs: LogData[] = logs.map((log) => JSON.parse(log));
@@ -26,18 +13,6 @@ async function getAllForStage(redisClient: Redis, stageId: StageId) {
 }
 
 async function createOne(redisClient: Redis, logData: LogData) {
-  // Temporary Lambda
-  // const response = await axios.post(
-  //   SET_LAMBDA,
-  //   { ...logData, score: logData.score || decodeTime(logData.id) },
-  //   {
-  //     headers: {
-  //       'x-api-key': API_KEY,
-  //     },
-  //   },
-  // );
-  // return await response.data;
-
   try {
     if (!logData.stageId) return null;
     // Insert log into Redis, sorted by timestamp

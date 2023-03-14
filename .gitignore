@@ -5,3 +5,4 @@ dist
 .vscode
 ecosystem.config.js
 input.secret.example.json
+playground.pem

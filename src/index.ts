@@ -5,7 +5,7 @@ import 'express-async-errors';
 import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
 import homeRouter from './routers/public/home';
-import logsRouter from './routers/public/logs';
+import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
 import runsRouter from './routers/public/runs';
 import servicesRouter from './routers/public/services';
@@ -13,7 +13,9 @@ import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
 import { authMiddleware } from './utils/auth-middleware';
-import { redisMiddleware } from './utils/redis-middleware';
+import { redisClient } from './utils/redisClient';
+
+import { BACKEND_PORT } from './utils/config';
 
 const app = express();
 app.use(express.json());
@@ -28,7 +30,7 @@ publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
 publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
-publicRouter.use('/logs', authMiddleware, redisMiddleware, logsRouter);
+publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
 publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 
@@ -39,13 +41,20 @@ const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
 app.use('/internal', privateRouter);
 
-const PORT = process.env.PORT || 3001;
+const PORT = BACKEND_PORT || 3001;
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
 server.on('error', (error: Error) => {
-  // redisClient.quit();
+  redisClient.quit();
   console.error(`Failed to start server: ${error}`);
+});
+
+server.on('close', () => {
+  console.log('Server shutting down');
+  redisClient.quit(() => {
+    console.log('Redis client disconnected');
+  });
 });
