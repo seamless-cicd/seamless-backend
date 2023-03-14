@@ -8,6 +8,13 @@ const redisClient = new Redis(REDIS_PORT, REDIS_HOST, {
   reconnectOnError: (err) => err.message.includes('READONLY'),
 });
 
+// SAVE FOR LOCAL TESTING
+// const redisClient = new Redis(6379, '127.0.0.1', {
+//   connectTimeout: 2000,
+//   lazyConnect: true,
+//   reconnectOnError: (err) => err.message.includes('READONLY'),
+// });
+
 // Status messages
 redisClient
   .on('connect', () => {
