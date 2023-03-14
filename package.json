@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/index.js",
-    "dev": "ts-node-dev src/index.ts",
+    "dev": "ts-node-dev --ignore-watch node_modules --ignore-watch prisma ./src/index.ts",
     "test": "jest --verbose",
     "test:watch": "jest --watchAll --verbose",
     "lint": "eslint src/**/*.ts",
