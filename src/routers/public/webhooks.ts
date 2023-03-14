@@ -9,7 +9,6 @@ const NGROK = process.env.NGROK;
 const webhooksRouter = express.Router();
 
 webhooksRouter.post('', async (req: Request, res: Response) => {
-  console.log(NGROK);
   const event = req.headers['x-github-event'];
   const { ref, action } = req.body;
   console.log(event);
