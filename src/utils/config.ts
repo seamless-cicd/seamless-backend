@@ -9,6 +9,7 @@ const envSchema = z.object({
   API_KEY: z.string(),
   GET_LAMBDA: z.string(),
   SET_LAMBDA: z.string(),
+  GITHUB_CLIENT_SECRET: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -23,5 +24,11 @@ if (!parsedEnv.success) {
   process.exit(1);
 }
 
-export const { REDIS_HOST, REDIS_PORT, API_KEY, GET_LAMBDA, SET_LAMBDA } =
-  parsedEnv.data;
+export const {
+  REDIS_HOST,
+  REDIS_PORT,
+  API_KEY,
+  GET_LAMBDA,
+  SET_LAMBDA,
+  GITHUB_CLIENT_SECRET,
+} = parsedEnv.data;
