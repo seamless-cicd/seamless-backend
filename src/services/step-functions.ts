@@ -1,4 +1,7 @@
-import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+import {
+  ListStateMachinesCommand,
+  StartExecutionCommand,
+} from '@aws-sdk/client-sfn';
 import { StageType, Status } from '@prisma/client';
 import { z } from 'zod';
 import { createSfnClient } from '../clients/step-function';
@@ -52,7 +55,6 @@ async function gatherInput(runId: string) {
     });
 
     const sfnInput = {
-      awsStepFunction: pipeline.awsStepFunction,
       serviceId: service.id,
       runId: run.id,
       stageIds: stageIds,
@@ -113,8 +115,20 @@ async function start(runId: string) {
       awsSecretAccessKey,
     );
 
+    // Retrieve Step Function ARN
+    const stateMachinesList = await sfnClient.send(
+      new ListStateMachinesCommand({}),
+    );
+    if (!stateMachinesList || !stateMachinesList.stateMachines) {
+      throw new Error('Failed to retrieve Step Function');
+    }
+
+    const stateMachineArn = stateMachinesList.stateMachines
+      .filter((stateMachine) => stateMachine.name === 'SeamlessStateMachine')
+      .map((stateMachine) => stateMachine.stateMachineArn)[0];
+
     const sfnCommand = new StartExecutionCommand({
-      stateMachineArn: sfnInput.awsStepFunction,
+      stateMachineArn,
       input: JSON.stringify(sfnInput),
     });
 

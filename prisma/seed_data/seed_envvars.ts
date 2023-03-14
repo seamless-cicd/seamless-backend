@@ -89,11 +89,6 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       },
       {
         resourceType: ResourceType.SERVICE,
-        name: 'logSubscriberUrl',
-        value: process.env.LOG_SUBSCRIBER_URL || '',
-      },
-      {
-        resourceType: ResourceType.SERVICE,
         name: 'dockerBaseImage',
         value: 'node',
       },

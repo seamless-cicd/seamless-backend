@@ -4,11 +4,13 @@ dotenv.config();
 import { z } from 'zod';
 
 const envSchema = z.object({
+  BACKEND_PORT: z.string(),
+  DATABASE_URL: z.string(),
   REDIS_HOST: z.string(),
   REDIS_PORT: z.string().transform(Number),
-  API_KEY: z.string(),
-  GET_LAMBDA: z.string(),
-  SET_LAMBDA: z.string(),
+  AWS_ACCOUNT_ID: z.string(),
+  AWS_ACCESS_KEY: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
   GITHUB_CLIENT_ID: z.string(),
 });
@@ -26,11 +28,13 @@ if (!parsedEnv.success) {
 }
 
 export const {
+  BACKEND_PORT,
+  DATABASE_URL,
   REDIS_HOST,
   REDIS_PORT,
-  API_KEY,
-  GET_LAMBDA,
-  SET_LAMBDA,
+  AWS_ACCOUNT_ID,
+  AWS_ACCESS_KEY,
+  AWS_SECRET_ACCESS_KEY,
   GITHUB_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
 } = parsedEnv.data;
