@@ -2,13 +2,16 @@ import cors from 'cors';
 import express from 'express';
 
 import statusUpdatesRouter from './routers/private/status-updates';
+import authRouter from './routers/public/authentication';
 import homeRouter from './routers/public/home';
 import logsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
 import runsRouter from './routers/public/runs';
 import servicesRouter from './routers/public/services';
 import stagesRouter from './routers/public/stages';
+import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
+import { authMiddleware } from './utils/auth-middleware';
 import { redisMiddleware } from './utils/redis-middleware';
 
 const app = express();
@@ -19,12 +22,14 @@ app.use('/', homeRouter);
 
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
-publicRouter.use('/pipelines', pipelinesRouter);
-publicRouter.use('/services', servicesRouter);
-publicRouter.use('/runs', runsRouter);
-publicRouter.use('/stages', stagesRouter);
-publicRouter.use('/logs', redisMiddleware, logsRouter);
-publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/auth', authRouter);
+publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
+publicRouter.use('/services', authMiddleware, servicesRouter);
+publicRouter.use('/runs', authMiddleware, runsRouter);
+publicRouter.use('/stages', authMiddleware, stagesRouter);
+publicRouter.use('/logs', authMiddleware, redisMiddleware, logsRouter);
+publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
+publicRouter.use('/user', authMiddleware, userRouter);
 
 app.use('/api', publicRouter);
 
