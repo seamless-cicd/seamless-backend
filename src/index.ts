@@ -30,8 +30,15 @@ publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
 publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
-publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
-publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
+
+// auth middleware deactivated to test with postman
+// publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
+publicRouter.use('/logs', createLogsRouter(redisClient));
+
+// publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
+// for testing, no middleware - middleware is intercepting the data from github
+// with middleware it wouldn't "ping" when set up, when deactivated it pings
+publicRouter.use('/webhooks', webhooksRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 
 app.use('/api', publicRouter);
