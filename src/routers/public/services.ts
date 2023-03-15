@@ -35,4 +35,16 @@ servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(updatedData);
 });
 
+servicesRouter.post(
+  '/:serviceId/rollback/:commitHash',
+  async (req: Request, res: Response) => {
+    const { serviceId, commitHash } = req.params;
+    const ecsServiceUpdateResponse = await servicesService.rollback(
+      serviceId,
+      commitHash,
+    );
+    res.status(200).json(ecsServiceUpdateResponse);
+  },
+);
+
 export default servicesRouter;

@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 import { REDIS_HOST, REDIS_PORT } from './config';
 
-const redisClient = new Redis(REDIS_PORT, REDIS_HOST);
+const redisClient = new Redis(REDIS_PORT || 6379, REDIS_HOST);
 
 // Status messages
 redisClient

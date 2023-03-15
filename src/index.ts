@@ -44,7 +44,7 @@ const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
 app.use('/internal', privateRouter);
 
-const PORT = BACKEND_PORT || 3001;
+const PORT = BACKEND_PORT || 3000;
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
