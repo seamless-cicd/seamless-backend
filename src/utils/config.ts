@@ -14,6 +14,7 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_PAT: z.string(),
+  BACKEND_URL: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
