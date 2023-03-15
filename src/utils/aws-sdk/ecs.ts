@@ -39,36 +39,39 @@ const createEcrClient = (awsRegion: string) =>
 
 // ECR operations
 // Check if tagged image (e.g. "my-image:1.0") exists in the specified ECR repository
-const checkIfImageExists = async (
+const imageExistsInEcr = async (
+  awsAccountId: string,
   awsRegion: string,
-  awsEcrRepository: string,
-  imageNameWithTag: string,
+  repositoryUri: string,
+  imageTag: string,
 ) => {
   const ecrClient = createEcrClient(awsRegion);
+  const repositoryName = repositoryUri.slice(repositoryUri.indexOf('/') + 1);
 
   const params = {
-    repositoryName: awsEcrRepository,
+    registryId: awsAccountId,
+    repositoryName,
     imageIds: [
       {
-        imageTag: imageNameWithTag,
+        imageTag,
       },
     ],
   };
 
   const command = new DescribeImagesCommand(params);
   const { imageDetails } = await ecrClient.send(command);
+  console.log(imageDetails);
 
   if (!imageDetails || imageDetails.length === 0) {
-    console.log(
-      `Image ${imageNameWithTag} does not exist in repository ${awsEcrRepository}.`,
-    );
-    return true;
-  } else {
-    console.log(
-      `Image ${imageNameWithTag} exists in repository ${awsEcrRepository}.`,
-    );
     return false;
+  } else {
+    return true;
   }
+};
+
+const isEcrRepo = (awsAccountId: string, repositoryUri: string) => {
+  const prefix = `^${awsAccountId}.dkr.ecr`;
+  return new RegExp(prefix).test(repositoryUri);
 };
 
 // ECS operations
@@ -117,8 +120,8 @@ const findTaskDefinitionForService = async (
 
 // Create a new Task Definition, preserving as much as possible from the current one
 const updateTaskDefinitionWithNewImageTag = (
+  awsAccountId: string,
   awsRegion: string,
-  awsEcrRepository: string,
   taskDefinition: TaskDefinition,
   newTag: string,
 ) => {
@@ -129,17 +132,19 @@ const updateTaskDefinitionWithNewImageTag = (
   );
 
   // Assume the Task Definition only has 1 container, so select the first one
-  const currentImage = newTaskDefinition.containerDefinitions[0].image;
-  const newImage = `${currentImage?.split(':')[0]}:${newTag}`;
-  newTaskDefinition.containerDefinitions[0].image = newImage;
+  const currentImage: string = newTaskDefinition.containerDefinitions[0].image;
+  const currentRepoUri = currentImage.split(':')[0];
+  const newImage = `${currentRepoUri}:${newTag}`;
 
-  // Check if specified image exists in ECR
-  if (!checkIfImageExists(awsRegion, awsEcrRepository, newImage)) {
-    throw new Error(
-      `Image ${newImage} does not exist in repository ${awsEcrRepository}.`,
-    );
+  // Check if rollback target image exists
+  if (
+    isEcrRepo(awsAccountId, currentRepoUri) &&
+    !imageExistsInEcr(awsAccountId, awsRegion, currentRepoUri, newTag)
+  ) {
+    throw new Error(`image ${newImage} does not exist`);
   }
 
+  newTaskDefinition.containerDefinitions[0].image = newImage;
   return newTaskDefinition;
 };
 

@@ -147,8 +147,8 @@ async function rollback(id: string, commitHash: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    const { awsRegion, awsEcsCluster } = pipeline;
-    const { awsEcsService, awsEcrRepository } = service;
+    const { awsAccountId, awsRegion, awsEcsCluster } = pipeline;
+    const { awsEcsService } = service;
 
     const ecsClient = ecsService.createEcsClient(awsRegion);
 
@@ -162,8 +162,8 @@ async function rollback(id: string, commitHash: string) {
     // Update with new tag (git commit hash)
     const newTaskDefinition =
       await ecsService.updateTaskDefinitionWithNewImageTag(
+        awsAccountId,
         awsRegion,
-        awsEcrRepository,
         taskDefinition,
         commitHash,
       );
