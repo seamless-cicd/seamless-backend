@@ -1,3 +1,4 @@
+import { DescribeImagesCommand, ECRClient } from '@aws-sdk/client-ecr';
 import {
   DescribeServicesCommand,
   DescribeTaskDefinitionCommand,
@@ -29,9 +30,48 @@ const taskDefinitionProperties = [
   'volumes',
 ];
 
+// Clients
 const createEcsClient = (awsRegion: string) =>
   new ECSClient({ region: awsRegion });
 
+const createEcrClient = (awsRegion: string) =>
+  new ECRClient({ region: awsRegion });
+
+// ECR operations
+// Check if tagged image (e.g. "my-image:1.0") exists in the specified ECR repository
+const checkIfImageExists = async (
+  awsRegion: string,
+  awsEcrRepository: string,
+  imageNameWithTag: string,
+) => {
+  const ecrClient = createEcrClient(awsRegion);
+
+  const params = {
+    repositoryName: awsEcrRepository,
+    imageIds: [
+      {
+        imageTag: imageNameWithTag,
+      },
+    ],
+  };
+
+  const command = new DescribeImagesCommand(params);
+  const { imageDetails } = await ecrClient.send(command);
+
+  if (!imageDetails || imageDetails.length === 0) {
+    console.log(
+      `Image ${imageNameWithTag} does not exist in repository ${awsEcrRepository}.`,
+    );
+    return true;
+  } else {
+    console.log(
+      `Image ${imageNameWithTag} exists in repository ${awsEcrRepository}.`,
+    );
+    return false;
+  }
+};
+
+// ECS operations
 const findService = async (
   ecsClient: ECSClient,
   serviceName: string,
@@ -77,6 +117,8 @@ const findTaskDefinitionForService = async (
 
 // Create a new Task Definition, preserving as much as possible from the current one
 const updateTaskDefinitionWithNewImageTag = (
+  awsRegion: string,
+  awsEcrRepository: string,
   taskDefinition: TaskDefinition,
   newTag: string,
 ) => {
@@ -86,10 +128,17 @@ const updateTaskDefinitionWithNewImageTag = (
     ),
   );
 
-  // Assume the Task Definition only has 1 container
+  // Assume the Task Definition only has 1 container, so select the first one
   const currentImage = newTaskDefinition.containerDefinitions[0].image;
   const newImage = `${currentImage?.split(':')[0]}:${newTag}`;
   newTaskDefinition.containerDefinitions[0].image = newImage;
+
+  // Check if specified image exists in ECR
+  if (!checkIfImageExists(awsRegion, awsEcrRepository, newImage)) {
+    throw new Error(
+      `Image ${newImage} does not exist in repository ${awsEcrRepository}.`,
+    );
+  }
 
   return newTaskDefinition;
 };
@@ -131,7 +180,7 @@ const updateServiceWithNewTaskDefinition = async (
   return response;
 };
 
-export {
+export default {
   createEcsClient,
   findService,
   findTaskDefinitionForService,

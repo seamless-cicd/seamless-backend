@@ -7,8 +7,7 @@ import pipelinesService from './pipelines';
 export interface ServiceWithEnvVars extends Service {
   awsEcsServiceStaging?: string;
   awsEcsService: string;
-  awsEcsTaskDefinition?: string;
-  awsEcrRepository?: string;
+  awsEcrRepository: string;
   awsEcrSnsTopic?: string;
   logSubscriberUrl?: string;
 }
@@ -149,31 +148,34 @@ async function rollback(id: string, commitHash: string) {
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
     const { awsRegion, awsEcsCluster } = pipeline;
-    const { awsEcsService } = service;
+    const { awsEcsService, awsEcrRepository } = service;
 
     const ecsClient = ecsService.createEcsClient(awsRegion);
 
-    // Find current Task Definition
-    const taskDefinition = ecsService.findTaskDefinitionForService(
+    // Find Task Definition currently used by Service
+    const taskDefinition = await ecsService.findTaskDefinitionForService(
       ecsClient,
       awsEcsService,
       awsEcsCluster,
     );
 
     // Update with new tag (git commit hash)
-    const newTaskDefinition = ecsService.updateTaskDefinitionWithNewImageTag(
-      taskDefinition,
-      commitHash,
-    );
+    const newTaskDefinition =
+      await ecsService.updateTaskDefinitionWithNewImageTag(
+        awsRegion,
+        awsEcrRepository,
+        taskDefinition,
+        commitHash,
+      );
 
     // Register new Task Definition on ECR
-    const registeredTaskDefinition = ecsService.registerTaskDefinition(
+    const registeredTaskDefinition = await ecsService.registerTaskDefinition(
       ecsClient,
       newTaskDefinition,
     );
 
     // Update the ECS Service
-    const response = ecsService.updateServiceWithNewTaskDefinition(
+    const response = await ecsService.updateServiceWithNewTaskDefinition(
       ecsClient,
       awsEcsService,
       awsEcsCluster,

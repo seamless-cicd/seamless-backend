@@ -40,4 +40,5 @@ export const {
   GITHUB_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
   GITHUB_PAT,
+  BACKEND_URL,
 } = parsedEnv.data;
