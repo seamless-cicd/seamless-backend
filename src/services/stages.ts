@@ -1,5 +1,5 @@
 import { StageType, Status } from '@prisma/client';
-import prisma from '../clients/prisma-client';
+import prisma from '../utils/prisma-client';
 
 async function getAllForRun(runId: any) {
   try {

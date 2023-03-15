@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { Status } from '@prisma/client';
+import { z } from 'zod';
 
 const StageIdsSchema = z.object({
   prepare: z.string().uuid(),
@@ -64,7 +64,6 @@ type ContainerVariables = z.infer<typeof ContainerVariablesSchema>;
 
 // Schema for validating the input data required for the Step Function to run
 const SfnInputSchema = z.object({
-  awsStepFunction: z.string(),
   serviceId: z.string().uuid(),
   runId: z.string().uuid(),
   stageIds: StageIdsSchema,

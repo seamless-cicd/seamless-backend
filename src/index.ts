@@ -12,8 +12,7 @@ import servicesRouter from './routers/public/services';
 import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
-import { authMiddleware } from './utils/auth-middleware';
-import { redisClient } from './utils/redisClient';
+import { redisClient } from './utils/redis-client';
 
 import { BACKEND_PORT } from './utils/config';
 
@@ -26,13 +25,20 @@ app.use('/', homeRouter);
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
 publicRouter.use('/auth', authRouter);
-publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
-publicRouter.use('/services', authMiddleware, servicesRouter);
-publicRouter.use('/runs', authMiddleware, runsRouter);
-publicRouter.use('/stages', authMiddleware, stagesRouter);
-publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
-publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
-publicRouter.use('/user', authMiddleware, userRouter);
+// publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
+// publicRouter.use('/services', authMiddleware, servicesRouter);
+// publicRouter.use('/runs', authMiddleware, runsRouter);
+// publicRouter.use('/stages', authMiddleware, stagesRouter);
+// publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
+// publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
+// publicRouter.use('/user', authMiddleware, userRouter);
+publicRouter.use('/pipelines', pipelinesRouter);
+publicRouter.use('/services', servicesRouter);
+publicRouter.use('/runs', runsRouter);
+publicRouter.use('/stages', stagesRouter);
+publicRouter.use('/logs', createLogsRouter(redisClient));
+publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/user', userRouter);
 
 app.use('/api', publicRouter);
 

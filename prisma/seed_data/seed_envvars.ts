@@ -2,7 +2,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { ResourceType } from '@prisma/client';
-import prisma from '../../src/clients/prisma-client';
+import prisma from '../../src/utils/prisma-client';
+
+import {
+  AWS_ACCOUNT_ID,
+  DATABASE_URL,
+  REDIS_HOST,
+} from '../../src/utils/config';
 
 export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
   await prisma.environmentVariable.createMany({
@@ -16,39 +22,28 @@ export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
       {
         resourceType: ResourceType.PIPELINE,
         resourceId: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
-        name: 'awsAvailabilityZone',
-        value: 'us-east-1a',
-      },
-      {
-        resourceType: ResourceType.PIPELINE,
-        resourceId: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
         name: 'awsAccountId',
-        value: process.env.AWS_ACCOUNT_ID || '',
+        value: AWS_ACCOUNT_ID,
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsEcsCluster',
-        value: 'demo-cluster',
+        value: 'seamless-demo-cluster',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsEcsClusterStaging',
-        value: 'demo-cluster',
-      },
-      {
-        resourceType: ResourceType.PIPELINE,
-        name: 'awsStepFunction',
-        value: process.env.AWS_STEP_FUNCTION_ARN || '',
+        value: 'seamless-demo-cluster',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsRds',
-        value: process.env.DATABASE_URL || '',
+        value: DATABASE_URL,
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsElastiCache',
-        value: process.env.REDIS_HOST || '',
+        value: REDIS_HOST,
       },
     ].map((envVarData) => ({
       ...envVarData,
@@ -85,12 +80,7 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsSnsTopic',
-        value: 'seamless-pipeline-topic',
-      },
-      {
-        resourceType: ResourceType.SERVICE,
-        name: 'dockerBaseImage',
-        value: 'node',
+        value: 'SeamlessTopic',
       },
     ].map((envVarData) => ({
       ...envVarData,
