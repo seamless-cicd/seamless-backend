@@ -49,6 +49,7 @@ const ContainerVariablesSchema = z.object({
   awsSecretAccessKey: z.string(),
   githubPat: z.string(),
   githubRepoUrl: z.string(),
+  commitHash: z.string(),
   codeQualityCommand: z.string().optional(),
   unitTestCommand: z.string().optional(),
   dockerfilePath: z.string(),

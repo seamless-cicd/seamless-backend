@@ -72,6 +72,7 @@ async function gatherInput(runId: string) {
         awsSecretAccessKey: pipeline.awsSecretAccessKey,
         githubPat: pipeline.githubPat,
         githubRepoUrl: service.githubRepoUrl,
+        commitHash: run.commitHash,
         codeQualityCommand: service.codeQualityCommand,
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
