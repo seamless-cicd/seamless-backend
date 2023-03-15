@@ -1,5 +1,5 @@
-import prisma from '../clients/prisma-client';
-import { ResourceType, EnvironmentVariable, Service } from '@prisma/client';
+import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
+import prisma from '../utils/prisma-client';
 import envVarsService from './envVars';
 
 export interface ServiceWithEnvVars extends Service {
@@ -9,7 +9,6 @@ export interface ServiceWithEnvVars extends Service {
   awsEcrRepository?: string;
   awsEcrSnsTopic?: string;
   logSubscriberUrl?: string;
-  dockerBaseImage?: string;
 }
 
 // gets all services - only top level data - assumes one pipeline

@@ -13,6 +13,7 @@ const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
   GITHUB_CLIENT_ID: z.string(),
+  GITHUB_PAT: z.string(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -37,4 +38,5 @@ export const {
   AWS_SECRET_ACCESS_KEY,
   GITHUB_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
+  GITHUB_PAT,
 } = parsedEnv.data;

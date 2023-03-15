@@ -2,16 +2,24 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { StageType, TriggerType } from '@prisma/client';
-import prisma from '../../src/clients/prisma-client';
+import prisma from '../../src/utils/prisma-client';
+
+import {
+  AWS_ACCESS_KEY,
+  AWS_SECRET_ACCESS_KEY,
+  GITHUB_PAT,
+} from '../../src/utils/config';
 
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
     data: {
       id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
       name: 'Demo Pipeline',
-      githubPat: process.env.GITHUB_PAT || '',
-      awsAccessKey: process.env.AWS_ACCESS_KEY || '',
-      awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+      // githubClientId: GITHUB_CLIENT_ID,
+      // githubClientSecret: GITHUB_CLIENT_SECRET,
+      githubPat: GITHUB_PAT,
+      awsAccessKey: AWS_ACCESS_KEY,
+      awsSecretAccessKey: AWS_SECRET_ACCESS_KEY,
       services: {
         create: [
           {
@@ -22,7 +30,8 @@ export const seedPipelines = async () => {
             triggerOnPrSync: false,
             useStaging: false,
             autoDeploy: false,
-            githubRepoUrl: process.env.GITHUB_REPO_URL || '',
+            githubRepoUrl:
+              'https://github.com/seamless-cicd/seamless-demo-notification',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
