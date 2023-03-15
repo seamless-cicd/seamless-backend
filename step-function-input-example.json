@@ -1,0 +1,64 @@
+{
+  "serviceId": "d8583d1c-ce63-4e0c-bd55-2088409bc7e2",
+  "runId": "d8583d1c-ce63-4e0c-bd55-2088409bc7e3",
+  "stageIds": {
+    "prepare": "d8583d1c-ce63-4e0c-bd55-2088409bc7e4",
+    "codeQuality": "d8583d1c-ce63-4e0c-bd55-2088409bc7e5",
+    "unitTest": "d8583d1c-ce63-4e0c-bd55-2088409bc7e6",
+    "build": "d8583d1c-ce63-4e0c-bd55-2088409bc7e7",
+    "deployStaging": "d8583d1c-ce63-4e0c-bd55-2088409bc7e8",
+    "deployProduction": "d8583d1c-ce63-4e0c-bd55-2088409bc7e9"
+  },
+  "runStatus": {
+    "run": {
+      "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e3",
+      "status": "IDLE"
+    },
+    "stages": {
+      "prepare": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e4",
+        "status": "IDLE"
+      },
+      "codeQuality": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e5",
+        "status": "IDLE"
+      },
+      "unitTest": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e6",
+        "status": "IDLE"
+      },
+      "build": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e7",
+        "status": "IDLE"
+      },
+      "deployStaging": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e8",
+        "status": "IDLE"
+      },
+      "deployProduction": {
+        "id": "d8583d1c-ce63-4e0c-bd55-2088409bc7e9",
+        "status": "IDLE"
+      }
+    }
+  },
+  "runFull": "true",
+  "useStaging": "false",
+  "autoDeploy": "false",
+  "containerVariables": {
+    "awsRegion": "us-east-1",
+    "awsAccountId": "01234567912",
+    "awsAccessKey": "012345679ABC",
+    "awsSecretAccessKey": "012345679ABC",
+    "githubPat": "ghp_012345679abc",
+    "githubRepoUrl": "https://github.com/user-org/repo-name",
+    "codeQualityCommand": "npm run lint",
+    "unitTestCommand": "npm run test",
+    "dockerfilePath": ".",
+    "awsEcsClusterStaging": "my-staging-ecs-cluster-name",
+    "awsEcsServiceStaging": "my-staging-ecs-service-name",
+    "awsEcsCluster": "my-ecs-cluster-name",
+    "awsEcsService": "my-ecs-service-name",
+    "awsEcrRepo": "my-ecr-repo-name",
+    "logSubscriberUrl": "https://abc123.m.pipedream.net"
+  }
+}
