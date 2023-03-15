@@ -4,15 +4,15 @@ dotenv.config();
 import { z } from 'zod';
 
 const envSchema = z.object({
-  BACKEND_PORT: z.string(),
+  BACKEND_PORT: z.string().optional(),
   DATABASE_URL: z.string(),
   REDIS_HOST: z.string(),
-  REDIS_PORT: z.string().transform(Number),
+  REDIS_PORT: z.string().transform(Number).optional(),
   AWS_ACCOUNT_ID: z.string(),
   AWS_ACCESS_KEY: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
-  GITHUB_CLIENT_SECRET: z.string(),
-  GITHUB_CLIENT_ID: z.string(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_PAT: z.string(),
 });
 

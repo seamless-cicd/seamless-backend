@@ -20,6 +20,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-ecs": "^3.290.0",
     "@aws-sdk/client-sfn": "^3.282.0",
     "@octokit/core": "^4.2.0",
     "@octokit/oauth-app": "^4.2.0",
