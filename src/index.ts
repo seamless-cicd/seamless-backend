@@ -12,10 +12,10 @@ import servicesRouter from './routers/public/services';
 import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
-import { authMiddleware } from './utils/auth-middleware';
-import { redisClient } from './utils/redisClient';
+import { redisClient } from './utils/redis-client';
 
 import webhooksConfigRouter from './routers/public/webhook-config';
+import { authMiddleware } from './utils/auth-middleware';
 import { BACKEND_PORT } from './utils/config';
 
 const app = express();
@@ -27,17 +27,14 @@ app.use('/', homeRouter);
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
 publicRouter.use('/auth', authRouter);
+publicRouter.use('/logs', createLogsRouter(redisClient));
+publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
+publicRouter.use('/user', authMiddleware, userRouter);
 publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
 publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
-
-// auth middleware deactivated to test with postman
-// publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
-publicRouter.use('/logs', createLogsRouter(redisClient));
-
-publicRouter.use('/webhooks', webhooksRouter);
-publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 
 app.use('/api', publicRouter);

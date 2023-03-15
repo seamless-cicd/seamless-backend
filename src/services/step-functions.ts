@@ -1,11 +1,8 @@
-import {
-  ListStateMachinesCommand,
-  StartExecutionCommand,
-} from '@aws-sdk/client-sfn';
+import { ListStateMachinesCommand } from '@aws-sdk/client-sfn';
 import { StageType, Status } from '@prisma/client';
 import { z } from 'zod';
-import { createSfnClient } from '../clients/step-function';
 import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
+import { createSfnClient } from '../utils/step-function';
 import pipelinesService from './pipelines';
 import runsService from './runs';
 import servicesService from './services';
@@ -127,16 +124,20 @@ async function start(runId: string) {
       .filter((stateMachine) => stateMachine.name === 'SeamlessStateMachine')
       .map((stateMachine) => stateMachine.stateMachineArn)[0];
 
-    const sfnCommand = new StartExecutionCommand({
-      stateMachineArn,
-      input: JSON.stringify(sfnInput),
-    });
+    // Debugging
+    console.log(sfnInput);
+    console.log(stateMachineArn);
 
-    const response = await sfnClient.send(sfnCommand);
+    // const sfnCommand = new StartExecutionCommand({
+    //   stateMachineArn,
+    //   input: JSON.stringify(sfnInput),
+    // });
+
+    // const response = await sfnClient.send(sfnCommand);
 
     // Call other services to write to RDS and send notifications
 
-    return response;
+    // return response;
   } catch (error) {
     if (error instanceof Error) {
       console.error(

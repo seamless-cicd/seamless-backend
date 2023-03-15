@@ -15,6 +15,7 @@ async function getAllForStage(redisClient: Redis, stageId: StageId) {
 async function createOne(redisClient: Redis, logData: LogData) {
   try {
     if (!logData.stageId) return null;
+
     // Insert log into Redis, sorted by timestamp
     await redisClient.zadd(
       `${logData.stageId}`, // key

@@ -17,12 +17,12 @@ const StageIdSchema = z
 export type StageId = z.infer<typeof StageIdSchema>;
 
 export const LogDataSchema = z.object({
-  id: z.string(),
-  log: z.string(),
-  stageId: z.string(),
-  timestamp: z.string().datetime(),
-  score: z.number().optional(),
-  type: z.string(),
+  id: z.string(), // ULID
+  message: z.string(), // Log text
+  timestamp: z.string().datetime(), // From ULID
+  score: z.number().optional(), // Numerical value of ULID
+  type: z.string(), // stdout or stderr
+  stageId: z.string().uuid(), // Pipeline stage UUID
 });
 
 export type LogData = z.infer<typeof LogDataSchema>;
@@ -108,6 +108,7 @@ const createLogsRouter = (redisClient: Redis) => {
       const validatedLogData = LogDataSchema.safeParse(logData);
 
       if (!validatedLogData.success) {
+        console.error('Invalid log data:', logData);
         console.error(validatedLogData.error);
         return res.status(400).json({ message: 'Invalid log data' });
       }
@@ -115,7 +116,7 @@ const createLogsRouter = (redisClient: Redis) => {
       // Store log in Redis
       await logsService.createOne(redisClient, validatedLogData.data);
       // Emit log data to frontend
-      await streamLogsToClients(redisClient, validatedLogData.data.stageId);
+      // await streamLogsToClients(redisClient, validatedLogData.data.stageId);
       res.status(200).send('Log stored');
     } catch (e) {
       if (e instanceof Error) {

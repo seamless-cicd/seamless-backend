@@ -1,5 +1,5 @@
-import prisma from '../clients/prisma-client';
 import { ResourceType } from '@prisma/client';
+import prisma from '../utils/prisma-client';
 
 async function getAll(resourceType: ResourceType) {
   try {
