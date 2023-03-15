@@ -15,8 +15,8 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
 
   // Authenticate with Github
   const auth = createOAuthUserAuth({
-    clientId: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
+    clientId: GITHUB_CLIENT_ID || '',
+    clientSecret: GITHUB_CLIENT_SECRET || '',
     code,
     scopes: ['repo', 'write:repo_hook'],
   });
