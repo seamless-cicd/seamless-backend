@@ -1,12 +1,5 @@
-import {
-  DescribeServicesCommand,
-  DescribeTaskDefinitionCommand,
-  ECSClient,
-  RegisterTaskDefinitionCommand,
-  RegisterTaskDefinitionCommandInput,
-  UpdateServiceCommand,
-} from '@aws-sdk/client-ecs';
 import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
+import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
 import envVarsService from './envVars';
 import pipelinesService from './pipelines';
@@ -144,8 +137,10 @@ async function updateOne(id: any, data: any) {
   }
 }
 
+// Create new Task Definition pointing to Docker image tagged with the specified commit hash, and deploy to ECS service (Production cluster)
 async function rollback(id: string, commitHash: string) {
   try {
+    // Retrieve info about the Service and its Pipeline
     const service = await getOne(id);
     if (!service || !service?.pipelineId)
       throw new Error('Failed to get Service');
@@ -153,81 +148,36 @@ async function rollback(id: string, commitHash: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    const ecsClient = new ECSClient({ region: pipeline.awsRegion });
+    const { awsRegion, awsEcsCluster } = pipeline;
+    const { awsEcsService } = service;
 
-    // Retrieve data about the ECS Service
-    const { services } = await ecsClient.send(
-      new DescribeServicesCommand({
-        services: [service.awsEcsService],
-        cluster: pipeline.awsEcsCluster,
-      }),
-    );
-    if (!services || services.length === 0) {
-      throw new Error('No Services found');
-    }
+    const ecsClient = ecsService.createEcsClient(awsRegion);
 
-    // Extract data about the Service's Task Definition
-    const currentTaskDefinitionArn = services[0].taskDefinition;
-
-    const { taskDefinition: currentTaskDefinition } = await ecsClient.send(
-      new DescribeTaskDefinitionCommand({
-        taskDefinition: currentTaskDefinitionArn,
-      }),
-    );
-    if (!currentTaskDefinition) {
-      throw new Error('No Task Definition found');
-    }
-
-    // Create a new Task Definition, preserving as much as possible from the current one
-    const taskDefinitionProperties = [
-      'containerDefinitions',
-      'cpu',
-      'ephemeralStorage',
-      'executionRoleArn',
-      'family',
-      'inferenceAccelerators',
-      'ipcMode',
-      'memory',
-      'networkMode',
-      'pidMode',
-      'placementConstraints',
-      'proxyConfiguration',
-      'requiresCompatibilities',
-      'runtimePlatform',
-      'tags',
-      'taskRoleArn',
-      'volumes',
-    ];
-
-    const newTaskDefinition = Object.fromEntries(
-      Object.entries(currentTaskDefinition).filter((entry) =>
-        taskDefinitionProperties.includes(entry[0]),
-      ),
+    // Find current Task Definition
+    const taskDefinition = ecsService.findTaskDefinitionForService(
+      ecsClient,
+      awsEcsService,
+      awsEcsCluster,
     );
 
-    // Assume only 1 container
-    const currentImage = newTaskDefinition.containerDefinitions[0].image;
-    const newImage = `${currentImage?.split(':')[0]}:${commitHash}`;
-    newTaskDefinition.containerDefinitions[0].image = newImage;
+    // Update with new tag (git commit hash)
+    const newTaskDefinition = ecsService.updateTaskDefinitionWithNewImageTag(
+      taskDefinition,
+      commitHash,
+    );
 
     // Register new Task Definition on ECR
-    const { taskDefinition: registeredTaskDefinition } = await ecsClient.send(
-      new RegisterTaskDefinitionCommand(
-        newTaskDefinition as RegisterTaskDefinitionCommandInput,
-      ),
+    const registeredTaskDefinition = ecsService.registerTaskDefinition(
+      ecsClient,
+      newTaskDefinition,
     );
-    if (!registeredTaskDefinition) {
-      throw new Error('Failed to register new Task Definition');
-    }
 
-    // Update the ECS Service using the newly-registered Task Definition's ARN
-    const response = await ecsClient.send(
-      new UpdateServiceCommand({
-        service: service.awsEcsService,
-        cluster: pipeline.awsEcsCluster,
-        taskDefinition: registeredTaskDefinition.taskDefinitionArn,
-        forceNewDeployment: true,
-      }),
+    // Update the ECS Service
+    const response = ecsService.updateServiceWithNewTaskDefinition(
+      ecsClient,
+      awsEcsService,
+      awsEcsCluster,
+      registeredTaskDefinition,
     );
 
     return response;
