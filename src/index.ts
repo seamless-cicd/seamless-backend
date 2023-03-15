@@ -15,6 +15,7 @@ import webhooksRouter from './routers/public/webhooks';
 import { authMiddleware } from './utils/auth-middleware';
 import { redisClient } from './utils/redisClient';
 
+import webhooksConfigRouter from './routers/public/webhook-config';
 import { BACKEND_PORT } from './utils/config';
 
 const app = express();
@@ -35,10 +36,8 @@ publicRouter.use('/stages', authMiddleware, stagesRouter);
 // publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
 publicRouter.use('/logs', createLogsRouter(redisClient));
 
-// publicRouter.use('/webhooks', authMiddleware, webhooksRouter);
-// for testing, no middleware - middleware is intercepting the data from github
-// with middleware it wouldn't "ping" when set up, when deactivated it pings
 publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 
 app.use('/api', publicRouter);

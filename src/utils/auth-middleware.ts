@@ -1,5 +1,5 @@
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
-import { Octokit } from '@octokit/rest';
+import { Octokit } from '@octokit/core';
 import { NextFunction, Request, Response } from 'express';
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../utils/config';
 
@@ -23,6 +23,7 @@ export const authMiddleware = async (
         clientSecret: GITHUB_CLIENT_SECRET,
         clientType: 'oauth-app',
         token,
+        scopes: ['repo', 'write:repo_hook'],
       },
     });
 

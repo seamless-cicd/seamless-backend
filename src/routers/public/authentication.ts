@@ -18,12 +18,13 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
     clientId: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
     code,
+    scopes: ['repo', 'write:repo_hook'],
   });
 
   const { token } = await auth();
 
   // Pass access token back to frontend
-  return res.json({ token }).sendStatus(200);
+  return res.json({ token }).send();
 });
 
 export default authRouter;
