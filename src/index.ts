@@ -22,11 +22,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const frontendPath = path.join(__dirname, 'frontend');
-app.use(express.static(frontendPath));
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
 // app.use('/', homeRouter);
 app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // Public routes, consumed by the frontend
