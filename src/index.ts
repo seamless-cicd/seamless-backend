@@ -14,6 +14,7 @@ import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
 import { redisClient } from './utils/redis-client';
 
+import websocketsRouter from './routers/private/websockets';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import { authMiddleware } from './utils/auth-middleware';
 import { BACKEND_PORT } from './utils/config';
@@ -32,8 +33,8 @@ app.get('/', (req, res) => {
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
 publicRouter.use('/auth', authRouter);
-publicRouter.use('/logs', createLogsRouter(redisClient));
 publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/logs', createLogsRouter(redisClient));
 publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
@@ -47,6 +48,7 @@ app.use('/api', publicRouter);
 // Private routes, hit by AWS infra
 const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
+privateRouter.use('/websockets', websocketsRouter);
 app.use('/internal', privateRouter);
 
 const PORT = BACKEND_PORT || 3000;
