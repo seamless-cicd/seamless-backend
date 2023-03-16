@@ -49,6 +49,7 @@ const ContainerVariablesSchema = z.object({
   awsSecretAccessKey: z.string(),
   githubPat: z.string(),
   githubRepoUrl: z.string(),
+  commitHash: z.string(),
   codeQualityCommand: z.string().optional(),
   unitTestCommand: z.string().optional(),
   dockerfilePath: z.string(),
@@ -57,7 +58,6 @@ const ContainerVariablesSchema = z.object({
   awsEcsCluster: z.string(),
   awsEcsService: z.string(),
   awsEcrRepo: z.string(),
-  logSubscriberUrl: z.string().optional(),
 });
 
 type ContainerVariables = z.infer<typeof ContainerVariablesSchema>;

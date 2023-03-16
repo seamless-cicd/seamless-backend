@@ -1,7 +1,8 @@
 import { Status, TriggerType } from '@prisma/client';
 import prisma from '../utils/prisma-client';
+import stagesService from './stages';
 
-// runs are displayed for a particular service - all runs are not displayed  in a literal sense. only runs for a service are displayed
+// Get all Runs for a Service
 async function getAllForService(serviceId: any) {
   try {
     const allRuns = await prisma.run.findMany({
@@ -17,6 +18,7 @@ async function getAllForService(serviceId: any) {
   }
 }
 
+// Get a Run
 async function getOne(runId: string) {
   try {
     const run = await prisma.run.findUnique({
@@ -32,7 +34,7 @@ async function getOne(runId: string) {
   }
 }
 
-// method to create a run - will be used to create empty run
+// Create a Run with initial default data
 async function createOne(serviceId: any) {
   try {
     const run = await prisma.run.create({
@@ -50,6 +52,20 @@ async function createOne(serviceId: any) {
   }
 }
 
+// Create a placeholder Run and associated Stages, for a Service
+// Performed each time the pipeline is executed
+async function createRunAndStages(serviceId: string) {
+  try {
+    const run = await createOne(serviceId);
+    if (!run) throw new Error('error creating the run');
+    await stagesService.createAll(run.id);
+    return run;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// Delete a Run
 async function deleteOne(id: any) {
   try {
     const deleted = await prisma.run.delete({
@@ -65,45 +81,7 @@ async function deleteOne(id: any) {
   }
 }
 
-async function updateRunStatus(id: string, status: Status) {
-  try {
-    const originalRun = await prisma.run.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!originalRun) {
-      throw new Error('Original run is non-existent');
-    }
-
-    const endedAt = new Date();
-    const runEnded = status === Status.FAILURE || Status.SUCCESS;
-
-    const duration = Math.floor(
-      (endedAt.getTime() - originalRun.startedAt.getTime()) / 1000,
-    );
-
-    const updated = await prisma.run.update({
-      where: {
-        id: id,
-      },
-      data: {
-        status,
-        endedAt: runEnded ? endedAt : null,
-        duration: runEnded ? duration : null,
-      },
-    });
-    await prisma.$disconnect();
-    return updated;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-// similar to above but this function taken from service and reused to update data points
-// used to update data from postman to test long polling
+// Update a Run
 async function updateOne(id: any, data: any) {
   try {
     const updated = await prisma.run.update({
@@ -120,10 +98,50 @@ async function updateOne(id: any, data: any) {
   }
 }
 
+// Update status and duration of a Run, using status updates sent by the state machine
+async function updateRunStatus(id: string, status: Status) {
+  try {
+    const run = await prisma.run.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!run) {
+      throw new Error('run does not exist');
+    }
+
+    const endedAt = new Date();
+    const runEnded = status === Status.FAILURE || Status.SUCCESS;
+
+    const duration = Math.floor(
+      (endedAt.getTime() - run.startedAt.getTime()) / 1000,
+    );
+
+    const updatedRun = await prisma.run.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status,
+        endedAt: runEnded ? endedAt : null,
+        duration: runEnded ? duration : null,
+      },
+    });
+
+    await prisma.$disconnect();
+    return updatedRun;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
 export default {
   getAllForService,
   getOne,
   createOne,
+  createRunAndStages,
   deleteOne,
   updateOne,
   updateRunStatus,

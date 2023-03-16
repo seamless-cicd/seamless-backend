@@ -1,12 +1,6 @@
-import {
-  DescribeServicesCommand,
-  DescribeTaskDefinitionCommand,
-  ECSClient,
-  RegisterTaskDefinitionCommand,
-  RegisterTaskDefinitionCommandInput,
-  UpdateServiceCommand,
-} from '@aws-sdk/client-ecs';
 import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
+import { ServiceEditFormType, ServiceFormType } from '../schemas/formSchema';
+import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
 import envVarsService from './envVars';
 import pipelinesService from './pipelines';
@@ -14,26 +8,25 @@ import pipelinesService from './pipelines';
 export interface ServiceWithEnvVars extends Service {
   awsEcsServiceStaging?: string;
   awsEcsService: string;
-  awsEcsTaskDefinition?: string;
-  awsEcrRepository?: string;
-  awsEcrSnsTopic?: string;
-  logSubscriberUrl?: string;
+  awsEcrRepository: string;
 }
 
-// gets all services - only top level data - assumes one pipeline
+// Get all Services in the database - assumes all Service belong to a single pipeline
 async function getAll() {
   try {
     const allServices = await prisma.service.findMany();
 
-    // Retrieve env vars for all services
+    // Retrieve env vars for all Services
     const envVars = await envVarsService.getAll(ResourceType.SERVICE);
-    // Group env vars by service id
+
+    // Group env vars by Service id
     const groupedEnvVars = envVars?.reduce(
       (entryMap, e) =>
         entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
       new Map(),
     );
-    // Insert into the associated pipeline object inside allServices
+
+    // Insert env vars into the associated Service inside the allServices Array
     allServices.forEach((service) => {
       const envVarsForService: EnvironmentVariable[] = groupedEnvVars?.get(
         service.id,
@@ -53,6 +46,7 @@ async function getAll() {
   }
 }
 
+// Get a Service
 async function getOne(serviceId: string) {
   try {
     const service = await prisma.service.findUnique({
@@ -61,12 +55,13 @@ async function getOne(serviceId: string) {
       },
     });
 
-    // Retrieve env vars for this service
+    // Retrieve env vars for this Service
     const envVars = await envVarsService.getOne(
       ResourceType.SERVICE,
       serviceId,
     );
-    // Insert env vars into the pipeline object
+
+    // Insert env vars into the Service
     const flattenedEnvVars: { [key: string]: string } = {};
     envVars?.forEach((envVar) => {
       flattenedEnvVars[envVar.name] = envVar.value;
@@ -80,71 +75,76 @@ async function getOne(serviceId: string) {
   }
 }
 
-async function createOne(serviceData: any) {
-  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceData;
+// Create a Service
+async function createOne(serviceFormData: ServiceFormType) {
+  // Form data includes AWS data which must be inserted into the env vars table
+  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceFormData;
 
   try {
-    const service = await prisma.service.create({
+    const createdService = await prisma.service.create({
       data: serviceTableData,
     });
 
-    const envVarsCount = await prisma.environmentVariable.createMany({
+    await prisma.environmentVariable.createMany({
       data: [
         {
           name: 'awsEcrRepo',
           value: awsEcrRepo,
-          resourceId: service.id,
+          resourceId: createdService.id,
           resourceType: ResourceType.SERVICE,
         },
         {
           name: 'awsEcsService',
           value: awsEcsService,
-          resourceId: service.id,
+          resourceId: createdService.id,
           resourceType: ResourceType.SERVICE,
         },
       ],
     });
 
     await prisma.$disconnect();
-    return [service, envVarsCount];
+    return createdService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function deleteOne(id: any) {
+// Delete a Service
+async function deleteOne(id: string) {
   try {
-    const deleted = await prisma.service.delete({
+    const deletedService = await prisma.service.delete({
       where: {
-        id: id,
+        id,
       },
     });
     await prisma.$disconnect();
-    return deleted;
+    return deletedService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function updateOne(id: any, data: any) {
+// Update a Service
+async function updateOne(id: string, serviceEditFormData: ServiceEditFormType) {
   try {
-    const updated = await prisma.service.update({
+    const updatedService = await prisma.service.update({
       where: {
-        id: id,
+        id,
       },
-      data: data,
+      data: serviceEditFormData,
     });
     await prisma.$disconnect();
-    return updated;
+    return updatedService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function rollback(id: string, commitHash: string) {
+// Retrieve all images in ECR, for this Service
+async function getRollbackImages(id: string) {
   try {
     const service = await getOne(id);
     if (!service || !service?.pipelineId)
@@ -153,81 +153,61 @@ async function rollback(id: string, commitHash: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    const ecsClient = new ECSClient({ region: pipeline.awsRegion });
-
-    // Retrieve data about the ECS Service
-    const { services } = await ecsClient.send(
-      new DescribeServicesCommand({
-        services: [service.awsEcsService],
-        cluster: pipeline.awsEcsCluster,
-      }),
+    const images = ecsService.getAllImages(
+      pipeline.awsAccountId,
+      pipeline.awsRegion,
+      service.awsEcrRepository,
     );
-    if (!services || services.length === 0) {
-      throw new Error('No Services found');
-    }
+    return images;
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-    // Extract data about the Service's Task Definition
-    const currentTaskDefinitionArn = services[0].taskDefinition;
+// Create new Task Definition pointing to Docker image tagged with the specified commit hash, and deploy to ECS service (Production cluster)
+async function rollback(id: string, commitHash: string) {
+  try {
+    // Retrieve info about the Service and its Pipeline
+    const service = await getOne(id);
+    if (!service || !service?.pipelineId)
+      throw new Error('Failed to get Service');
 
-    const { taskDefinition: currentTaskDefinition } = await ecsClient.send(
-      new DescribeTaskDefinitionCommand({
-        taskDefinition: currentTaskDefinitionArn,
-      }),
-    );
-    if (!currentTaskDefinition) {
-      throw new Error('No Task Definition found');
-    }
+    const pipeline = await pipelinesService.getOne(service.pipelineId);
+    if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    // Create a new Task Definition, preserving as much as possible from the current one
-    const taskDefinitionProperties = [
-      'containerDefinitions',
-      'cpu',
-      'ephemeralStorage',
-      'executionRoleArn',
-      'family',
-      'inferenceAccelerators',
-      'ipcMode',
-      'memory',
-      'networkMode',
-      'pidMode',
-      'placementConstraints',
-      'proxyConfiguration',
-      'requiresCompatibilities',
-      'runtimePlatform',
-      'tags',
-      'taskRoleArn',
-      'volumes',
-    ];
+    const { awsAccountId, awsRegion, awsEcsCluster } = pipeline;
+    const { awsEcsService } = service;
 
-    const newTaskDefinition = Object.fromEntries(
-      Object.entries(currentTaskDefinition).filter((entry) =>
-        taskDefinitionProperties.includes(entry[0]),
-      ),
+    const ecsClient = ecsService.createEcsClient(awsRegion);
+
+    // Find Task Definition currently used by Service
+    const taskDefinition = await ecsService.findTaskDefinitionForService(
+      ecsClient,
+      awsEcsService,
+      awsEcsCluster,
     );
 
-    // Assume only 1 container
-    const currentImage = newTaskDefinition.containerDefinitions[0].image;
-    const newImage = `${currentImage?.split(':')[0]}:${commitHash}`;
-    newTaskDefinition.containerDefinitions[0].image = newImage;
+    // Update with new tag (git commit hash)
+    const newTaskDefinition =
+      await ecsService.updateTaskDefinitionWithNewImageTag(
+        awsAccountId,
+        awsRegion,
+        taskDefinition,
+        commitHash,
+      );
 
     // Register new Task Definition on ECR
-    const { taskDefinition: registeredTaskDefinition } = await ecsClient.send(
-      new RegisterTaskDefinitionCommand(
-        newTaskDefinition as RegisterTaskDefinitionCommandInput,
-      ),
+    const registeredTaskDefinition = await ecsService.registerTaskDefinition(
+      ecsClient,
+      newTaskDefinition,
     );
-    if (!registeredTaskDefinition) {
-      throw new Error('Failed to register new Task Definition');
-    }
 
-    // Update the ECS Service using the newly-registered Task Definition's ARN
-    const response = await ecsClient.send(
-      new UpdateServiceCommand({
-        service: service.awsEcsService,
-        cluster: pipeline.awsEcsCluster,
-        taskDefinition: registeredTaskDefinition.taskDefinitionArn,
-        forceNewDeployment: true,
-      }),
+    // Update the ECS Service
+    const response = await ecsService.updateServiceWithNewTaskDefinition(
+      ecsClient,
+      awsEcsService,
+      awsEcsCluster,
+      registeredTaskDefinition,
     );
 
     return response;
@@ -236,4 +216,12 @@ async function rollback(id: string, commitHash: string) {
   }
 }
 
-export default { getAll, getOne, createOne, deleteOne, updateOne, rollback };
+export default {
+  getAll,
+  getOne,
+  createOne,
+  deleteOne,
+  updateOne,
+  getRollbackImages,
+  rollback,
+};

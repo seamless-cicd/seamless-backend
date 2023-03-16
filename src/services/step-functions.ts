@@ -1,4 +1,7 @@
-import { ListStateMachinesCommand } from '@aws-sdk/client-sfn';
+import {
+  ListStateMachinesCommand,
+  StartExecutionCommand,
+} from '@aws-sdk/client-sfn';
 import { StageType, Status } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
@@ -72,6 +75,7 @@ async function gatherInput(runId: string) {
         awsSecretAccessKey: pipeline.awsSecretAccessKey,
         githubPat: pipeline.githubPat,
         githubRepoUrl: service.githubRepoUrl,
+        commitHash: run.commitHash,
         codeQualityCommand: service.codeQualityCommand,
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
@@ -80,7 +84,6 @@ async function gatherInput(runId: string) {
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
         awsEcrRepo: service.awsEcrRepository,
-        logSubscriberUrl: service.logSubscriberUrl,
       },
     };
 
@@ -113,31 +116,30 @@ async function start(runId: string) {
     );
 
     // Retrieve Step Function ARN
-    const stateMachinesList = await sfnClient.send(
+    const { stateMachines } = await sfnClient.send(
       new ListStateMachinesCommand({}),
     );
-    if (!stateMachinesList || !stateMachinesList.stateMachines) {
+    if (!stateMachines || stateMachines.length === 0) {
       throw new Error('Failed to retrieve Step Function');
     }
 
-    const stateMachineArn = stateMachinesList.stateMachines
-      .filter((stateMachine) => stateMachine.name === 'SeamlessStateMachine')
+    const stateMachineArn = stateMachines
+      .filter((stateMachine) =>
+        /^SeamlessStateMachine/.test(stateMachine.name || ''),
+      )
       .map((stateMachine) => stateMachine.stateMachineArn)[0];
 
     // Debugging
     console.log(sfnInput);
     console.log(stateMachineArn);
 
-    // const sfnCommand = new StartExecutionCommand({
-    //   stateMachineArn,
-    //   input: JSON.stringify(sfnInput),
-    // });
+    const sfnCommand = new StartExecutionCommand({
+      stateMachineArn,
+      input: JSON.stringify(sfnInput),
+    });
 
-    // const response = await sfnClient.send(sfnCommand);
-
-    // Call other services to write to RDS and send notifications
-
-    // return response;
+    const response = await sfnClient.send(sfnCommand);
+    return response;
   } catch (error) {
     if (error instanceof Error) {
       console.error(

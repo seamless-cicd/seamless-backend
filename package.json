@@ -12,7 +12,9 @@
     "lint": "eslint src/**/*.ts",
     "docker:build": "docker build -t seamless-backend .",
     "docker:run": "BASH_env=.env docker run seamless-backend",
-    "docker:push": "BASH_env=.env docker push seamless-backend:latest"
+    "docker:push": "BASH_env=.env docker push seamless-backend:latest",
+    "build-frontend": "cd ../seamless-frontend && npm run build",
+    "build-serve-app": "rm -rf dist && rm -rf ../seamless-frontend/dist && npm run build && npm run build-frontend && mkdir dist/src/frontend && cp -r ../seamless-frontend/dist/* dist/src/frontend && npm start"
   },
   "author": "Seamless",
   "license": "ISC",
@@ -20,6 +22,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-ecr": "^3.290.0",
     "@aws-sdk/client-ecs": "^3.290.0",
     "@aws-sdk/client-sfn": "^3.282.0",
     "@octokit/core": "^4.2.0",
