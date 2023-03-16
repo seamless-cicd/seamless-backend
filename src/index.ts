@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
+import path from 'path';
 
 import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
@@ -22,6 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const frontendPath = path.join(__dirname, 'dist/frontend');
+app.use(express.static(frontendPath));
 app.use('/', homeRouter);
 
 // Public routes, consumed by the frontend

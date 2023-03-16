@@ -3,10 +3,12 @@ import { Run } from '@prisma/client';
 import express, { Request, Response } from 'express';
 import runsService from '../../services/runs';
 import servicesService from '../../services/services';
+import stagesService from '../../services/stages';
+import stepFunctionsService from '../../services/step-functions';
 
 const servicesRouter = express.Router();
 
-// Get all Services in the database - assumes all Service belong to a single pipeline
+// Get all Services in the database - assumes all Services belong to a single pipeline
 servicesRouter.get('/', async (req: Request, res: Response) => {
   const services = await servicesService.getAll();
   res.status(200).json(services);
@@ -43,6 +45,32 @@ servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   );
   res.status(200).json(updatedService);
 });
+
+// Start a Run for this Service
+servicesRouter.post(
+  '/:serviceId/start',
+  async (req: Request, res: Response) => {
+    const { serviceId } = req.params;
+
+    try {
+      // Create a new Run and multiple Stages
+      const run = await runsService.createOne(serviceId);
+
+      if (!run)
+        return res.status(500).json({ message: 'error creating the run' });
+
+      await stagesService.createAll(run.id);
+
+      // Start the Step Function (state machine)
+      await stepFunctionsService.start(run.id);
+
+      // The returned runId will be used for navigation
+      res.status(200).send(run.id);
+    } catch (error) {
+      res.status(500).json({ message: 'error starting the run' });
+    }
+  },
+);
 
 // Retrieve all possible rollback images for this Service
 servicesRouter.get(
@@ -85,6 +113,7 @@ servicesRouter.post(
   '/:serviceId/rollbacks/:commitHash',
   async (req: Request, res: Response) => {
     const { serviceId, commitHash } = req.params;
+
     const ecsServiceUpdateResponse = await servicesService.rollback(
       serviceId,
       commitHash,

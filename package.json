@@ -12,7 +12,9 @@
     "lint": "eslint src/**/*.ts",
     "docker:build": "docker build -t seamless-backend .",
     "docker:run": "BASH_env=.env docker run seamless-backend",
-    "docker:push": "BASH_env=.env docker push seamless-backend:latest"
+    "docker:push": "BASH_env=.env docker push seamless-backend:latest",
+    "build-frontend": "cd ../seamless-frontend && npm run build",
+    "serve-frontend": "npm run build && npm run build-frontend && rm -rf dist/frontend && mkdir dist/frontend && cp -r ../seamless-frontend/dist/* dist/frontend && npm start"
   },
   "author": "Seamless",
   "license": "ISC",

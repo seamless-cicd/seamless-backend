@@ -1,54 +1,30 @@
 import express, { Request, Response } from 'express';
 import runsService from '../../services/runs';
-import stagesService from '../../services/stages';
-import stepFunctionsService from '../../services/step-functions';
 
 const runsRouter = express.Router();
 
-runsRouter.get('', async (req: Request, res: Response) => {
+// Get all Runs for a Service
+runsRouter.get('/', async (req: Request, res: Response) => {
   const { serviceId } = req.query;
   const serviceData = await runsService.getAllForService(serviceId);
   res.status(200).json(serviceData);
 });
 
+// Get a Run
 runsRouter.get('/:runId', async (req: Request, res: Response) => {
   const { runId } = req.params;
   const runData = await runsService.getOne(runId);
   res.status(200).json(runData);
 });
 
-// post to runs router when run button is clicked on a service
-// this will create an empty run and corresponding empty stages for use since
-// a run has stages
+// Create a Run and multiple placeholder Stages
 runsRouter.post('/', async (req: Request, res: Response) => {
   const { serviceId } = req.query;
+  if (!serviceId || typeof serviceId !== 'string')
+    return res.status(400).json({ message: 'invalid service id' });
 
-  // create a new empty run in db
-  const newRun = await runsService.createOne(serviceId);
-
-  if (!newRun)
-    return res
-      .status(500)
-      .json({ message: 'There was a problem creating the run' });
-
-  // create new empty stages data in the db using the newRun id
-  await stagesService.createAll(newRun.id);
-
-  res.status(200).json(newRun);
-});
-
-// Start a Step Function for this Run
-// Run and Stages must first be created by POSTing to /runs
-runsRouter.post('/:runId/start', async (req: Request, res: Response) => {
-  const { runId } = req.params;
-  try {
-    const response = await stepFunctionsService.start(runId);
-    res.status(200).json(response);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'There was a problem executing the Step Function' });
-  }
+  const run = await runsService.createRunAndStages(serviceId);
+  res.status(200).json(run);
 });
 
 runsRouter.delete('/:runId', async (req: Request, res: Response) => {
@@ -56,7 +32,6 @@ runsRouter.delete('/:runId', async (req: Request, res: Response) => {
   const deleteData = await runsService.deleteOne(runId);
   res.status(200).json(deleteData);
 });
-
 
 // added to test with postman updating run status so that it can be polled from the front end
 runsRouter.patch('/:runId', async (req: Request, res: Response) => {
