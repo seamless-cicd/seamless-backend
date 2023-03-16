@@ -14,7 +14,7 @@
     "docker:run": "BASH_env=.env docker run seamless-backend",
     "docker:push": "BASH_env=.env docker push seamless-backend:latest",
     "build-frontend": "cd ../seamless-frontend && npm run build",
-    "serve-frontend": "npm run build && npm run build-frontend && rm -rf dist/frontend && mkdir dist/frontend && cp -r ../seamless-frontend/dist/* dist/frontend && npm start"
+    "build-serve-app": "rm -rf dist && rm -rf ../seamless-frontend/dist && npm run build && npm run build-frontend && mkdir dist/src/frontend && cp -r ../seamless-frontend/dist/* dist/src/frontend && npm start"
   },
   "author": "Seamless",
   "license": "ISC",

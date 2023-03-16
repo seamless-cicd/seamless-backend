@@ -5,7 +5,6 @@ import path from 'path';
 
 import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
-import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
 import runsRouter from './routers/public/runs';
@@ -23,9 +22,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const frontendPath = path.join(__dirname, 'dist/frontend');
+const frontendPath = path.join(__dirname, 'frontend');
 app.use(express.static(frontendPath));
-app.use('/', homeRouter);
+// app.use('/', homeRouter);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
