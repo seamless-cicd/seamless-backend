@@ -15,6 +15,7 @@ const envSchema = z.object({
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_PAT: z.string(),
   BACKEND_URL: z.string().optional(),
+  WEBSOCKETS_API_URL: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -41,4 +42,5 @@ export const {
   GITHUB_CLIENT_ID,
   GITHUB_PAT,
   BACKEND_URL,
+  WEBSOCKETS_API_URL,
 } = parsedEnv.data;
