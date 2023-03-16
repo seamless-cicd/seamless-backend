@@ -4,7 +4,6 @@ import express, { Request, Response } from 'express';
 import runsService from '../../services/runs';
 import servicesService from '../../services/services';
 import stagesService from '../../services/stages';
-import stepFunctionsService from '../../services/step-functions';
 
 const servicesRouter = express.Router();
 
@@ -46,25 +45,19 @@ servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(updatedService);
 });
 
-// Start a Run for this Service
+// Placeholder: Doesn't actually execute the pipeline
+// Create a new Run and Stages for the Service
 servicesRouter.post(
   '/:serviceId/start',
   async (req: Request, res: Response) => {
     const { serviceId } = req.params;
 
     try {
-      // Create a new Run and multiple Stages
       const run = await runsService.createOne(serviceId);
-
       if (!run)
         return res.status(500).json({ message: 'error creating the run' });
 
       await stagesService.createAll(run.id);
-
-      // Start the Step Function (state machine)
-      await stepFunctionsService.start(run.id);
-
-      // The returned runId will be used for navigation
       res.status(200).send(run.id);
     } catch (error) {
       res.status(500).json({ message: 'error starting the run' });
@@ -72,7 +65,7 @@ servicesRouter.post(
   },
 );
 
-// Retrieve all possible rollback images for this Service
+// Retrieve all rollback images for this Service
 servicesRouter.get(
   '/:serviceId/rollbacks',
   async (req: Request, res: Response) => {
@@ -87,7 +80,7 @@ servicesRouter.get(
     )
       return [];
 
-    // For all runs, also retrieve ECR data and merge the two
+    // Merge Run data with Docker image data from ECR
     type Rollback = {
       runs: Run[];
       image: ImageDetail;
@@ -108,7 +101,7 @@ servicesRouter.get(
   },
 );
 
-// Initiate a rollback to an existing Docker image tagged with a git commit hash
+// Perform a rollback
 servicesRouter.post(
   '/:serviceId/rollbacks/:commitHash',
   async (req: Request, res: Response) => {

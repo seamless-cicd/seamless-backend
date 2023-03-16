@@ -27,18 +27,18 @@ async function gatherInput(runId: string) {
   try {
     // Query db for all associated entities
     const run = await runsService.getOne(runId);
-    if (!run || !run?.serviceId) throw new Error('Failed to get Run data');
+    if (!run || !run?.serviceId) throw new Error('failed to get run data');
 
     const stages = await stagesService.getAllForRun(runId);
-    if (!stages) throw new Error('Failed to get Stages associated with Run');
+    if (!stages) throw new Error('failed to get stages associated with run');
 
     const service = await servicesService.getOne(run.serviceId);
     if (!service || !service?.pipelineId)
-      throw new Error('Failed to get Service associated with Run');
+      throw new Error('failed to get service associated with run');
 
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline)
-      throw new Error('Failed to get Pipeline associated with Service');
+      throw new Error('failed to get pipeline associated with service');
 
     // Assemble the Step Function input object
     const stageIds: Record<string, string> = {};
@@ -95,7 +95,7 @@ async function gatherInput(runId: string) {
     if (error instanceof z.ZodError) {
       console.error(error.issues);
     } else {
-      console.error('Failed to retrieve Step Function input data');
+      console.error('failed to get step function input data');
     }
     return null;
   }
@@ -104,8 +104,7 @@ async function gatherInput(runId: string) {
 async function start(runId: string) {
   try {
     const sfnInput = await gatherInput(runId);
-    if (!sfnInput)
-      throw new Error('Failed to retrieve Step Function input data');
+    if (!sfnInput) throw new Error('failed to get step function input data');
 
     const { awsRegion, awsAccessKey, awsSecretAccessKey } =
       sfnInput.containerVariables;
@@ -120,7 +119,7 @@ async function start(runId: string) {
       new ListStateMachinesCommand({}),
     );
     if (!stateMachines || stateMachines.length === 0) {
-      throw new Error('Failed to retrieve Step Function');
+      throw new Error('failed to get step function arn');
     }
 
     const stateMachineArn = stateMachines
@@ -143,7 +142,7 @@ async function start(runId: string) {
   } catch (error) {
     if (error instanceof Error) {
       console.error(
-        error.message || 'Failed to start Step Function. Check input data.',
+        error.message || 'failed to start step function; check input data',
       );
     }
   }
