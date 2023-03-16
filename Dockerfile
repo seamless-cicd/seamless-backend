@@ -24,7 +24,7 @@ COPY --from=build  /app/prisma /app/prisma
 COPY --from=build  /app/dist /app/dist
 
 # Copy frontend
-COPY public /app/dist
+COPY public /app/dist/public
 
 EXPOSE 3000
 CMD ["npm", "start"]
