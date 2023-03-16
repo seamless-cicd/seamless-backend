@@ -42,13 +42,12 @@ const createEcrClient = (awsRegion: string) =>
 const imageExistsInEcr = async (
   awsAccountId: string,
   awsRegion: string,
-  repositoryUri: string,
+  repositoryName: string,
   imageTag: string,
 ) => {
   const ecrClient = createEcrClient(awsRegion);
-  const repositoryName = repositoryUri.slice(repositoryUri.indexOf('/') + 1);
 
-  const params = {
+  const command = new DescribeImagesCommand({
     registryId: awsAccountId,
     repositoryName,
     imageIds: [
@@ -56,11 +55,9 @@ const imageExistsInEcr = async (
         imageTag,
       },
     ],
-  };
+  });
 
-  const command = new DescribeImagesCommand(params);
   const { imageDetails } = await ecrClient.send(command);
-  console.log(imageDetails);
 
   if (!imageDetails || imageDetails.length === 0) {
     return false;
@@ -72,6 +69,34 @@ const imageExistsInEcr = async (
 const isEcrRepo = (awsAccountId: string, repositoryUri: string) => {
   const prefix = `^${awsAccountId}.dkr.ecr`;
   return new RegExp(prefix).test(repositoryUri);
+};
+
+const getAllImages = async (
+  awsAccountId: string,
+  awsRegion: string,
+  repositoryName: string,
+) => {
+  const images = [];
+  let nextToken;
+
+  const ecrClient = createEcrClient(awsRegion);
+
+  // Paginate to retrieve all results
+  do {
+    const command = new DescribeImagesCommand({
+      registryId: awsAccountId,
+      repositoryName,
+      nextToken: nextToken,
+    }) as DescribeImagesCommand;
+
+    const { imageDetails, nextToken: newNextToken } = await ecrClient.send(
+      command,
+    );
+    images.push(...(imageDetails || []));
+    nextToken = newNextToken;
+  } while (nextToken);
+
+  return images;
 };
 
 // ECS operations
@@ -135,11 +160,12 @@ const updateTaskDefinitionWithNewImageTag = (
   const currentImage: string = newTaskDefinition.containerDefinitions[0].image;
   const currentRepoUri = currentImage.split(':')[0];
   const newImage = `${currentRepoUri}:${newTag}`;
+  const repositoryName = currentRepoUri.slice(currentRepoUri.indexOf('/') + 1);
 
   // Check if rollback target image exists
   if (
     isEcrRepo(awsAccountId, currentRepoUri) &&
-    !imageExistsInEcr(awsAccountId, awsRegion, currentRepoUri, newTag)
+    !imageExistsInEcr(awsAccountId, awsRegion, repositoryName, newTag)
   ) {
     throw new Error(`image ${newImage} does not exist`);
   }
@@ -192,4 +218,5 @@ export default {
   updateTaskDefinitionWithNewImageTag,
   registerTaskDefinition,
   updateServiceWithNewTaskDefinition,
+  getAllImages,
 };

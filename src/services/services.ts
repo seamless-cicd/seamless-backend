@@ -1,4 +1,5 @@
 import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
+import { ServiceEditFormType, ServiceFormType } from '../schemas/formSchema';
 import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
 import envVarsService from './envVars';
@@ -8,24 +9,24 @@ export interface ServiceWithEnvVars extends Service {
   awsEcsServiceStaging?: string;
   awsEcsService: string;
   awsEcrRepository: string;
-  awsEcrSnsTopic?: string;
-  logSubscriberUrl?: string;
 }
 
-// gets all services - only top level data - assumes one pipeline
+// Get all Services in the database - assumes all Service belong to a single pipeline
 async function getAll() {
   try {
     const allServices = await prisma.service.findMany();
 
-    // Retrieve env vars for all services
+    // Retrieve env vars for all Services
     const envVars = await envVarsService.getAll(ResourceType.SERVICE);
-    // Group env vars by service id
+
+    // Group env vars by Service id
     const groupedEnvVars = envVars?.reduce(
       (entryMap, e) =>
         entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
       new Map(),
     );
-    // Insert into the associated pipeline object inside allServices
+
+    // Insert env vars into the associated Service inside the allServices Array
     allServices.forEach((service) => {
       const envVarsForService: EnvironmentVariable[] = groupedEnvVars?.get(
         service.id,
@@ -45,6 +46,7 @@ async function getAll() {
   }
 }
 
+// Get a Service
 async function getOne(serviceId: string) {
   try {
     const service = await prisma.service.findUnique({
@@ -53,12 +55,13 @@ async function getOne(serviceId: string) {
       },
     });
 
-    // Retrieve env vars for this service
+    // Retrieve env vars for this Service
     const envVars = await envVarsService.getOne(
       ResourceType.SERVICE,
       serviceId,
     );
-    // Insert env vars into the pipeline object
+
+    // Insert env vars into the Service
     const flattenedEnvVars: { [key: string]: string } = {};
     envVars?.forEach((envVar) => {
       flattenedEnvVars[envVar.name] = envVar.value;
@@ -72,67 +75,92 @@ async function getOne(serviceId: string) {
   }
 }
 
-async function createOne(serviceData: any) {
-  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceData;
+// Create a Service
+async function createOne(serviceFormData: ServiceFormType) {
+  // Form data includes AWS data which must be inserted into the env vars table
+  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceFormData;
 
   try {
-    const service = await prisma.service.create({
+    const createdService = await prisma.service.create({
       data: serviceTableData,
     });
 
-    const envVarsCount = await prisma.environmentVariable.createMany({
+    await prisma.environmentVariable.createMany({
       data: [
         {
           name: 'awsEcrRepo',
           value: awsEcrRepo,
-          resourceId: service.id,
+          resourceId: createdService.id,
           resourceType: ResourceType.SERVICE,
         },
         {
           name: 'awsEcsService',
           value: awsEcsService,
-          resourceId: service.id,
+          resourceId: createdService.id,
           resourceType: ResourceType.SERVICE,
         },
       ],
     });
 
     await prisma.$disconnect();
-    return [service, envVarsCount];
+    return createdService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function deleteOne(id: any) {
+// Delete a Service
+async function deleteOne(id: string) {
   try {
-    const deleted = await prisma.service.delete({
+    const deletedService = await prisma.service.delete({
       where: {
-        id: id,
+        id,
       },
     });
     await prisma.$disconnect();
-    return deleted;
+    return deletedService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function updateOne(id: any, data: any) {
+// Update a Service
+async function updateOne(id: string, serviceEditFormData: ServiceEditFormType) {
   try {
-    const updated = await prisma.service.update({
+    const updatedService = await prisma.service.update({
       where: {
-        id: id,
+        id,
       },
-      data: data,
+      data: serviceEditFormData,
     });
     await prisma.$disconnect();
-    return updated;
+    return updatedService;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
+  }
+}
+
+// Retrieve all images in ECR, for this Service
+async function getRollbackImages(id: string) {
+  try {
+    const service = await getOne(id);
+    if (!service || !service?.pipelineId)
+      throw new Error('Failed to get Service');
+
+    const pipeline = await pipelinesService.getOne(service.pipelineId);
+    if (!pipeline) throw new Error('Failed to get Pipeline');
+
+    const images = ecsService.getAllImages(
+      pipeline.awsAccountId,
+      pipeline.awsRegion,
+      service.awsEcrRepository,
+    );
+    return images;
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -188,4 +216,12 @@ async function rollback(id: string, commitHash: string) {
   }
 }
 
-export default { getAll, getOne, createOne, deleteOne, updateOne, rollback };
+export default {
+  getAll,
+  getOne,
+  createOne,
+  deleteOne,
+  updateOne,
+  getRollbackImages,
+  rollback,
+};

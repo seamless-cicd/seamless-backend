@@ -58,7 +58,6 @@
     "awsEcsServiceStaging": "my-staging-ecs-service-name",
     "awsEcsCluster": "my-ecs-cluster-name",
     "awsEcsService": "my-ecs-service-name",
-    "awsEcrRepo": "my-ecr-repo-name",
-    "logSubscriberUrl": "https://abc123.m.pipedream.net"
+    "awsEcrRepo": "my-ecr-repo-name"
   }
 }

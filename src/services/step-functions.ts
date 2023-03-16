@@ -84,7 +84,6 @@ async function gatherInput(runId: string) {
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
         awsEcrRepo: service.awsEcrRepository,
-        logSubscriberUrl: service.logSubscriberUrl,
       },
     };
 
@@ -131,17 +130,16 @@ async function start(runId: string) {
       .map((stateMachine) => stateMachine.stateMachineArn)[0];
 
     // Debugging
-    // console.log(sfnInput);
-    // console.log(stateMachineArn);
+    console.log(sfnInput);
+    console.log(stateMachineArn);
 
     const sfnCommand = new StartExecutionCommand({
       stateMachineArn,
       input: JSON.stringify(sfnInput),
     });
 
-    // const response = await sfnClient.send(sfnCommand);
-    // return response;
-    return null;
+    const response = await sfnClient.send(sfnCommand);
+    return response;
   } catch (error) {
     if (error instanceof Error) {
       console.error(
