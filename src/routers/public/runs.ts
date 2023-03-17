@@ -37,7 +37,7 @@ runsRouter.delete('/:runId', async (req: Request, res: Response) => {
   res.status(200).json(deleteData);
 });
 
-// Start a Run for this Service
+// Start a Re-Run for this Service
 runsRouter.post('/:runId/rerun', async (req: Request, res: Response) => {
   const run = req.body.data;
 

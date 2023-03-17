@@ -1,12 +1,12 @@
 import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
 config();
-// PAT for testing if you don't want to use submitted PAT from form
-// const PAT = process.env.PAT
+
+// const triggerMainSchema
 
 const webhooksRouter = express.Router();
 
-webhooksRouter.post('', async (req: Request, res: Response) => {
+webhooksRouter.post('/', async (req: Request, res: Response) => {
   const event = req.headers['x-github-event'];
   const { ref, action } = req.body;
   console.log(event);
@@ -14,6 +14,11 @@ webhooksRouter.post('', async (req: Request, res: Response) => {
   console.log(action);
 
   if (event === 'push' && /\/main$/.test(ref)) {
+    // const commitData = {
+    //   commitHash: event.after,
+    //   commitMessage: event,
+    //   committer: event.pusher.name,
+    // };
     console.log('push on main => trigger pipeline actions');
   }
 
