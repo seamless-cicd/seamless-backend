@@ -1,11 +1,11 @@
 import {
   ListStateMachinesCommand,
+  SFNClient,
   StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
 import { StageType, Status } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
-import { createSfnClient } from '../utils/step-function';
 import pipelinesService from './pipelines';
 import runsService from './runs';
 import servicesService from './services';
@@ -71,9 +71,9 @@ async function gatherInput(runId: string) {
       containerVariables: {
         awsRegion: pipeline.awsRegion,
         awsAccountId: pipeline.awsAccountId,
-        awsAccessKey: pipeline.awsAccessKey,
-        awsSecretAccessKey: pipeline.awsSecretAccessKey,
-        githubPat: pipeline.githubPat,
+        githubClientId: pipeline.githubClientId,
+        githubClientSecret: pipeline.githubClientSecret,
+        githubOauthToken: pipeline.githubOauthToken,
         githubRepoUrl: service.githubRepoUrl,
         commitHash: run.commitHash,
         codeQualityCommand: service.codeQualityCommand,
@@ -106,13 +106,10 @@ async function start(runId: string) {
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
-    const { awsRegion, awsAccessKey, awsSecretAccessKey } =
-      sfnInput.containerVariables;
-    const sfnClient = createSfnClient(
-      awsRegion,
-      awsAccessKey,
-      awsSecretAccessKey,
-    );
+    const { awsRegion } = sfnInput.containerVariables;
+    const sfnClient = new SFNClient({
+      region: awsRegion,
+    });
 
     // Retrieve Step Function ARN
     const { stateMachines } = await sfnClient.send(

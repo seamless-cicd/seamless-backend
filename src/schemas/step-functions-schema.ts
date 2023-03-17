@@ -42,12 +42,13 @@ const RunStatusSchema = z.object({
 
 type RunStatus = z.infer<typeof RunStatusSchema>;
 
+// Corresponds to State Machine Stack input in the infrastructure
 const ContainerVariablesSchema = z.object({
   awsRegion: z.string(),
   awsAccountId: z.string(),
-  awsAccessKey: z.string(),
-  awsSecretAccessKey: z.string(),
-  githubPat: z.string(),
+  githubClientId: z.string(),
+  githubClientSecret: z.string(),
+  githubOauthToken: z.string(),
   githubRepoUrl: z.string(),
   commitHash: z.string(),
   codeQualityCommand: z.string().optional(),
