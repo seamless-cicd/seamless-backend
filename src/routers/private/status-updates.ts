@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { RunStatusSchema } from '../../schemas/step-functions-schema';
 import runsService from '../../services/runs';
 import stagesService from '../../services/stages';
+import { webSocketsConnectionManager } from '../../utils/websockets';
 
 const statusUpdatesRouter = express.Router();
 
@@ -11,9 +12,13 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     data = JSON.parse(data);
   }
 
-  const { run, stages } = RunStatusSchema.parse(data);
+  const parsedData = RunStatusSchema.parse(data);
+  const { run, stages } = parsedData;
 
   try {
+    // Send Websockets to clients
+    webSocketsConnectionManager.postDataToConnections(parsedData);
+
     // Update run
     await runsService.updateRunStatus(run.id, run.status);
 

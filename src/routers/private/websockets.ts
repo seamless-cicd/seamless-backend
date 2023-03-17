@@ -1,13 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import express, { Request, Response } from 'express';
-import {
-  deleteConnection,
-  postDataToConnections,
-} from '../../utils/websockets';
+import { webSocketsConnectionManager } from '../../utils/websockets';
 
 const websocketsRouter = express.Router();
-
-const connectionIds: string[] = [];
 
 // `/connect` route activates upon new connections to Websockets API
 websocketsRouter.post('/connect', async (req: Request, res: Response) => {
@@ -19,7 +14,7 @@ websocketsRouter.post('/connect', async (req: Request, res: Response) => {
 
   console.log(`Client with ${connectionId} connected to Websockets`);
 
-  connectionIds.push(connectionId);
+  webSocketsConnectionManager.addConnection(connectionId);
 
   return res.sendStatus(200);
 });
@@ -34,7 +29,7 @@ websocketsRouter.delete('/disconnect', async (req: Request, res: Response) => {
 
   console.log(`Client with ${connectionId} disconnected from Websockets`);
 
-  deleteConnection(connectionIds, connectionId);
+  webSocketsConnectionManager.deleteConnection(connectionId);
 
   return res.sendStatus(200);
 });
@@ -42,7 +37,11 @@ websocketsRouter.delete('/disconnect', async (req: Request, res: Response) => {
 // TEMPORARY: Route for posting messages to the client
 websocketsRouter.post('/send-message', async (_: Request, res: Response) => {
   try {
-    await postDataToConnections(connectionIds);
+    const data = {
+      message: 'Hello world!',
+    };
+
+    webSocketsConnectionManager.postDataToConnections(data);
     console.log(`Messages to clients were sent.`);
     res.sendStatus(204);
   } catch (e) {
