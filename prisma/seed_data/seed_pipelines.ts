@@ -4,16 +4,20 @@ dotenv.config();
 import { StageType, TriggerType } from '@prisma/client';
 import prisma from '../../src/utils/prisma-client';
 
-import { GITHUB_PAT } from '../../src/utils/config';
+import {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_OAUTH_TOKEN,
+} from '../../src/utils/config';
 
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
     data: {
       id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
       name: 'Demo Pipeline',
-      // githubClientId: GITHUB_CLIENT_ID,
-      // githubClientSecret: GITHUB_CLIENT_SECRET,
-      githubPat: GITHUB_PAT,
+      githubClientId: GITHUB_CLIENT_ID,
+      githubClientSecret: GITHUB_CLIENT_SECRET,
+      githubOauthToken: GITHUB_OAUTH_TOKEN,
       services: {
         create: [
           {

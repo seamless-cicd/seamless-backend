@@ -59,9 +59,9 @@ model Pipeline {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   name               String?
-  githubPat          String
-  awsAccessKey       String
-  awsSecretAccessKey String
+  githubClientId     String?
+  githubClientSecret String?
+  githubOauthToken   String?
   services           Service[]
 }
 
