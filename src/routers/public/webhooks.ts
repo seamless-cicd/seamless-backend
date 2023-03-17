@@ -8,7 +8,7 @@ import githubService from '../../services/github';
 config();
 
 const webhooksRouter = express.Router();
-const token = process.env.GITHUB_OAUTH_TOKEN;
+const token = process.env.GITHUB_OAUTH_TOKEN || '';
 
 webhooksRouter.post('/', async (req: Request, res: Response) => {
   const { body: webhookData } = req;
