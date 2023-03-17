@@ -4,9 +4,9 @@ import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../../utils/config';
 
 const authRouter = express.Router();
 
-// Get access token originally
+// Get GitHub access token
 authRouter.get('/access-token', async (req: Request, res: Response) => {
-  // Temporary code supplied to the frontend by GitHub OAuth that we can use to
+  // Temporary code supplied to the frontend by GitHub OAuth
   const code = req.query.code;
 
   if (!code || typeof code !== 'string' || code.length === 0) {
@@ -15,8 +15,8 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
 
   // Authenticate with Github
   const auth = createOAuthUserAuth({
-    clientId: GITHUB_CLIENT_ID || '',
-    clientSecret: GITHUB_CLIENT_SECRET || '',
+    clientId: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
     code,
     scopes: ['repo', 'write:repo_hook'],
   });

@@ -4,11 +4,7 @@ dotenv.config();
 import { StageType, TriggerType } from '@prisma/client';
 import prisma from '../../src/utils/prisma-client';
 
-import {
-  AWS_ACCESS_KEY,
-  AWS_SECRET_ACCESS_KEY,
-  GITHUB_PAT,
-} from '../../src/utils/config';
+import { GITHUB_PAT } from '../../src/utils/config';
 
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
@@ -18,8 +14,6 @@ export const seedPipelines = async () => {
       // githubClientId: GITHUB_CLIENT_ID,
       // githubClientSecret: GITHUB_CLIENT_SECRET,
       githubPat: GITHUB_PAT,
-      awsAccessKey: AWS_ACCESS_KEY,
-      awsSecretAccessKey: AWS_SECRET_ACCESS_KEY,
       services: {
         create: [
           {
