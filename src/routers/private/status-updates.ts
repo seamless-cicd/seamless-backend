@@ -16,8 +16,11 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   const { run, stages } = parsedData;
 
   try {
-    // Send Websockets to clients
-    webSocketsConnectionManager.postDataToConnections(parsedData);
+    // Send data to clients through websockets
+    webSocketsConnectionManager.postDataToConnections({
+      type: 'status_update',
+      data: parsedData,
+    });
 
     // Update run
     await runsService.updateRunStatus(run.id, run.status);

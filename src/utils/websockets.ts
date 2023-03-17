@@ -6,6 +6,11 @@ import {
 
 import { WEBSOCKETS_API_URL } from '../utils/config';
 
+type WebSocketsData = {
+  type: string;
+  data: object;
+};
+
 // Set this config with app.set
 class WebSocketsConnectionManager {
   readonly connectionIds: string[];
@@ -23,14 +28,14 @@ class WebSocketsConnectionManager {
     this.connectionIds.splice(index, 1);
   }
 
-  async postDataToConnections(dataObject: object) {
+  async postDataToConnections(data: WebSocketsData) {
     const client = new ApiGatewayManagementApiClient({
       endpoint: WEBSOCKETS_API_URL,
       region: 'us-east-1',
     });
 
-    const dataString = JSON.stringify(dataObject);
-    const data = Uint8Array.from(
+    const dataString = JSON.stringify(data);
+    const dataUint8Array = Uint8Array.from(
       dataString.split('').map((x) => x.charCodeAt(0)),
     );
 
@@ -39,7 +44,7 @@ class WebSocketsConnectionManager {
         try {
           const requestParams = {
             ConnectionId: connectionId,
-            Data: data,
+            Data: dataUint8Array,
           };
           const command = new PostToConnectionCommand(requestParams);
           await client.send(command);

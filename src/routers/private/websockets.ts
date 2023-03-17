@@ -34,20 +34,4 @@ websocketsRouter.delete('/disconnect', async (req: Request, res: Response) => {
   return res.sendStatus(200);
 });
 
-// TEMPORARY: Route for posting messages to the client
-websocketsRouter.post('/send-message', async (_: Request, res: Response) => {
-  try {
-    const data = {
-      message: 'Hello world!',
-    };
-
-    webSocketsConnectionManager.postDataToConnections(data);
-    console.log(`Messages to clients were sent.`);
-    res.sendStatus(204);
-  } catch (e) {
-    console.error(e);
-    res.sendStatus(500);
-  }
-});
-
 export default websocketsRouter;
