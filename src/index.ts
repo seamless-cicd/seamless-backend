@@ -1,7 +1,6 @@
 import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
-import path from 'path';
 
 import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
@@ -14,6 +13,9 @@ import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
 import { redisClient } from './utils/redis-client';
 
+import createLogUpdatesRouter from './routers/private/log-updates';
+import websocketsRouter from './routers/private/websockets';
+import homeRouter from './routers/public/home';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import { authMiddleware } from './utils/auth-middleware';
 import { BACKEND_PORT } from './utils/config';
@@ -22,18 +24,18 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const frontendPath = path.join(__dirname, 'frontend');
-app.use(express.static(frontendPath));
-// app.use('/', homeRouter);
-app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
+app.use('/', homeRouter);
+// const frontendPath = path.join(__dirname, 'frontend');
+// app.use(express.static(frontendPath));
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(frontendPath, 'index.html'));
+// });
 
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
 publicRouter.use('/auth', authRouter);
-publicRouter.use('/logs', createLogsRouter(redisClient));
 publicRouter.use('/webhooks', webhooksRouter);
+publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
 publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
@@ -47,6 +49,8 @@ app.use('/api', publicRouter);
 // Private routes, hit by AWS infra
 const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
+privateRouter.use('/log-updates', createLogUpdatesRouter(redisClient));
+privateRouter.use('/websockets', websocketsRouter);
 app.use('/internal', privateRouter);
 
 const PORT = BACKEND_PORT || 3000;
