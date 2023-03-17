@@ -13,6 +13,7 @@ import { userRouter } from './routers/public/user';
 import webhooksRouter from './routers/public/webhooks';
 import { redisClient } from './utils/redis-client';
 
+import createLogUpdatesRouter from './routers/private/log-updates';
 import websocketsRouter from './routers/private/websockets';
 import homeRouter from './routers/public/home';
 import webhooksConfigRouter from './routers/public/webhook-config';
@@ -34,7 +35,7 @@ app.use('/', homeRouter);
 const publicRouter = express.Router();
 publicRouter.use('/auth', authRouter);
 publicRouter.use('/webhooks', webhooksRouter);
-publicRouter.use('/logs', createLogsRouter(redisClient));
+publicRouter.use('/logs', authMiddleware, createLogsRouter(redisClient));
 publicRouter.use('/webhooks-config', authMiddleware, webhooksConfigRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
 publicRouter.use('/pipelines', authMiddleware, pipelinesRouter);
@@ -48,6 +49,7 @@ app.use('/api', publicRouter);
 // Private routes, hit by AWS infra
 const privateRouter = express.Router();
 privateRouter.use('/status-updates', statusUpdatesRouter);
+privateRouter.use('/log-updates', createLogUpdatesRouter(redisClient));
 privateRouter.use('/websockets', websocketsRouter);
 app.use('/internal', privateRouter);
 
