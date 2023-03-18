@@ -18,7 +18,6 @@ export const serviceFormSchema = z.object({
   dockerComposeFilePath: z
     .string()
     .min(1, 'Docker compose file path is required'),
-  awsEcrRepo: z.string().min(1, 'AWS ECR repo is required'),
   awsEcsService: z.string().min(1, 'AWS ECS Service is required'),
   // pipeline id is added programmatically in submit handler
   pipelineId: z.string().optional(),

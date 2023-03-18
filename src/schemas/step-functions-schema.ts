@@ -58,7 +58,6 @@ const ContainerVariablesSchema = z.object({
   awsEcsServiceStaging: z.string(),
   awsEcsCluster: z.string(),
   awsEcsService: z.string(),
-  awsEcrRepo: z.string(),
 });
 
 type ContainerVariables = z.infer<typeof ContainerVariablesSchema>;

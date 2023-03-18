@@ -37,6 +37,7 @@ export const seedPipelines = async () => {
               create: [
                 {
                   id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
+                  githubRepoBranch: 'main',
                   commitHash: 'abc123',
                   commitMessage: 'feat: add notification feature',
                   committer: 'Jason Wang',

@@ -23,7 +23,6 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
   try {
     // Extract relevant info from the webhook
     const commit = await githubService.processWebhook(webhook);
-    console.log(commit);
 
     if (commit) {
       // Find service linked to this webhook
@@ -42,6 +41,7 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
         // Create new Run
         // Repo URL is not needed for Run creation
         const { githubRepoUrl, ...commitDataForRun } = commit;
+
         const run = await runsService.createOne(service.id, commitDataForRun);
         if (!run) throw new Error('error creating the run');
 
@@ -49,10 +49,10 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
         await stagesService.createAll(run.id);
 
         // Start the Step Function (state machine)
-        // await stepFunctionsService.start(run.id);
+        await stepFunctionsService.start(run.id);
 
-        // The returned run id will be used for navigation
-        res.status(200).send(run.id);
+        // // The returned run id will be used for navigation
+        // res.status(200).send(run.id);
       }
     }
   } catch (error) {

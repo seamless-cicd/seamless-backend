@@ -57,11 +57,6 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
         value:
           'SeamlessStack-SeamlessDemoProdStackNestedStackSeamlessDemoProdStackNestedStackResource-KII6J4RJ34EG-SeamlessDemoProdNotificationServiceB2D131F4-Q4Nyej21pXj3',
       },
-      {
-        resourceType: ResourceType.SERVICE,
-        name: 'awsEcrRepo',
-        value: 'seamless-demo-prod-notification',
-      },
     ].map((envVarData) => ({
       ...envVarData,
       resourceId: serviceId,

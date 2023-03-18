@@ -8,7 +8,6 @@ import pipelinesService from './pipelines';
 export interface ServiceWithEnvVars extends Service {
   awsEcsService: string;
   awsEcsServiceStaging?: string;
-  awsEcrRepo: string;
 }
 
 // Get all Services in the database - assumes all Service belong to a single pipeline
@@ -108,7 +107,7 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
 // Create a Service
 async function createOne(serviceFormData: ServiceFormType) {
   // Form data includes AWS data which must be inserted into the env vars table
-  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceFormData;
+  const { awsEcsService, ...serviceTableData } = serviceFormData;
 
   try {
     const createdService = await prisma.service.create({
@@ -117,12 +116,6 @@ async function createOne(serviceFormData: ServiceFormType) {
 
     await prisma.environmentVariable.createMany({
       data: [
-        {
-          name: 'awsEcrRepo',
-          value: awsEcrRepo,
-          resourceId: createdService.id,
-          resourceType: ResourceType.SERVICE,
-        },
         {
           name: 'awsEcsService',
           value: awsEcsService,
@@ -183,10 +176,14 @@ async function getRollbackImages(id: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
+    const repoPath = service.githubRepoUrl.match(
+      /\/([^/]+\/[^/.]+)(?:\.git)?$/,
+    )?.[1];
+
     const images = ecsService.getAllImages(
       pipeline.awsAccountId,
       pipeline.awsRegion,
-      service.awsEcrRepo,
+      repoPath || '',
     );
     return images;
   } catch (e) {

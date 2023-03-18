@@ -83,7 +83,6 @@ async function gatherInput(runId: string) {
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
-        awsEcrRepo: service.awsEcrRepo,
       },
     };
 
@@ -126,8 +125,8 @@ async function start(runId: string) {
       .map((stateMachine) => stateMachine.stateMachineArn)[0];
 
     // Debugging
-    console.log(sfnInput);
-    console.log(stateMachineArn);
+    // console.log(sfnInput);
+    // console.log(stateMachineArn);
 
     const sfnCommand = new StartExecutionCommand({
       stateMachineArn,
