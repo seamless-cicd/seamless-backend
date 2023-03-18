@@ -1,8 +1,8 @@
 import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
-import { ServiceEditFormType, ServiceFormType } from '../schemas/formSchema';
+import { ServiceEditFormType, ServiceFormType } from '../schemas/form-schema';
 import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
-import envVarsService from './envVars';
+import envVarsService from './env-vars';
 import pipelinesService from './pipelines';
 
 export interface ServiceWithEnvVars extends Service {

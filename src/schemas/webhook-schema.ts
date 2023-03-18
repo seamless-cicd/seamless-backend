@@ -27,6 +27,7 @@ const PullRequestWebhookSchema = z.object({
         name: z.string(),
       }),
       sha: z.string(), // Commit hash
+      ref: z.string(), // Branch name
     }),
   }),
 });

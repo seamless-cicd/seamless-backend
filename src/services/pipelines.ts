@@ -1,6 +1,6 @@
 import { EnvironmentVariable, Pipeline, ResourceType } from '@prisma/client';
 import prisma from '../utils/prisma-client';
-import envVarsService from './envVars';
+import envVarsService from './env-vars';
 
 export interface PipelineWithEnvVars extends Pipeline {
   awsRegion: string;

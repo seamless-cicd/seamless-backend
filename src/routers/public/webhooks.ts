@@ -23,6 +23,7 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
   try {
     // Extract relevant info from the webhook
     const commit = await githubService.processWebhook(webhook);
+    console.log(commit);
 
     if (commit) {
       // Find service linked to this webhook

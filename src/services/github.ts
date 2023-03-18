@@ -105,6 +105,7 @@ const processWebhook = async (webhook: Webhook) => {
       committer,
       triggerType: TriggerType.MAIN,
       githubRepoUrl: html_url.split('/commit/')[0],
+      githubRepoBranch: 'main',
     };
   }
 
@@ -117,6 +118,7 @@ const processWebhook = async (webhook: Webhook) => {
           name: repo,
         },
         sha,
+        ref: githubRepoBranch,
       },
     },
   } = webhook;
@@ -142,6 +144,7 @@ const processWebhook = async (webhook: Webhook) => {
     triggerType:
       webhook.action === 'opened' ? TriggerType.PR_OPEN : TriggerType.PR_SYNC,
     githubRepoUrl: html_url.split('/commit/')[0],
+    githubRepoBranch,
   };
 };
 
