@@ -4,11 +4,7 @@ dotenv.config();
 import { ResourceType } from '@prisma/client';
 import prisma from '../../src/utils/prisma-client';
 
-import {
-  AWS_ACCOUNT_ID,
-  DATABASE_URL,
-  REDIS_HOST,
-} from '../../src/utils/config';
+import { AWS_ACCOUNT_ID } from '../../src/utils/config';
 
 export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
   await prisma.environmentVariable.createMany({
@@ -59,7 +55,7 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       },
       {
         resourceType: ResourceType.SERVICE,
-        name: 'awsEcrRepository',
+        name: 'awsEcrRepo',
         value: 'seamless-demo-notification',
       },
     ].map((envVarData) => ({

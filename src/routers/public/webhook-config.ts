@@ -1,13 +1,17 @@
 import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
+import apiGatewaysService from '../../services/api-gateway';
+
 config();
-// PAT for testing if you don't want to use submitted PAT from form
-// const PAT = process.env.PAT
-const BACKEND_URL = process.env.BACKEND_URL;
 
 const webhooksConfigRouter = express.Router();
 
 webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
+  // Find endpoint for API Gateway, so GitHub can send webhooks to it
+  const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
+    'SeamlessHttpApi',
+  );
+
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
   const urlSections = githubRepoUrl.split('/');
@@ -54,6 +58,10 @@ webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
 });
 
 webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
+  const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
+    'SeamlessHttpApi',
+  );
+
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
   const urlSections = githubRepoUrl.split('/');

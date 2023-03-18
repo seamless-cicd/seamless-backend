@@ -83,7 +83,7 @@ async function gatherInput(runId: string) {
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
-        awsEcrRepo: service.awsEcrRepository,
+        awsEcrRepo: service.awsEcrRepo,
       },
     };
 

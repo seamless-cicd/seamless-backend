@@ -21,6 +21,7 @@ servicesRouter.get('/:serviceId', async (req: Request, res: Response) => {
 });
 
 // Create a Service, using form submission data
+// Todo: Split env vars out and insert separately
 servicesRouter.post('/', async (req: Request, res: Response) => {
   const serviceFormData = req.body;
   const createdService = await servicesService.createOne(serviceFormData);
@@ -35,6 +36,7 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
 });
 
 // Update a Service
+// Todo: Split env vars out and insert separately
 servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   const { serviceId } = req.params;
   const serviceEditFormData = req.body;

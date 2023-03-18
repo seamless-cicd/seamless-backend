@@ -14,6 +14,7 @@ pipelinesRouter.get('/:pipelineId', async (req: Request, res: Response) => {
   res.status(200).json(pipelineData);
 });
 
+// Todo: Split env vars out (Cluster info) and insert separately
 pipelinesRouter.post('', async (req: Request, res: Response) => {
   const data = req.body;
   const pipeline = await pipelinesService.createOne(data);

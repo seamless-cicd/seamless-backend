@@ -12,11 +12,12 @@ const envSchema = z.object({
   AWS_ACCOUNT_ID: z.string(),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
-  WEBSOCKETS_API_URL: z.string(),
-  // Unavailable during CDK deploy. Provide here if you want to use it as seed data.
-  GITHUB_OAUTH_TOKEN: z.string().optional(),
+  // Unavailable during CDK deploy. Must be retrieved using AWS SDK during setup.
+  WEBSOCKETS_API_URL: z.string().optional(),
   // Unavailable during CDK deploy. Must be retrieved using AWS SDK during setup.
   BACKEND_URL: z.string().optional(),
+  // Unavailable during CDK deploy. Provide here if you want to use it as seed data.
+  GITHUB_OAUTH_TOKEN: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -40,6 +41,6 @@ export const {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   WEBSOCKETS_API_URL,
-  GITHUB_OAUTH_TOKEN,
   BACKEND_URL,
+  GITHUB_OAUTH_TOKEN,
 } = parsedEnv.data;

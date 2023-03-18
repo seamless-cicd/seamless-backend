@@ -8,7 +8,7 @@ import pipelinesService from './pipelines';
 export interface ServiceWithEnvVars extends Service {
   awsEcsService: string;
   awsEcsServiceStaging?: string;
-  awsEcrRepository: string;
+  awsEcrRepo: string;
 }
 
 // Get all Services in the database - assumes all Service belong to a single pipeline
@@ -186,7 +186,7 @@ async function getRollbackImages(id: string) {
     const images = ecsService.getAllImages(
       pipeline.awsAccountId,
       pipeline.awsRegion,
-      service.awsEcrRepository,
+      service.awsEcrRepo,
     );
     return images;
   } catch (e) {

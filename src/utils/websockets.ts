@@ -3,8 +3,7 @@ import {
   ApiGatewayManagementApiClient,
   PostToConnectionCommand,
 } from '@aws-sdk/client-apigatewaymanagementapi';
-
-import { WEBSOCKETS_API_URL } from '../utils/config';
+import apiGatewaysService from '../services/api-gateway';
 
 type WebSocketsData = {
   type: string;
@@ -29,6 +28,11 @@ class WebSocketsConnectionManager {
   }
 
   async postDataToConnections(data: WebSocketsData) {
+    const WEBSOCKETS_API_URL = await apiGatewaysService.getApiGatewayUrl(
+      'SeamlessWebsocketsApi',
+    );
+    if (!WEBSOCKETS_API_URL) return;
+
     const client = new ApiGatewayManagementApiClient({
       endpoint: WEBSOCKETS_API_URL,
       region: 'us-east-1',
