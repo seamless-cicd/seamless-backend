@@ -1,11 +1,11 @@
 import {
   ListStateMachinesCommand,
+  SFNClient,
   StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
 import { StageType, Status } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
-import { createSfnClient } from '../utils/step-function';
 import pipelinesService from './pipelines';
 import runsService from './runs';
 import servicesService from './services';
@@ -27,18 +27,18 @@ async function gatherInput(runId: string) {
   try {
     // Query db for all associated entities
     const run = await runsService.getOne(runId);
-    if (!run || !run?.serviceId) throw new Error('Failed to get Run data');
+    if (!run || !run?.serviceId) throw new Error('failed to get run data');
 
     const stages = await stagesService.getAllForRun(runId);
-    if (!stages) throw new Error('Failed to get Stages associated with Run');
+    if (!stages) throw new Error('failed to get stages associated with run');
 
     const service = await servicesService.getOne(run.serviceId);
     if (!service || !service?.pipelineId)
-      throw new Error('Failed to get Service associated with Run');
+      throw new Error('failed to get service associated with run');
 
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline)
-      throw new Error('Failed to get Pipeline associated with Service');
+      throw new Error('failed to get pipeline associated with service');
 
     // Assemble the Step Function input object
     const stageIds: Record<string, string> = {};
@@ -71,9 +71,9 @@ async function gatherInput(runId: string) {
       containerVariables: {
         awsRegion: pipeline.awsRegion,
         awsAccountId: pipeline.awsAccountId,
-        awsAccessKey: pipeline.awsAccessKey,
-        awsSecretAccessKey: pipeline.awsSecretAccessKey,
-        githubPat: pipeline.githubPat,
+        githubClientId: pipeline.githubClientId,
+        githubClientSecret: pipeline.githubClientSecret,
+        githubOauthToken: pipeline.githubOauthToken,
         githubRepoUrl: service.githubRepoUrl,
         commitHash: run.commitHash,
         codeQualityCommand: service.codeQualityCommand,
@@ -83,7 +83,7 @@ async function gatherInput(runId: string) {
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
-        awsEcrRepo: service.awsEcrRepository,
+        awsEcrRepo: service.awsEcrRepo,
       },
     };
 
@@ -95,7 +95,7 @@ async function gatherInput(runId: string) {
     if (error instanceof z.ZodError) {
       console.error(error.issues);
     } else {
-      console.error('Failed to retrieve Step Function input data');
+      console.error('failed to get step function input data');
     }
     return null;
   }
@@ -104,23 +104,19 @@ async function gatherInput(runId: string) {
 async function start(runId: string) {
   try {
     const sfnInput = await gatherInput(runId);
-    if (!sfnInput)
-      throw new Error('Failed to retrieve Step Function input data');
+    if (!sfnInput) throw new Error('failed to get step function input data');
 
-    const { awsRegion, awsAccessKey, awsSecretAccessKey } =
-      sfnInput.containerVariables;
-    const sfnClient = createSfnClient(
-      awsRegion,
-      awsAccessKey,
-      awsSecretAccessKey,
-    );
+    const { awsRegion } = sfnInput.containerVariables;
+    const sfnClient = new SFNClient({
+      region: awsRegion,
+    });
 
     // Retrieve Step Function ARN
     const { stateMachines } = await sfnClient.send(
       new ListStateMachinesCommand({}),
     );
     if (!stateMachines || stateMachines.length === 0) {
-      throw new Error('Failed to retrieve Step Function');
+      throw new Error('failed to get step function arn');
     }
 
     const stateMachineArn = stateMachines
@@ -143,7 +139,7 @@ async function start(runId: string) {
   } catch (error) {
     if (error instanceof Error) {
       console.error(
-        error.message || 'Failed to start Step Function. Check input data.',
+        error.message || 'failed to start step function; check input data',
       );
     }
   }

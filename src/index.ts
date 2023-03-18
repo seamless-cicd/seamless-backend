@@ -2,23 +2,24 @@ import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
 
-import statusUpdatesRouter from './routers/private/status-updates';
 import authRouter from './routers/public/authentication';
+import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
 import runsRouter from './routers/public/runs';
 import servicesRouter from './routers/public/services';
 import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
+import webhooksConfigRouter from './routers/public/webhook-config';
 import webhooksRouter from './routers/public/webhooks';
-import { redisClient } from './utils/redis-client';
 
 import createLogUpdatesRouter from './routers/private/log-updates';
+import statusUpdatesRouter from './routers/private/status-updates';
 import websocketsRouter from './routers/private/websockets';
-import homeRouter from './routers/public/home';
-import webhooksConfigRouter from './routers/public/webhook-config';
+
 import { authMiddleware } from './utils/auth-middleware';
 import { BACKEND_PORT } from './utils/config';
+import { redisClient } from './utils/redis-client';
 
 const app = express();
 app.use(express.json());

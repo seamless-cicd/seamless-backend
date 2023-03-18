@@ -41,15 +41,15 @@
       }
     }
   },
-  "runFull": "true",
-  "useStaging": "false",
-  "autoDeploy": "false",
+  "runFull": true,
+  "useStaging": false,
+  "autoDeploy": false,
   "containerVariables": {
     "awsRegion": "us-east-1",
     "awsAccountId": "01234567912",
-    "awsAccessKey": "012345679ABC",
-    "awsSecretAccessKey": "012345679ABC",
-    "githubPat": "ghp_012345679abc",
+    "githubClientId": "abc123",
+    "githubClientSecret": "abc123",
+    "githubOauthToken": "gho_abc123",
     "githubRepoUrl": "https://github.com/user-org/repo-name",
     "codeQualityCommand": "npm run lint",
     "unitTestCommand": "npm run test",

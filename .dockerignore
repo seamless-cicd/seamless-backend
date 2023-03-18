@@ -4,4 +4,3 @@ dist
 .env
 .vscode
 step-function-input.json
-playground.pem

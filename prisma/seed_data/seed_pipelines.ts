@@ -5,9 +5,9 @@ import { StageType, TriggerType } from '@prisma/client';
 import prisma from '../../src/utils/prisma-client';
 
 import {
-  AWS_ACCESS_KEY,
-  AWS_SECRET_ACCESS_KEY,
-  GITHUB_PAT,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_OAUTH_TOKEN,
 } from '../../src/utils/config';
 
 export const seedPipelines = async () => {
@@ -15,11 +15,9 @@ export const seedPipelines = async () => {
     data: {
       id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
       name: 'Demo Pipeline',
-      // githubClientId: GITHUB_CLIENT_ID,
-      // githubClientSecret: GITHUB_CLIENT_SECRET,
-      githubPat: GITHUB_PAT,
-      awsAccessKey: AWS_ACCESS_KEY,
-      awsSecretAccessKey: AWS_SECRET_ACCESS_KEY,
+      githubClientId: GITHUB_CLIENT_ID,
+      githubClientSecret: GITHUB_CLIENT_SECRET,
+      githubOauthToken: GITHUB_OAUTH_TOKEN,
       services: {
         create: [
           {
@@ -48,26 +46,32 @@ export const seedPipelines = async () => {
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
                         type: StageType.PREPARE,
+                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
                         type: StageType.CODE_QUALITY,
+                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
                         type: StageType.UNIT_TEST,
+                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
                         type: StageType.BUILD,
+                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e8',
                         type: StageType.DEPLOY_STAGING,
+                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e9',
                         type: StageType.DEPLOY_PROD,
+                        startedAt: new Date(),
                       },
                     ],
                   },

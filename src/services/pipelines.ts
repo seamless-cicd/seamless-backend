@@ -5,13 +5,12 @@ import envVarsService from './envVars';
 export interface PipelineWithEnvVars extends Pipeline {
   awsRegion: string;
   awsAccountId: string;
-  awsEcsClusterStaging?: string;
   awsEcsCluster: string;
+  awsEcsClusterStaging?: string;
   awsStepFunction: string;
-  awsRds: string;
-  awsElastiCache: string;
 }
 
+// Get all Pipelines
 async function getAll() {
   try {
     const allPipelines = await prisma.pipeline.findMany({
@@ -56,6 +55,7 @@ async function getAll() {
   }
 }
 
+// Get one Pipeline by id
 async function getOne(pipelineID: string) {
   try {
     const pipeline = await prisma.pipeline.findUnique({
@@ -79,6 +79,31 @@ async function getOne(pipelineID: string) {
     const envVars = await envVarsService.getOne(
       ResourceType.PIPELINE,
       pipelineID,
+    );
+    // Insert env vars into the pipeline object
+    const flattenedEnvVars: { [key: string]: string } = {};
+    envVars?.forEach((envVar) => {
+      flattenedEnvVars[envVar.name] = envVar.value;
+    });
+
+    await prisma.$disconnect();
+    return { ...pipeline, ...flattenedEnvVars } as PipelineWithEnvVars;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+// Get first Pipeline
+async function getFirst() {
+  try {
+    const pipeline = await prisma.pipeline.findFirst({});
+    if (!pipeline) return null;
+
+    // Retrieve env vars for this pipeline
+    const envVars = await envVarsService.getOne(
+      ResourceType.PIPELINE,
+      pipeline.id,
     );
     // Insert env vars into the pipeline object
     const flattenedEnvVars: { [key: string]: string } = {};
@@ -121,4 +146,4 @@ async function deleteOne(id: string) {
   }
 }
 
-export default { getAll, getOne, createOne, deleteOne };
+export default { getAll, getOne, getFirst, createOne, deleteOne };

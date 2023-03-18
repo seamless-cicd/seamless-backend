@@ -3,7 +3,7 @@ import prisma from '../utils/prisma-client';
 import stagesService from './stages';
 
 // Get all Runs for a Service
-async function getAllForService(serviceId: any) {
+async function getAllForService(serviceId: string) {
   try {
     const allRuns = await prisma.run.findMany({
       where: {
@@ -35,13 +35,13 @@ async function getOne(runId: string) {
 }
 
 // Create a Run with initial default data
-async function createOne(serviceId: any) {
+async function createOne(serviceId: string, data: any = {}) {
   try {
     const run = await prisma.run.create({
       data: {
-        startedAt: new Date(),
         triggerType: TriggerType.MAIN,
         serviceId: serviceId,
+        ...data,
       },
     });
     await prisma.$disconnect();
@@ -66,7 +66,7 @@ async function createRunAndStages(serviceId: string) {
 }
 
 // Delete a Run
-async function deleteOne(id: any) {
+async function deleteOne(id: string) {
   try {
     const deleted = await prisma.run.delete({
       where: {
@@ -82,7 +82,7 @@ async function deleteOne(id: any) {
 }
 
 // Update a Run
-async function updateOne(id: any, data: any) {
+async function updateOne(id: string, data: any) {
   try {
     const updated = await prisma.run.update({
       where: {
