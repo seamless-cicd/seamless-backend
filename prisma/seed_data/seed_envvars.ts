@@ -24,12 +24,14 @@ export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsEcsCluster',
-        value: 'seamless-demo-cluster',
+        value:
+          'SeamlessStack-SeamlessDemoProdClusterStackNestedStackSeamlessDemoProdClusterStackNeste-UZBAFPU59B8U-SeamlessDemoProdCluster5D82937D-kGDRcx5wgR62',
       },
       {
         resourceType: ResourceType.PIPELINE,
         name: 'awsEcsClusterStaging',
-        value: 'seamless-demo-cluster',
+        value:
+          'SeamlessStack-SeamlessDemoProdClusterStackNestedStackSeamlessDemoProdClusterStackNeste-UZBAFPU59B8U-SeamlessDemoProdCluster5D82937D-kGDRcx5wgR62',
       },
     ].map((envVarData) => ({
       ...envVarData,
@@ -46,17 +48,19 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcsService',
-        value: 'seamless-demo-notification',
+        value:
+          'SeamlessStack-SeamlessDemoProdStackNestedStackSeamlessDemoProdStackNestedStackResource-KII6J4RJ34EG-SeamlessDemoProdNotificationServiceB2D131F4-Q4Nyej21pXj3',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcsServiceStaging',
-        value: 'seamless-demo-notification',
+        value:
+          'SeamlessStack-SeamlessDemoProdStackNestedStackSeamlessDemoProdStackNestedStackResource-KII6J4RJ34EG-SeamlessDemoProdNotificationServiceB2D131F4-Q4Nyej21pXj3',
       },
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcrRepo',
-        value: 'seamless-demo-notification',
+        value: 'seamless-demo-prod-notification',
       },
     ].map((envVarData) => ({
       ...envVarData,

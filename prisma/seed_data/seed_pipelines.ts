@@ -29,7 +29,7 @@ export const seedPipelines = async () => {
             useStaging: false,
             autoDeploy: false,
             githubRepoUrl:
-              'https://github.com/seamless-cicd/seamless-demo-notification',
+              'https://github.com/seamless-cicd/seamless-demo-prod-notification',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
