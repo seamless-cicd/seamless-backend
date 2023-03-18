@@ -45,7 +45,7 @@ publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
-publicRouter.use('/dashboard', dashboardRouter);
+publicRouter.use('/dashboard', authMiddleware, dashboardRouter);
 
 app.use('/api', publicRouter);
 
