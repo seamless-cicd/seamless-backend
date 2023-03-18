@@ -67,7 +67,7 @@ runsRouter.post('/:runId/rerun', async (req: Request, res: Response) => {
   }
 });
 
-// added to test with postman updating run status so that it can be polled from the front end
+// Update Run status
 runsRouter.patch('/:runId', async (req: Request, res: Response) => {
   const { runId } = req.params;
   const data = req.body;

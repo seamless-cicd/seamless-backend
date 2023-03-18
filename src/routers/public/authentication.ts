@@ -1,5 +1,7 @@
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
 import express, { Request, Response } from 'express';
+import githubService from '../../services/github';
+import pipelineService from '../../services/pipelines';
 import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../../utils/config';
 
 const authRouter = express.Router();
@@ -22,6 +24,10 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
   });
 
   const { token } = await auth();
+
+  // Store token in first (only) pipeline
+  const pipeline = await pipelineService.getFirst();
+  if (pipeline) await githubService.storeToken(token, pipeline.id);
 
   // Pass access token back to frontend
   return res.json({ token }).send();

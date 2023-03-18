@@ -6,8 +6,8 @@ import envVarsService from './envVars';
 import pipelinesService from './pipelines';
 
 export interface ServiceWithEnvVars extends Service {
-  awsEcsServiceStaging?: string;
   awsEcsService: string;
+  awsEcsServiceStaging?: string;
   awsEcrRepository: string;
 }
 
@@ -62,6 +62,36 @@ async function getOne(serviceId: string) {
     );
 
     // Insert env vars into the Service
+    const flattenedEnvVars: { [key: string]: string } = {};
+    envVars?.forEach((envVar) => {
+      flattenedEnvVars[envVar.name] = envVar.value;
+    });
+
+    await prisma.$disconnect();
+    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+// Find Service linked to the specified GitHub repository
+// Todo: Account for case where multiple Services are linked to the same repo
+async function findOneByRepoUrl(githubRepoUrl: string) {
+  try {
+    const service = await prisma.service.findFirst({
+      where: {
+        githubRepoUrl,
+      },
+    });
+
+    if (!service) throw new Error('no service linked to that repo');
+
+    const envVars = await envVarsService.getOne(
+      ResourceType.SERVICE,
+      service.id,
+    );
+
     const flattenedEnvVars: { [key: string]: string } = {};
     envVars?.forEach((envVar) => {
       flattenedEnvVars[envVar.name] = envVar.value;
@@ -219,6 +249,7 @@ async function rollback(id: string, commitHash: string) {
 export default {
   getAll,
   getOne,
+  findOneByRepoUrl,
   createOne,
   deleteOne,
   updateOne,

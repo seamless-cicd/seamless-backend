@@ -3,17 +3,20 @@ dotenv.config();
 
 import { z } from 'zod';
 
+// Most of these are injected into Backend container when deploying infrastructure via AWS CDK
 const envSchema = z.object({
   BACKEND_PORT: z.string().optional(),
-  BACKEND_URL: z.string().optional(),
   DATABASE_URL: z.string(),
   REDIS_HOST: z.string(),
-  REDIS_PORT: z.string().transform(Number).optional(),
+  REDIS_PORT: z.string().transform(Number).optional(), // Defaults to 6379
   AWS_ACCOUNT_ID: z.string(),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
-  GITHUB_OAUTH_TOKEN: z.string(),
-  WEBSOCKETS_API_URL: z.string().optional(),
+  WEBSOCKETS_API_URL: z.string(),
+  // Unavailable during CDK deploy. Provide here if you want to use it as seed data.
+  GITHUB_OAUTH_TOKEN: z.string().optional(),
+  // Unavailable during CDK deploy. Must be retrieved using AWS SDK during setup.
+  BACKEND_URL: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof envSchema>;
@@ -30,13 +33,13 @@ if (!parsedEnv.success) {
 
 export const {
   BACKEND_PORT,
-  BACKEND_URL,
   DATABASE_URL,
   REDIS_HOST,
   REDIS_PORT,
   AWS_ACCOUNT_ID,
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
-  GITHUB_OAUTH_TOKEN,
   WEBSOCKETS_API_URL,
+  GITHUB_OAUTH_TOKEN,
+  BACKEND_URL,
 } = parsedEnv.data;

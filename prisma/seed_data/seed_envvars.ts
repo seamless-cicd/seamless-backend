@@ -35,16 +35,6 @@ export const seedPipelineEnvironmentVariables = async (pipelineId: string) => {
         name: 'awsEcsClusterStaging',
         value: 'seamless-demo-cluster',
       },
-      {
-        resourceType: ResourceType.PIPELINE,
-        name: 'awsRds',
-        value: DATABASE_URL,
-      },
-      {
-        resourceType: ResourceType.PIPELINE,
-        name: 'awsElastiCache',
-        value: REDIS_HOST,
-      },
     ].map((envVarData) => ({
       ...envVarData,
       resourceId: pipelineId,
@@ -65,11 +55,6 @@ export const seedServiceEnvironmentVariables = async (serviceId: string) => {
       {
         resourceType: ResourceType.SERVICE,
         name: 'awsEcsServiceStaging',
-        value: 'seamless-demo-notification',
-      },
-      {
-        resourceType: ResourceType.SERVICE,
-        name: 'awsEcsTaskDefinition',
         value: 'seamless-demo-notification',
       },
       {
