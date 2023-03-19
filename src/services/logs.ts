@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { LogData, StageId } from '../routers/public/logs';
+import { LogData, StageId } from '../schemas/log-schema';
 
 async function getAllForStage(redisClient: Redis, stageId: StageId) {
   try {
