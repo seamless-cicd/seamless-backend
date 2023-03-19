@@ -38,15 +38,17 @@ async function deleteOne(id: string) {
 async function createAll(runId: string) {
   try {
     await Promise.all(
-      Object.values(StageType).map((type) => {
-        return prisma.stage.create({
-          data: {
-            startedAt: new Date(),
-            type,
-            runId,
-          },
-        });
-      }),
+      Object.values(StageType)
+        .filter((stage) => stage !== StageType.OTHER)
+        .map((type) => {
+          return prisma.stage.create({
+            data: {
+              startedAt: new Date(),
+              type,
+              runId,
+            },
+          });
+        }),
     );
     await prisma.$disconnect();
   } catch (e) {
