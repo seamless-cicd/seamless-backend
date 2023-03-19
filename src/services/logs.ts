@@ -18,9 +18,9 @@ async function createOne(redisClient: Redis, logData: LogData) {
 
     // Insert log into Redis, sorted by timestamp
     await redisClient.zadd(
-      `${logData.stageId}`, // key
-      Number(logData.score), // score
-      JSON.stringify(logData), // data string
+      `${logData.stageId}`, // Redis key
+      Number(logData.score), // timestamp converted to milliseconds
+      JSON.stringify(logData),
       async (err, result) => {
         if (err) {
           throw new Error('Failed to add log.');

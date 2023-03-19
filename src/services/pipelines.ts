@@ -1,6 +1,8 @@
+import { PipelineFormType } from '../schemas/form-schema';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../utils/config';
 import prisma from '../utils/prisma-client';
 
-// Get all Pipelines
+// Get all Pipelines and nested details
 async function getAll() {
   try {
     const pipelines = await prisma.pipeline.findMany({
@@ -16,7 +18,6 @@ async function getAll() {
         },
       },
     });
-
     await prisma.$disconnect();
     return pipelines;
   } catch (e) {
@@ -25,12 +26,12 @@ async function getAll() {
   }
 }
 
-// Get one Pipeline by id
-async function getOne(pipelineID: string) {
+// Get a Pipeline
+async function getOne(pipelineId: string) {
   try {
     const pipeline = await prisma.pipeline.findUnique({
       where: {
-        id: pipelineID,
+        id: pipelineId,
       },
       include: {
         services: {
@@ -44,7 +45,6 @@ async function getOne(pipelineID: string) {
         },
       },
     });
-
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
@@ -68,12 +68,16 @@ async function getFirst() {
 }
 
 // Create a Pipeline
-async function createOne(pipelineData: any) {
+// User doesn't enter GitHub data in the form; those are hardcoded in the CDK
+async function createOne(pipelineFormData: PipelineFormType) {
   try {
     const createdPipeline = await prisma.pipeline.create({
-      data: pipelineData,
+      data: {
+        ...pipelineFormData,
+        githubClientId: GITHUB_CLIENT_ID,
+        githubClientSecret: GITHUB_CLIENT_SECRET,
+      },
     });
-
     await prisma.$disconnect();
     return createdPipeline;
   } catch (e) {
@@ -85,14 +89,13 @@ async function createOne(pipelineData: any) {
 // Delete a Pipeline
 async function deleteOne(id: string) {
   try {
-    const pipeline = await prisma.pipeline.delete({
+    const deletedPipeline = await prisma.pipeline.delete({
       where: {
         id: id,
       },
     });
-
     await prisma.$disconnect();
-    return pipeline;
+    return deletedPipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

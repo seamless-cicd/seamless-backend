@@ -1,39 +1,14 @@
-import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
 import { ServiceEditFormType, ServiceFormType } from '../schemas/form-schema';
 import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
-import envVarsService from './env-vars';
 import pipelinesService from './pipelines';
 
 // Get all Services in the database - assumes all Service belong to a single pipeline
 async function getAll() {
   try {
-    const allServices = await prisma.service.findMany();
-
-    // Retrieve env vars for all Services
-    const envVars = await envVarsService.getAll(ResourceType.SERVICE);
-
-    // Group env vars by Service id
-    const groupedEnvVars = envVars?.reduce(
-      (entryMap, e) =>
-        entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
-      new Map(),
-    );
-
-    // Insert env vars into the associated Service inside the allServices Array
-    allServices.forEach((service) => {
-      const envVarsForService: EnvironmentVariable[] = groupedEnvVars?.get(
-        service.id,
-      );
-      const flattenedEnvVars: { [key: string]: string } = {};
-      envVarsForService?.forEach((envVar) => {
-        flattenedEnvVars[envVar.name] = envVar.value;
-      });
-      Object.assign(service, flattenedEnvVars);
-    });
-
+    const services = await prisma.service.findMany();
     await prisma.$disconnect();
-    return allServices;
+    return services;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -48,21 +23,8 @@ async function getOne(serviceId: string) {
         id: serviceId,
       },
     });
-
-    // Retrieve env vars for this Service
-    const envVars = await envVarsService.getOne(
-      ResourceType.SERVICE,
-      serviceId,
-    );
-
-    // Insert env vars into the Service
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
     await prisma.$disconnect();
-    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
+    return service;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -81,18 +43,8 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
 
     if (!service) throw new Error('no service linked to that repo');
 
-    const envVars = await envVarsService.getOne(
-      ResourceType.SERVICE,
-      service.id,
-    );
-
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
     await prisma.$disconnect();
-    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
+    return service;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -102,31 +54,9 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
 // Create a Service
 async function createOne(serviceFormData: ServiceFormType) {
   try {
-    // Form data includes AWS data which must be inserted into the env vars table
-    const { awsEcsService, awsEcsServiceStaging, ...serviceTableData } =
-      serviceFormData;
-
     const createdService = await prisma.service.create({
-      data: serviceTableData,
+      data: serviceFormData,
     });
-
-    await prisma.environmentVariable.createMany({
-      data: [
-        {
-          name: 'awsEcsService',
-          value: awsEcsService,
-          resourceId: createdService.id,
-          resourceType: ResourceType.SERVICE,
-        },
-        {
-          name: 'awsEcsServiceStaging',
-          value: awsEcsServiceStaging || '', // Optional
-          resourceId: createdService.id,
-          resourceType: ResourceType.SERVICE,
-        },
-      ],
-    });
-
     await prisma.$disconnect();
     return createdService;
   } catch (e) {
@@ -143,9 +73,6 @@ async function deleteOne(id: string) {
         id,
       },
     });
-
-    // Todo: Also delete env vars
-
     await prisma.$disconnect();
     return deletedService;
   } catch (e) {

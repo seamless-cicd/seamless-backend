@@ -5,13 +5,13 @@ import stagesService from './stages';
 // Get all Runs for a Service
 async function getAllForService(serviceId: string) {
   try {
-    const allRuns = await prisma.run.findMany({
+    const runs = await prisma.run.findMany({
       where: {
         serviceId: serviceId,
       },
     });
     await prisma.$disconnect();
-    return allRuns;
+    return runs;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -34,10 +34,11 @@ async function getOne(runId: string) {
   }
 }
 
-// Create a Run with initial default data
+// Create a Run with initial data
+// Initial data may vary depending on whether it's a new run or a re-run
 async function createOne(serviceId: string, data: any = {}) {
   try {
-    const run = await prisma.run.create({
+    const createdRun = await prisma.run.create({
       data: {
         triggerType: TriggerType.MAIN,
         serviceId: serviceId,
@@ -45,7 +46,7 @@ async function createOne(serviceId: string, data: any = {}) {
       },
     });
     await prisma.$disconnect();
-    return run;
+    return createdRun;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -56,10 +57,10 @@ async function createOne(serviceId: string, data: any = {}) {
 // Performed each time the pipeline is executed
 async function createRunAndStages(serviceId: string) {
   try {
-    const run = await createOne(serviceId);
-    if (!run) throw new Error('error creating the run');
-    await stagesService.createAll(run.id);
-    return run;
+    const createdRun = await createOne(serviceId);
+    if (!createdRun) throw new Error('error creating the run');
+    await stagesService.createAll(createdRun.id);
+    return createdRun;
   } catch (e) {
     console.error(e);
   }
@@ -68,13 +69,13 @@ async function createRunAndStages(serviceId: string) {
 // Delete a Run
 async function deleteOne(id: string) {
   try {
-    const deleted = await prisma.run.delete({
+    const deletedRun = await prisma.run.delete({
       where: {
         id: id,
       },
     });
     await prisma.$disconnect();
-    return deleted;
+    return deletedRun;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

@@ -1,4 +1,14 @@
+// These are also used on the Frontend
 import { z } from 'zod';
+
+// Pipeline Setup Form
+export const pipelineFormSchema = z.object({
+  name: z.string().min(1, 'Pipeline name is required').max(40),
+  awsEcsCluster: z.string().min(1, 'ECS Cluster name is required').max(40),
+  awsEcsClusterStaging: z.string().optional(),
+});
+
+export type PipelineFormType = z.infer<typeof pipelineFormSchema>;
 
 // Service Edit Form
 export const serviceEditFormSchema = z.object({

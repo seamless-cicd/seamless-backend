@@ -1,177 +1,60 @@
 import { StageType, Status } from '@prisma/client';
 import prisma from '../utils/prisma-client';
 
-async function getAllForRun(runId: any) {
+// Get all Stages for a Run
+// They will be ordered on the Frontend
+async function getAllForRun(runId: string) {
   try {
-    const allStages = await prisma.stage.findMany({
+    const stages = await prisma.stage.findMany({
       where: {
         runId: runId,
       },
-      orderBy: {
-        createdAt: 'asc',
-      },
     });
     await prisma.$disconnect();
-    return allStages;
+    return stages;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function deleteOne(id: any) {
+async function deleteOne(id: string) {
   try {
-    const deleted = await prisma.stage.delete({
+    const deletedStage = await prisma.stage.delete({
       where: {
         id: id,
       },
     });
     await prisma.$disconnect();
-    return deleted;
+    return deletedStage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function createAll(runId: any) {
+async function createAll(runId: string) {
   try {
-    await Promise.all([
-      createPrepare(runId),
-      createCodeQuality(runId),
-      createUnitTest(runId),
-      createIntegrationTest(runId),
-      createBuild(runId),
-      createDeployStaging(runId),
-      createDeployProd(runId),
-    ]);
+    await Promise.all(
+      Object.values(StageType).map((type) => {
+        return prisma.stage.create({
+          data: {
+            startedAt: new Date(),
+            type,
+            runId,
+          },
+        });
+      }),
+    );
+    await prisma.$disconnect();
   } catch (e) {
     console.log(e);
-  }
-}
-
-async function createPrepare(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.PREPARE,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
     await prisma.$disconnect();
   }
 }
 
-async function createCodeQuality(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.CODE_QUALITY,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createUnitTest(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.UNIT_TEST,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createIntegrationTest(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.INTEGRATION_TEST,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createBuild(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.BUILD,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createDeployStaging(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.DEPLOY_STAGING,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createDeployProd(runId: any) {
-  try {
-    const stage = await prisma.stage.create({
-      data: {
-        startedAt: new Date(),
-        type: StageType.DEPLOY_PROD,
-        runId: runId,
-      },
-    });
-    await prisma.$disconnect();
-    return stage;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-// needed to test status updates for polling, with postman can update status
-// then can see if the front end polls and displays new data
-async function updateOne(id: any, data: any) {
+// For testing polling
+async function updateOne(id: string, data: any) {
   try {
     const updated = await prisma.stage.update({
       where: {
@@ -187,19 +70,54 @@ async function updateOne(id: any, data: any) {
   }
 }
 
-// TODO: Update duration
+// Update status and duration of a Stage, using status updates sent by the state machine
 async function updateStageStatus(id: string, status: Status) {
   try {
-    const stage = await prisma.stage.update({
+    const stage = await prisma.stage.findUnique({
       where: {
         id: id,
       },
-      data: {
-        status: status,
-      },
     });
+
+    if (!stage) {
+      throw new Error('stage does not exist');
+    }
+
+    let updatedStage;
+
+    // If Stage hasn't started, record the current time
+    if (!stage.startedAt) {
+      updatedStage = await prisma.stage.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status,
+          startedAt: new Date(),
+        },
+      });
+    } else {
+      const endedAt = new Date();
+      const stageEnded = status === Status.FAILURE || Status.SUCCESS;
+
+      const duration = Math.floor(
+        (endedAt.getTime() - stage.startedAt.getTime()) / 1000,
+      );
+
+      updatedStage = await prisma.stage.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status,
+          endedAt: stageEnded ? endedAt : null,
+          duration: stageEnded ? duration : null,
+        },
+      });
+    }
+
     await prisma.$disconnect();
-    return stage;
+    return updatedStage;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
