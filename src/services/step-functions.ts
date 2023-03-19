@@ -3,9 +3,10 @@ import {
   SFNClient,
   StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
-import { StageType, Status } from '@prisma/client';
+import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
-import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
+import { SfnInputSchema, Stage } from '../schemas/step-function-schema';
+import { AWS_ACCOUNT_ID, AWS_REGION } from '../utils/config';
 import pipelinesService from './pipelines';
 import runsService from './runs';
 import servicesService from './services';
@@ -65,12 +66,12 @@ async function gatherInput(runId: string) {
         },
         stages: runStatusStages,
       },
-      runFull: service.triggerOnMain,
+      runFull: run.triggerType === TriggerType.MAIN,
       useStaging: service.useStaging,
       autoDeploy: service.autoDeploy,
       containerVariables: {
-        awsRegion: pipeline.awsRegion,
-        awsAccountId: pipeline.awsAccountId,
+        awsRegion: AWS_REGION,
+        awsAccountId: AWS_ACCOUNT_ID,
         githubClientId: pipeline.githubClientId,
         githubClientSecret: pipeline.githubClientSecret,
         githubOauthToken: pipeline.githubOauthToken,
@@ -83,13 +84,11 @@ async function gatherInput(runId: string) {
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
         awsEcsService: service.awsEcsService,
-        awsEcrRepo: service.awsEcrRepo,
       },
     };
 
-    // Validate data shape
+    // Validate data
     const validatedSfnInput = SfnInputSchema.parse(sfnInput);
-
     return validatedSfnInput;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -106,9 +105,8 @@ async function start(runId: string) {
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
-    const { awsRegion } = sfnInput.containerVariables;
     const sfnClient = new SFNClient({
-      region: awsRegion,
+      region: AWS_REGION,
     });
 
     // Retrieve Step Function ARN
@@ -126,8 +124,8 @@ async function start(runId: string) {
       .map((stateMachine) => stateMachine.stateMachineArn)[0];
 
     // Debugging
-    console.log(sfnInput);
-    console.log(stateMachineArn);
+    // console.log(sfnInput);
+    // console.log(stateMachineArn);
 
     const sfnCommand = new StartExecutionCommand({
       stateMachineArn,

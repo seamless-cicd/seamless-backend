@@ -1,45 +1,14 @@
-import { EnvironmentVariable, ResourceType, Service } from '@prisma/client';
-import { ServiceEditFormType, ServiceFormType } from '../schemas/formSchema';
+import { ServiceEditFormType, ServiceFormType } from '../schemas/form-schema';
 import ecsService from '../utils/aws-sdk/ecs';
 import prisma from '../utils/prisma-client';
-import envVarsService from './envVars';
 import pipelinesService from './pipelines';
-
-export interface ServiceWithEnvVars extends Service {
-  awsEcsService: string;
-  awsEcsServiceStaging?: string;
-  awsEcrRepo: string;
-}
 
 // Get all Services in the database - assumes all Service belong to a single pipeline
 async function getAll() {
   try {
-    const allServices = await prisma.service.findMany();
-
-    // Retrieve env vars for all Services
-    const envVars = await envVarsService.getAll(ResourceType.SERVICE);
-
-    // Group env vars by Service id
-    const groupedEnvVars = envVars?.reduce(
-      (entryMap, e) =>
-        entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
-      new Map(),
-    );
-
-    // Insert env vars into the associated Service inside the allServices Array
-    allServices.forEach((service) => {
-      const envVarsForService: EnvironmentVariable[] = groupedEnvVars?.get(
-        service.id,
-      );
-      const flattenedEnvVars: { [key: string]: string } = {};
-      envVarsForService?.forEach((envVar) => {
-        flattenedEnvVars[envVar.name] = envVar.value;
-      });
-      Object.assign(service, flattenedEnvVars);
-    });
-
+    const services = await prisma.service.findMany();
     await prisma.$disconnect();
-    return allServices;
+    return services;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -54,21 +23,8 @@ async function getOne(serviceId: string) {
         id: serviceId,
       },
     });
-
-    // Retrieve env vars for this Service
-    const envVars = await envVarsService.getOne(
-      ResourceType.SERVICE,
-      serviceId,
-    );
-
-    // Insert env vars into the Service
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
     await prisma.$disconnect();
-    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
+    return service;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -87,51 +43,20 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
 
     if (!service) throw new Error('no service linked to that repo');
 
-    const envVars = await envVarsService.getOne(
-      ResourceType.SERVICE,
-      service.id,
-    );
-
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
     await prisma.$disconnect();
-    return { ...service, ...flattenedEnvVars } as ServiceWithEnvVars;
+    return service;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-// Create a Service
+// Create a Service, using form data
 async function createOne(serviceFormData: ServiceFormType) {
-  // Form data includes AWS data which must be inserted into the env vars table
-  const { awsEcrRepo, awsEcsService, ...serviceTableData } = serviceFormData;
-
   try {
     const createdService = await prisma.service.create({
-      data: serviceTableData,
+      data: serviceFormData,
     });
-
-    await prisma.environmentVariable.createMany({
-      data: [
-        {
-          name: 'awsEcrRepo',
-          value: awsEcrRepo,
-          resourceId: createdService.id,
-          resourceType: ResourceType.SERVICE,
-        },
-        {
-          name: 'awsEcsService',
-          value: awsEcsService,
-          resourceId: createdService.id,
-          resourceType: ResourceType.SERVICE,
-        },
-      ],
-    });
-
     await prisma.$disconnect();
     return createdService;
   } catch (e) {
@@ -180,14 +105,11 @@ async function getRollbackImages(id: string) {
     if (!service || !service?.pipelineId)
       throw new Error('Failed to get Service');
 
-    const pipeline = await pipelinesService.getOne(service.pipelineId);
-    if (!pipeline) throw new Error('Failed to get Pipeline');
+    const repoPath = service.githubRepoUrl.match(
+      /\/([^/]+\/[^/.]+)(?:\.git)?$/,
+    )?.[1];
 
-    const images = ecsService.getAllImages(
-      pipeline.awsAccountId,
-      pipeline.awsRegion,
-      service.awsEcrRepo,
-    );
+    const images = ecsService.getAllImages(repoPath || '');
     return images;
   } catch (e) {
     console.error(e);
@@ -205,10 +127,10 @@ async function rollback(id: string, commitHash: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    const { awsAccountId, awsRegion, awsEcsCluster } = pipeline;
+    const { awsEcsCluster } = pipeline;
     const { awsEcsService } = service;
 
-    const ecsClient = ecsService.createEcsClient(awsRegion);
+    const ecsClient = ecsService.createEcsClient();
 
     // Find Task Definition currently used by Service
     const taskDefinition = await ecsService.findTaskDefinitionForService(
@@ -220,8 +142,6 @@ async function rollback(id: string, commitHash: string) {
     // Update with new tag (git commit hash)
     const newTaskDefinition =
       await ecsService.updateTaskDefinitionWithNewImageTag(
-        awsAccountId,
-        awsRegion,
         taskDefinition,
         commitHash,
       );

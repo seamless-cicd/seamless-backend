@@ -15,6 +15,10 @@ export const seedPipelines = async () => {
     data: {
       id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
       name: 'Demo Pipeline',
+      awsEcsCluster:
+        'SeamlessStack-SeamlessDemoProdClusterStackNestedStackSeamlessDemoProdClusterStackNeste-UZBAFPU59B8U-SeamlessDemoProdCluster5D82937D-kGDRcx5wgR62',
+      awsEcsClusterStaging:
+        'SeamlessStack-SeamlessDemoProdClusterStackNestedStackSeamlessDemoProdClusterStackNeste-UZBAFPU59B8U-SeamlessDemoProdCluster5D82937D-kGDRcx5wgR62',
       githubClientId: GITHUB_CLIENT_ID,
       githubClientSecret: GITHUB_CLIENT_SECRET,
       githubOauthToken: GITHUB_OAUTH_TOKEN,
@@ -23,13 +27,17 @@ export const seedPipelines = async () => {
           {
             id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
             name: 'Demo Service',
+            awsEcsService:
+              'SeamlessStack-SeamlessDemoProdStackNestedStackSeamlessDemoProdStackNestedStackResource-KII6J4RJ34EG-SeamlessDemoProdNotificationServiceB2D131F4-Q4Nyej21pXj3',
+            awsEcsServiceStaging:
+              'SeamlessStack-SeamlessDemoProdStackNestedStackSeamlessDemoProdStackNestedStackResource-KII6J4RJ34EG-SeamlessDemoProdNotificationServiceB2D131F4-Q4Nyej21pXj3',
             triggerOnMain: true,
-            triggerOnPrOpen: false,
-            triggerOnPrSync: false,
+            triggerOnPrOpen: true,
+            triggerOnPrSync: true,
             useStaging: false,
             autoDeploy: false,
             githubRepoUrl:
-              'https://github.com/seamless-cicd/seamless-demo-notification',
+              'https://github.com/seamless-cicd/seamless-demo-prod-notification',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
@@ -83,7 +91,4 @@ export const seedPipelines = async () => {
       },
     },
   });
-
-  const allPipelines = await prisma.pipeline.findMany();
-  return allPipelines;
 };

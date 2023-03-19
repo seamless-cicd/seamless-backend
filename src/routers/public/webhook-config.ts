@@ -12,6 +12,9 @@ webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
     'SeamlessHttpApi',
   );
 
+  // Debugging
+  // const BACKEND_URL = 'https://d5ef-108-60-51-226.ngrok.io';
+
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
   const urlSections = githubRepoUrl.split('/');
@@ -26,21 +29,13 @@ webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
     events.push('pull_request');
   }
 
-  await req.octokit.request('GET /repos/{owner}/{repo}/hooks', {
-    owner: owner,
-    repo: repo,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  });
-
-  // URL will eventually have to be updated to that of user
+  // Add webhook
   const { data } = await req.octokit.request(
     'POST /repos/{owner}/{repo}/hooks',
     {
       owner: owner,
       repo: repo,
-      name: 'web', // this is default to create webhook
+      name: 'web', // Default value to create a webhook
       active: true,
       events: events,
       config: {
@@ -76,7 +71,7 @@ webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
     events.push('pull_request');
   }
 
-  // first find the existing webhooks - necessary to find the one that needs patching
+  // Find the existing webhook to be updated
   const webhooks = await req.octokit.request(
     'GET /repos/{owner}/{repo}/hooks',
     {
@@ -88,21 +83,19 @@ webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
     },
   );
 
-  // filter based off of the webhook with defined endpoint here
+  // Filter webhook based on endpoint
   const webhook = webhooks.data.filter((webhook) => {
     return webhook.config.url === BACKEND_URL + '/api/webhooks';
-  });
-  // save id
-  const webhookId = webhook[0].id;
+  })[0];
 
-  // patch it here with octokit - hook_id is what determines the hook
+  // Update webhook
   const { data } = await req.octokit.request(
     'PATCH /repos/{owner}/{repo}/hooks/{hook_id}',
     {
       owner: owner,
       repo: repo,
-      hook_id: webhookId,
-      name: 'web', // this is default to create webhook
+      hook_id: webhook.id,
+      name: 'web',
       active: true,
       events: events,
       config: {

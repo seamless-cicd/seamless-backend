@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-// npx prisma migrate dev --name migration_name
-// npx prisma migrate deploy
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -44,25 +39,17 @@ enum StageType {
   OTHER
 }
 
-model EnvironmentVariable {
-  id           String       @id @default(uuid())
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  resourceId   String
-  resourceType ResourceType
-  name         String
-  value        String
-}
-
 model Pipeline {
-  id                 String    @id @default(uuid())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  name               String?
-  githubClientId     String?
-  githubClientSecret String?
-  githubOauthToken   String?
-  services           Service[]
+  id                   String    @id @default(uuid())
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  name                 String?
+  awsEcsCluster        String
+  awsEcsClusterStaging String?
+  githubClientId       String
+  githubClientSecret   String
+  githubOauthToken     String?
+  services             Service[]
 }
 
 model Service {
@@ -71,6 +58,8 @@ model Service {
   updatedAt              DateTime  @updatedAt
   name                   String?
   lastRunAt              DateTime?
+  awsEcsService          String
+  awsEcsServiceStaging   String?
   triggerOnMain          Boolean   @default(true)
   triggerOnPrOpen        Boolean   @default(false)
   triggerOnPrSync        Boolean   @default(false)
@@ -95,8 +84,7 @@ model Run {
   updatedAt     DateTime    @updatedAt
   startedAt     DateTime    @default(now())
   endedAt       DateTime?
-  // Number in seconds
-  duration      Int?
+  duration      Int? // Seconds
   commitHash    String?
   commitMessage String?
   committer     String?

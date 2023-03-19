@@ -2,13 +2,12 @@ import {
   ApiGatewayV2Client,
   GetApisCommand,
 } from '@aws-sdk/client-apigatewayv2';
-import pipelinesService from './pipelines';
+import { AWS_REGION } from '../utils/config';
 
 // logicalId is "SeamlessHttpApi" or "SeamlessWebsocketsApi"
 const getApiGatewayUrl = async (logicalId: string) => {
-  const pipeline = await pipelinesService.getFirst();
   const apiGatewayClient = new ApiGatewayV2Client({
-    region: pipeline?.awsRegion,
+    region: AWS_REGION,
   });
 
   try {

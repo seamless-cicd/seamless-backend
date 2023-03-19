@@ -1,19 +1,11 @@
-import { EnvironmentVariable, Pipeline, ResourceType } from '@prisma/client';
+import { PipelineFormType } from '../schemas/form-schema';
+import { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '../utils/config';
 import prisma from '../utils/prisma-client';
-import envVarsService from './envVars';
 
-export interface PipelineWithEnvVars extends Pipeline {
-  awsRegion: string;
-  awsAccountId: string;
-  awsEcsCluster: string;
-  awsEcsClusterStaging?: string;
-  awsStepFunction: string;
-}
-
-// Get all Pipelines
+// Get all Pipelines and nested details
 async function getAll() {
   try {
-    const allPipelines = await prisma.pipeline.findMany({
+    const pipelines = await prisma.pipeline.findMany({
       include: {
         services: {
           include: {
@@ -26,41 +18,20 @@ async function getAll() {
         },
       },
     });
-
-    // Retrieve env vars for all pipelines
-    const envVars = await envVarsService.getAll(ResourceType.PIPELINE);
-    // Group env vars by pipeline id
-    const groupedEnvVars = envVars?.reduce(
-      (entryMap, e) =>
-        entryMap.set(e.resourceId, [...(entryMap.get(e.resourceId) || []), e]),
-      new Map(),
-    );
-    // Insert into the associated pipeline object inside allPipelines
-    allPipelines.forEach((pipeline) => {
-      const envVarsForPipeline: EnvironmentVariable[] = groupedEnvVars?.get(
-        pipeline.id,
-      );
-      const flattenedEnvVars: { [key: string]: string } = {};
-      envVarsForPipeline?.forEach((envVar) => {
-        flattenedEnvVars[envVar.name] = envVar.value;
-      });
-      Object.assign(pipeline, flattenedEnvVars);
-    });
-
     await prisma.$disconnect();
-    return allPipelines;
+    return pipelines;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
   }
 }
 
-// Get one Pipeline by id
-async function getOne(pipelineID: string) {
+// Get a Pipeline
+async function getOne(pipelineId: string) {
   try {
     const pipeline = await prisma.pipeline.findUnique({
       where: {
-        id: pipelineID,
+        id: pipelineId,
       },
       include: {
         services: {
@@ -74,20 +45,8 @@ async function getOne(pipelineID: string) {
         },
       },
     });
-
-    // Retrieve env vars for this pipeline
-    const envVars = await envVarsService.getOne(
-      ResourceType.PIPELINE,
-      pipelineID,
-    );
-    // Insert env vars into the pipeline object
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
     await prisma.$disconnect();
-    return { ...pipeline, ...flattenedEnvVars } as PipelineWithEnvVars;
+    return pipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -100,30 +59,6 @@ async function getFirst() {
     const pipeline = await prisma.pipeline.findFirst({});
     if (!pipeline) return null;
 
-    // Retrieve env vars for this pipeline
-    const envVars = await envVarsService.getOne(
-      ResourceType.PIPELINE,
-      pipeline.id,
-    );
-    // Insert env vars into the pipeline object
-    const flattenedEnvVars: { [key: string]: string } = {};
-    envVars?.forEach((envVar) => {
-      flattenedEnvVars[envVar.name] = envVar.value;
-    });
-
-    await prisma.$disconnect();
-    return { ...pipeline, ...flattenedEnvVars } as PipelineWithEnvVars;
-  } catch (e) {
-    console.error(e);
-    await prisma.$disconnect();
-  }
-}
-
-async function createOne(data: any) {
-  try {
-    const pipeline = await prisma.pipeline.create({
-      data: data,
-    });
     await prisma.$disconnect();
     return pipeline;
   } catch (e) {
@@ -131,15 +66,36 @@ async function createOne(data: any) {
     await prisma.$disconnect();
   }
 }
+
+// Create a Pipeline
+// User doesn't enter GitHub data in the form; those are hardcoded in the CDK
+async function createOne(pipelineFormData: PipelineFormType) {
+  try {
+    const createdPipeline = await prisma.pipeline.create({
+      data: {
+        ...pipelineFormData,
+        githubClientId: GITHUB_CLIENT_ID,
+        githubClientSecret: GITHUB_CLIENT_SECRET,
+      },
+    });
+    await prisma.$disconnect();
+    return createdPipeline;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+// Delete a Pipeline
 async function deleteOne(id: string) {
   try {
-    const pipeline = await prisma.pipeline.delete({
+    const deletedPipeline = await prisma.pipeline.delete({
       where: {
         id: id,
       },
     });
     await prisma.$disconnect();
-    return pipeline;
+    return deletedPipeline;
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

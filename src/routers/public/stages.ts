@@ -3,20 +3,23 @@ import stagesService from '../../services/stages';
 
 const stagesRouter = express.Router();
 
-// will get all runs for a particular service
-stagesRouter.get('', async (req: Request, res: Response) => {
+// Get all Stages for a Run
+stagesRouter.get('/', async (req: Request, res: Response) => {
   const { runId } = req.query;
+  if (!runId || typeof runId !== 'string')
+    return res.status(400).json({ message: 'invalid run id' });
   const serviceData = await stagesService.getAllForRun(runId);
   res.status(200).json(serviceData);
 });
 
+// Delete a Stage
 stagesRouter.delete('/:stageId', async (req: Request, res: Response) => {
   const { stageId } = req.params;
   const deleteData = await stagesService.deleteOne(stageId);
   res.status(200).json(deleteData);
 });
 
-// added to test with postman updating stage status so that it can be polled from the front end
+// Update a Stage
 stagesRouter.patch('/:stageId', async (req: Request, res: Response) => {
   const { stageId } = req.params;
   const data = req.body;
@@ -25,4 +28,3 @@ stagesRouter.patch('/:stageId', async (req: Request, res: Response) => {
 });
 
 export default stagesRouter;
-

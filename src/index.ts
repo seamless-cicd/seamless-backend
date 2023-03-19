@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
+import path from 'path';
 
 import authRouter from './routers/public/authentication';
 import homeRouter from './routers/public/home';
@@ -12,7 +13,7 @@ import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import webhooksRouter from './routers/public/webhooks';
-import dashboardRouter from './routers/public/dashboard';
+// import dashboardRouter from './routers/public/dashboard';
 
 import createLogUpdatesRouter from './routers/private/log-updates';
 import statusUpdatesRouter from './routers/private/status-updates';
@@ -26,12 +27,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/', homeRouter);
-// const frontendPath = path.join(__dirname, 'frontend');
-// app.use(express.static(frontendPath));
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(frontendPath, 'index.html'));
-// });
+// app.use('/', homeRouter);
+const frontendPath = path.join(__dirname, '../public');
+app.use(express.static(frontendPath));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();
@@ -45,7 +46,7 @@ publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
-publicRouter.use('/dashboard', authMiddleware, dashboardRouter);
+// publicRouter.use('/dashboard', authMiddleware, dashboardRouter);
 
 app.use('/api', publicRouter);
 

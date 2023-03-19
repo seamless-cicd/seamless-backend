@@ -54,11 +54,10 @@ const ContainerVariablesSchema = z.object({
   codeQualityCommand: z.string().optional(),
   unitTestCommand: z.string().optional(),
   dockerfilePath: z.string(),
-  awsEcsClusterStaging: z.string(),
-  awsEcsServiceStaging: z.string(),
+  awsEcsClusterStaging: z.string().optional(),
+  awsEcsServiceStaging: z.string().optional(),
   awsEcsCluster: z.string(),
   awsEcsService: z.string(),
-  awsEcrRepo: z.string(),
 });
 
 type ContainerVariables = z.infer<typeof ContainerVariablesSchema>;

@@ -43,7 +43,7 @@
   },
   "runFull": true,
   "useStaging": false,
-  "autoDeploy": false,
+  "autoDeploy": true,
   "containerVariables": {
     "awsRegion": "us-east-1",
     "awsAccountId": "01234567912",
@@ -57,7 +57,6 @@
     "awsEcsClusterStaging": "my-staging-ecs-cluster-name",
     "awsEcsServiceStaging": "my-staging-ecs-service-name",
     "awsEcsCluster": "my-ecs-cluster-name",
-    "awsEcsService": "my-ecs-service-name",
-    "awsEcrRepo": "my-ecr-repo-name"
+    "awsEcsService": "my-ecs-service-name"
   }
 }

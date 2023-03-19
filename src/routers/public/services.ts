@@ -8,7 +8,7 @@ import stagesService from '../../services/stages';
 const servicesRouter = express.Router();
 
 // Get all Services in the database - assumes all Services belong to a single pipeline
-servicesRouter.get('/', async (req: Request, res: Response) => {
+servicesRouter.get('/', async (_req: Request, res: Response) => {
   const services = await servicesService.getAll();
   res.status(200).json(services);
 });
@@ -20,8 +20,7 @@ servicesRouter.get('/:serviceId', async (req: Request, res: Response) => {
   res.status(200).json(service);
 });
 
-// Create a Service, using form submission data
-// Todo: Split env vars out and insert separately
+// Create a Service, using form data
 servicesRouter.post('/', async (req: Request, res: Response) => {
   const serviceFormData = req.body;
   const createdService = await servicesService.createOne(serviceFormData);
@@ -36,7 +35,6 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
 });
 
 // Update a Service
-// Todo: Split env vars out and insert separately
 servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   const { serviceId } = req.params;
   const serviceEditFormData = req.body;
@@ -72,8 +70,10 @@ servicesRouter.get(
   '/:serviceId/rollbacks',
   async (req: Request, res: Response) => {
     const { serviceId } = req.params;
+
     const allImages = await servicesService.getRollbackImages(serviceId);
     const allRuns = await runsService.getAllForService(serviceId);
+
     if (
       !allImages ||
       allImages.length === 0 ||
@@ -89,6 +89,7 @@ servicesRouter.get(
     };
     const rollbacks: Rollback[] = [];
 
+    // Compare Images Array with Runs Array and find matches based on commit hash
     allImages.forEach((image) => {
       const associatedRuns = allRuns.filter((run) => {
         if (!run.commitHash) return;

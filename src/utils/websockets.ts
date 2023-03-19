@@ -4,6 +4,7 @@ import {
   PostToConnectionCommand,
 } from '@aws-sdk/client-apigatewaymanagementapi';
 import apiGatewaysService from '../services/api-gateway';
+import { AWS_REGION } from './config';
 
 type WebSocketsData = {
   type: string;
@@ -35,7 +36,7 @@ class WebSocketsConnectionManager {
 
     const client = new ApiGatewayManagementApiClient({
       endpoint: WEBSOCKETS_API_URL,
-      region: 'us-east-1',
+      region: AWS_REGION,
     });
 
     const dataString = JSON.stringify(data);
