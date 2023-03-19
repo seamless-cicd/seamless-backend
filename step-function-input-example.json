@@ -43,7 +43,7 @@
   },
   "runFull": true,
   "useStaging": false,
-  "autoDeploy": false,
+  "autoDeploy": true,
   "containerVariables": {
     "awsRegion": "us-east-1",
     "awsAccountId": "01234567912",
