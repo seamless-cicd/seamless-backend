@@ -18,6 +18,7 @@ async function getAllForRun(runId: string) {
   }
 }
 
+// Delete a Stage
 async function deleteOne(id: string) {
   try {
     const deletedStage = await prisma.stage.delete({
@@ -33,6 +34,7 @@ async function deleteOne(id: string) {
   }
 }
 
+// Create all placeholder Stages for a Run
 async function createAll(runId: string) {
   try {
     await Promise.all(
@@ -53,7 +55,7 @@ async function createAll(runId: string) {
   }
 }
 
-// For testing polling
+// Update a Stage
 async function updateOne(id: string, data: any) {
   try {
     const updated = await prisma.stage.update({

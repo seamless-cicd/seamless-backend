@@ -31,6 +31,7 @@ runsRouter.post('/', async (req: Request, res: Response) => {
   res.status(200).json(run);
 });
 
+// Delete a Run
 runsRouter.delete('/:runId', async (req: Request, res: Response) => {
   const { runId } = req.params;
   const deleteData = await runsService.deleteOne(runId);
@@ -44,30 +45,30 @@ runsRouter.post('/:runId/rerun', async (req: Request, res: Response) => {
   try {
     // Create a new Run linked to this Service
     // Since this is a re-run, copy over the original run's git commit data
-    const newRun = await runsService.createOne(run.serviceId, {
+    const createdRun = await runsService.createOne(run.serviceId, {
       commitHash: run.commitHash,
       commitMessage: run.commitMessage,
       committer: run.committer,
       triggerType: run.triggerType,
     });
 
-    if (!newRun)
+    if (!createdRun)
       return res.status(500).json({ message: 'error creating the run' });
 
     // Create Stages linked to this Run
-    await stagesService.createAll(newRun.id);
+    await stagesService.createAll(createdRun.id);
 
     // Start the Step Function (state machine)
-    await stepFunctionsService.start(newRun.id);
+    await stepFunctionsService.start(createdRun.id);
 
     // The returned run id will be used for navigation
-    res.status(200).send(newRun.id);
+    res.status(200).send(createdRun.id);
   } catch (error) {
     res.status(500).json({ message: 'error starting the run' });
   }
 });
 
-// Update Run status
+// Update a Run
 runsRouter.patch('/:runId', async (req: Request, res: Response) => {
   const { runId } = req.params;
   const data = req.body;

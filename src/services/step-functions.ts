@@ -5,7 +5,7 @@ import {
 } from '@aws-sdk/client-sfn';
 import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
-import { SfnInputSchema, Stage } from '../schemas/step-functions-schema';
+import { SfnInputSchema, Stage } from '../schemas/step-function-schema';
 import { AWS_ACCOUNT_ID, AWS_REGION } from '../utils/config';
 import pipelinesService from './pipelines';
 import runsService from './runs';
@@ -87,9 +87,8 @@ async function gatherInput(runId: string) {
       },
     };
 
-    // Validate data shape
+    // Validate data
     const validatedSfnInput = SfnInputSchema.parse(sfnInput);
-
     return validatedSfnInput;
   } catch (error) {
     if (error instanceof z.ZodError) {

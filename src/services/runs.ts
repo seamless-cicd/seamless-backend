@@ -53,7 +53,7 @@ async function createOne(serviceId: string, data: any = {}) {
   }
 }
 
-// Create a placeholder Run and associated Stages, for a Service
+// Create a Run and multiple placeholder Stages
 // Performed each time the pipeline is executed
 async function createRunAndStages(serviceId: string) {
   try {

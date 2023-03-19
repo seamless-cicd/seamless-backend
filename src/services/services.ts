@@ -51,7 +51,7 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
   }
 }
 
-// Create a Service
+// Create a Service, using form data
 async function createOne(serviceFormData: ServiceFormType) {
   try {
     const createdService = await prisma.service.create({

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { RunStatusSchema } from '../../schemas/step-functions-schema';
+import { RunStatusSchema } from '../../schemas/step-function-schema';
 import runsService from '../../services/runs';
 import stagesService from '../../services/stages';
 import { webSocketsConnectionManager } from '../../utils/websockets';
