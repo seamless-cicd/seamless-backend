@@ -5,11 +5,6 @@ import prisma from '../utils/prisma-client';
 import envVarsService from './env-vars';
 import pipelinesService from './pipelines';
 
-export interface ServiceWithEnvVars extends Service {
-  awsEcsService: string;
-  awsEcsServiceStaging?: string;
-}
-
 // Get all Services in the database - assumes all Service belong to a single pipeline
 async function getAll() {
   try {
@@ -106,10 +101,11 @@ async function findOneByRepoUrl(githubRepoUrl: string) {
 
 // Create a Service
 async function createOne(serviceFormData: ServiceFormType) {
-  // Form data includes AWS data which must be inserted into the env vars table
-  const { awsEcsService, ...serviceTableData } = serviceFormData;
-
   try {
+    // Form data includes AWS data which must be inserted into the env vars table
+    const { awsEcsService, awsEcsServiceStaging, ...serviceTableData } =
+      serviceFormData;
+
     const createdService = await prisma.service.create({
       data: serviceTableData,
     });
@@ -119,6 +115,12 @@ async function createOne(serviceFormData: ServiceFormType) {
         {
           name: 'awsEcsService',
           value: awsEcsService,
+          resourceId: createdService.id,
+          resourceType: ResourceType.SERVICE,
+        },
+        {
+          name: 'awsEcsServiceStaging',
+          value: awsEcsServiceStaging || '', // Optional
           resourceId: createdService.id,
           resourceType: ResourceType.SERVICE,
         },
@@ -141,6 +143,9 @@ async function deleteOne(id: string) {
         id,
       },
     });
+
+    // Todo: Also delete env vars
+
     await prisma.$disconnect();
     return deletedService;
   } catch (e) {
@@ -173,18 +178,11 @@ async function getRollbackImages(id: string) {
     if (!service || !service?.pipelineId)
       throw new Error('Failed to get Service');
 
-    const pipeline = await pipelinesService.getOne(service.pipelineId);
-    if (!pipeline) throw new Error('Failed to get Pipeline');
-
     const repoPath = service.githubRepoUrl.match(
       /\/([^/]+\/[^/.]+)(?:\.git)?$/,
     )?.[1];
 
-    const images = ecsService.getAllImages(
-      pipeline.awsAccountId,
-      pipeline.awsRegion,
-      repoPath || '',
-    );
+    const images = ecsService.getAllImages(repoPath || '');
     return images;
   } catch (e) {
     console.error(e);
@@ -202,10 +200,10 @@ async function rollback(id: string, commitHash: string) {
     const pipeline = await pipelinesService.getOne(service.pipelineId);
     if (!pipeline) throw new Error('Failed to get Pipeline');
 
-    const { awsAccountId, awsRegion, awsEcsCluster } = pipeline;
+    const { awsEcsCluster } = pipeline;
     const { awsEcsService } = service;
 
-    const ecsClient = ecsService.createEcsClient(awsRegion);
+    const ecsClient = ecsService.createEcsClient();
 
     // Find Task Definition currently used by Service
     const taskDefinition = await ecsService.findTaskDefinitionForService(
@@ -217,8 +215,6 @@ async function rollback(id: string, commitHash: string) {
     // Update with new tag (git commit hash)
     const newTaskDefinition =
       await ecsService.updateTaskDefinitionWithNewImageTag(
-        awsAccountId,
-        awsRegion,
         taskDefinition,
         commitHash,
       );

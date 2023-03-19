@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
+import path from 'path';
 
 import authRouter from './routers/public/authentication';
 import homeRouter from './routers/public/home';
@@ -25,12 +26,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use('/', homeRouter);
-// const frontendPath = path.join(__dirname, 'frontend');
-// app.use(express.static(frontendPath));
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(frontendPath, 'index.html'));
-// });
+// app.use('/', homeRouter);
+const frontendPath = path.join(__dirname, '../public');
+app.use(express.static(frontendPath));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Public routes, consumed by the frontend
 const publicRouter = express.Router();

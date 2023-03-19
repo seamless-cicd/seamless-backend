@@ -8,9 +8,12 @@ const webhooksConfigRouter = express.Router();
 
 webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
   // Find endpoint for API Gateway, so GitHub can send webhooks to it
-  const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
-    'SeamlessHttpApi',
-  );
+  // const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
+  //   'SeamlessHttpApi',
+  // );
+
+  // Debugging
+  const BACKEND_URL = 'https://d5ef-108-60-51-226.ngrok.io';
 
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;

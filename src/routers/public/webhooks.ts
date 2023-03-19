@@ -17,12 +17,14 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
   // Immediately confirm receipt of webhook
   res.sendStatus(200);
 
-  // Validate payload type
-  const webhook = WebhookSchema.parse(req.body);
-
   try {
+    // Validate payload type
+    const webhook = WebhookSchema.safeParse(req.body);
+    // Ignore operations that are not on main or associated with a PR
+    if (!webhook.success) return;
+
     // Extract relevant info from the webhook
-    const commit = await githubService.processWebhook(webhook);
+    const commit = await githubService.processWebhook(webhook.data);
 
     if (commit) {
       // Find service linked to this webhook
@@ -39,7 +41,7 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
         (service.triggerOnPrSync && commit.triggerType === TriggerType.PR_SYNC)
       ) {
         // Create new Run
-        // Repo URL is not needed for Run creation
+        // Repo URL is not needed for Run creation; it pertains to the Service only
         const { githubRepoUrl, ...commitDataForRun } = commit;
 
         const run = await runsService.createOne(service.id, commitDataForRun);
@@ -49,10 +51,8 @@ webhooksRouter.post('/', async (req: Request, res: Response) => {
         await stagesService.createAll(run.id);
 
         // Start the Step Function (state machine)
-        await stepFunctionsService.start(run.id);
-
-        // // The returned run id will be used for navigation
-        // res.status(200).send(run.id);
+        const response = await stepFunctionsService.start(run.id);
+        console.log(JSON.stringify(response, null, 2));
       }
     }
   } catch (error) {
