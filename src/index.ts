@@ -13,6 +13,7 @@ import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import webhooksRouter from './routers/public/webhooks';
+import websocketsUrlRouter from './routers/public/websockets-url';
 // import dashboardRouter from './routers/public/dashboard';
 
 import createLogUpdatesRouter from './routers/private/log-updates';
@@ -46,6 +47,7 @@ publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
+publicRouter.use('/websockets-url', authMiddleware, websocketsUrlRouter);
 // publicRouter.use('/dashboard', authMiddleware, dashboardRouter);
 
 app.use('/api', publicRouter);

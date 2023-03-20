@@ -6,25 +6,25 @@ import { AWS_REGION } from '../utils/config';
 
 // logicalId is "SeamlessHttpApi" or "SeamlessWebsocketsApi"
 const getApiGatewayUrl = async (logicalId: string) => {
-  const apiGatewayClient = new ApiGatewayV2Client({
-    region: AWS_REGION,
-  });
-
   try {
+    const apiGatewayClient = new ApiGatewayV2Client({
+      region: AWS_REGION,
+    });
+
     const apis = await apiGatewayClient.send(new GetApisCommand({}));
     if (!apis.Items || apis.Items.length === 0)
       throw new Error('no api gateways found');
 
-    const httpApis = apis.Items.filter((api) => {
+    const filteredApis = apis.Items.filter((api) => {
       if (!api.Tags) return false;
       return api.Tags['aws:cloudformation:logical-id'] === logicalId;
     });
-    if (httpApis.length === 0) throw new Error('no api gateways found');
+    if (filteredApis.length === 0)
+      throw new Error('no matching api gateways found');
 
-    let url = httpApis[0].ApiEndpoint;
-    // Convert WebSocket URL to Connection URL
-    if (url?.startsWith('wss')) url = `https${url.slice(3)}/production`;
-
+    let url = filteredApis[0].ApiEndpoint;
+    // Add "production" stage to WebSocket URL
+    if (url?.startsWith('wss')) url = `${url}/production`;
     return url;
   } catch (error) {
     console.error(error);
