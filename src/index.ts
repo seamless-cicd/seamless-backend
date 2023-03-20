@@ -4,6 +4,7 @@ import 'express-async-errors';
 import path from 'path';
 
 import authRouter from './routers/public/authentication';
+// import dashboardRouter from './routers/public/dashboard';
 import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
@@ -13,7 +14,6 @@ import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import webhooksRouter from './routers/public/webhooks';
-// import dashboardRouter from './routers/public/dashboard';
 
 import createLogUpdatesRouter from './routers/private/log-updates';
 import statusUpdatesRouter from './routers/private/status-updates';
