@@ -10,6 +10,8 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   let data = req.body;
   if (typeof data === 'string') {
     data = JSON.parse(data);
+  } else {
+    data = JSON.parse(JSON.stringify(data)); // Remove bad control chars ("\n")
   }
 
   try {
