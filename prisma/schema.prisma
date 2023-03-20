@@ -20,6 +20,7 @@ enum Status {
   FAILURE
   IN_PROGRESS
   IDLE
+  AWAITING_APPROVAL
 }
 
 enum TriggerType {
