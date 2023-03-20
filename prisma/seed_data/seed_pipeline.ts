@@ -31,7 +31,7 @@ export const seedPipelines = async () => {
             triggerOnPrOpen: true,
             triggerOnPrSync: true,
             useStaging: true,
-            autoDeploy: true,
+            autoDeploy: false,
             githubRepoUrl:
               'https://github.com/seamless-cicd/seamless-demo-notification',
             unitTestCommand: 'npm run test',
