@@ -4,6 +4,7 @@ import 'express-async-errors';
 import path from 'path';
 
 import authRouter from './routers/public/authentication';
+// import dashboardRouter from './routers/public/dashboard';
 import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';

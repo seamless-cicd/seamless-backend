@@ -1,4 +1,9 @@
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import {
+  ListStateMachinesCommand,
+  SendTaskSuccessCommand,
+  SFNClient,
+  StartExecutionCommand,
+} from '@aws-sdk/client-sfn';
 import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-function-schema';
@@ -127,6 +132,39 @@ async function start(runId: string) {
       );
     }
   }
+}
+
+export async function sendTaskToken(taskToken: string) {
+  const sfnClient = new SFNClient({
+    region: AWS_REGION,
+  });
+
+  const sfnCommand = new SendTaskSuccessCommand({
+    taskToken,
+    output: '{}',
+  });
+
+  const response = await sfnClient.send(sfnCommand);
+  return response;
+}
+
+// Retrieve a step function's ARN
+async function retrieveStepFunctionArn(sfnClient: SFNClient) {
+  const { stateMachines } = await sfnClient.send(
+    new ListStateMachinesCommand({}),
+  );
+
+  if (!stateMachines || stateMachines.length === 0) {
+    throw new Error('failed to get step function arn');
+  }
+
+  const stateMachineArn = stateMachines
+    .filter((stateMachine) =>
+      /^SeamlessStateMachine/.test(stateMachine.name || ''),
+    )
+    .map((stateMachine) => stateMachine.stateMachineArn)[0];
+
+  return stateMachineArn;
 }
 
 export default { gatherInput, start };

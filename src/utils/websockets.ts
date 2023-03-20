@@ -9,7 +9,7 @@ import { AWS_REGION, WEBSOCKETS_API_URL } from './config';
 
 type WebSocketsData = {
   type: string;
-  data: RunStatus | LogData[];
+  data: RunStatus | LogData[] | object;
 };
 
 // Set this config with app.set

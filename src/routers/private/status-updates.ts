@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { RunStatusSchema } from '../../schemas/step-function-schema';
 import runsService from '../../services/runs';
 import stagesService from '../../services/stages';
+import deploymentApprovalManager from '../../utils/deployment-approval';
 import { webSocketsConnectionManager } from '../../utils/websockets';
 
 const statusUpdatesRouter = express.Router();
@@ -44,5 +45,27 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     }
   }
 });
+
+statusUpdatesRouter.post(
+  '/wait-for-approval',
+  (req: Request, res: Response) => {
+    // Add logic for waiting for task token
+    const { taskToken, runId } = req.body;
+
+    if (!taskToken) {
+      return res.status(400).json({ error: 'Missing task token' });
+    }
+
+    deploymentApprovalManager.setTaskToken(runId, taskToken);
+
+    // Post data to the frontend to wait for approval
+    webSocketsConnectionManager.postDataToConnections({
+      type: 'wait_for_approval',
+      data: {},
+    });
+
+    return res.sendStatus(200);
+  },
+);
 
 export default statusUpdatesRouter;
