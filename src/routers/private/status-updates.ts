@@ -22,7 +22,7 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     // Send data to clients through websockets
     webSocketsConnectionManager.postDataToConnections({
       type: 'status_update',
-      data: parsedData,
+      data: parsedData.data,
     });
 
     // Update run
@@ -38,7 +38,7 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error(e);
-      res.json({ error: e.message }).send(400);
+      res.status(400).json({ error: e.message });
     }
   }
 });

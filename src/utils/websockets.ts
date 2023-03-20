@@ -3,11 +3,13 @@ import {
   GoneException,
   PostToConnectionCommand,
 } from '@aws-sdk/client-apigatewaymanagementapi';
+import { LogData } from '../schemas/log-schema';
+import { RunStatus } from '../schemas/step-function-schema';
 import { AWS_REGION, WEBSOCKETS_API_URL } from './config';
 
 type WebSocketsData = {
   type: string;
-  data: object;
+  data: RunStatus | LogData[];
 };
 
 // Set this config with app.set

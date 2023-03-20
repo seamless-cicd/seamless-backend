@@ -13,7 +13,7 @@ const stageEnumToId = {
   [StageType.INTEGRATION_TEST]: 'integrationTest',
   [StageType.DEPLOY_STAGING]: 'deployStaging',
   [StageType.DEPLOY_PROD]: 'deployProduction',
-  [StageType.OTHER]: 'deployProduction',
+  [StageType.OTHER]: 'other',
 };
 
 // Gather data required for Step Function to run
@@ -32,6 +32,7 @@ async function gatherInput(runId: string) {
       },
     });
 
+    // Split data into entities
     const pipeline = data?.Service?.Pipeline;
     const service = data?.Service
       ? { ...data.Service, Pipeline: undefined }
