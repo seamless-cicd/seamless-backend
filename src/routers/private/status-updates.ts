@@ -12,10 +12,13 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     data = JSON.parse(data);
   }
 
-  const parsedData = RunStatusSchema.parse(data);
-  const { run, stages } = parsedData;
-
   try {
+    const parsedData = RunStatusSchema.safeParse(data);
+    if (!parsedData.success) {
+      throw new Error('invalid status data');
+    }
+    const { run, stages } = parsedData.data;
+
     // Send data to clients through websockets
     webSocketsConnectionManager.postDataToConnections({
       type: 'status_update',
@@ -34,6 +37,7 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     res.sendStatus(200);
   } catch (e) {
     if (e instanceof Error) {
+      console.error(e);
       res.json({ error: e.message }).send(400);
     }
   }

@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   ApiGatewayManagementApiClient,
+  GoneException,
   PostToConnectionCommand,
 } from '@aws-sdk/client-apigatewaymanagementapi';
-import apiGatewaysService from '../services/api-gateway';
-import { AWS_REGION } from './config';
+import { AWS_REGION, WEBSOCKETS_API_URL } from './config';
 
 type WebSocketsData = {
   type: string;
@@ -29,11 +28,6 @@ class WebSocketsConnectionManager {
   }
 
   async postDataToConnections(data: WebSocketsData) {
-    const WEBSOCKETS_API_URL = await apiGatewaysService.getApiGatewayUrl(
-      'SeamlessWebsocketsApi',
-    );
-    if (!WEBSOCKETS_API_URL) return;
-
     const client = new ApiGatewayManagementApiClient({
       endpoint: WEBSOCKETS_API_URL,
       region: AWS_REGION,
@@ -54,8 +48,8 @@ class WebSocketsConnectionManager {
           const command = new PostToConnectionCommand(requestParams);
           await client.send(command);
         } catch (e) {
-          // @ts-ignore
-          if (e && e.statusCode === 410) {
+          // Status code 410 Gone: Resource is permanently gone
+          if (e instanceof GoneException) {
             console.log(`Found stale connection, deleting ${connectionId}`);
             this.deleteConnection(connectionId);
           } else {

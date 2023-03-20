@@ -13,9 +13,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string(),
   REDIS_HOST: z.string(),
   REDIS_PORT: z.string().transform(Number).optional(), // Defaults to 6379
-  // Unavailable during CDK deployment. Must be retrieved using AWS SDK.
   BACKEND_URL: z.string().optional(),
   WEBSOCKETS_API_URL: z.string().optional(),
+  STEP_FUNCTION_ARN: z.string().optional(),
   // Provide OAuth token if you want to use it as seed data.
   GITHUB_OAUTH_TOKEN: z.string().optional(),
 });
@@ -43,5 +43,6 @@ export const {
   REDIS_PORT,
   BACKEND_URL,
   WEBSOCKETS_API_URL,
+  STEP_FUNCTION_ARN,
   GITHUB_OAUTH_TOKEN,
 } = parsedEnv.data;

@@ -1,20 +1,9 @@
-import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
-import apiGatewaysService from '../../services/api-gateway';
-
-config();
+import { BACKEND_URL } from '../../utils/config';
 
 const webhooksConfigRouter = express.Router();
 
 webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
-  // Find endpoint for API Gateway, so GitHub can send webhooks to it
-  const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
-    'SeamlessHttpApi',
-  );
-
-  // Debugging
-  // const BACKEND_URL = 'https://d5ef-108-60-51-226.ngrok.io';
-
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
   const urlSections = githubRepoUrl.split('/');
@@ -53,9 +42,9 @@ webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
 });
 
 webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
-  const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
-    'SeamlessHttpApi',
-  );
+  // const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
+  //   'SeamlessHttpApi',
+  // );
 
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
