@@ -7,7 +7,7 @@ import {
 import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-function-schema';
-import { AWS_ACCOUNT_ID, AWS_REGION, STEP_FUNCTION_ARN } from '../utils/config';
+import { AWS_ACCOUNT_ID, AWS_REGION } from '../utils/config';
 import prisma from '../utils/prisma-client';
 import { getStepFunctionArn } from '../utils/retrieve-env-vars';
 
@@ -112,10 +112,8 @@ async function gatherInput(runId: string) {
 // Start Step Function
 async function start(runId: string) {
   try {
-    let { STEP_FUNCTION_ARN } = process.env;
-    if (!STEP_FUNCTION_ARN) {
-      STEP_FUNCTION_ARN = await getStepFunctionArn();
-    }
+    const STEP_FUNCTION_ARN =
+      process.env.STEP_FUNCTION_ARN || (await getStepFunctionArn());
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
