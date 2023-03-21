@@ -6,13 +6,16 @@ import { deploymentApprovalManager } from '../../utils/deployment-approval';
 
 const runsRouter = express.Router();
 
-// Get all Runs for a Service
+// Get all Runs, for a Service if specified
 runsRouter.get('/', async (req: Request, res: Response) => {
   const { serviceId } = req.query;
-  if (!serviceId || typeof serviceId !== 'string')
-    return res.status(400).json({ message: 'invalid service id' });
-  const serviceData = await runsService.getAllForService(serviceId);
-  res.status(200).json(serviceData);
+  if (!serviceId || typeof serviceId !== 'string') {
+    const runs = await runsService.getAll();
+    res.status(200).json(runs);
+  } else {
+    const serviceData = await runsService.getAllForService(serviceId);
+    res.status(200).json(serviceData);
+  }
 });
 
 // Get a Run

@@ -2,6 +2,18 @@ import { Status, TriggerType } from '@prisma/client';
 import prisma from '../utils/prisma-client';
 import stagesService from './stages';
 
+// Get all Runs
+async function getAll() {
+  try {
+    const runs = await prisma.run.findMany({});
+    await prisma.$disconnect();
+    return runs;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
 // Get all Runs for a Service
 async function getAllForService(serviceId: string) {
   try {
@@ -139,6 +151,7 @@ async function updateRunStatus(id: string, status: Status) {
 }
 
 export default {
+  getAll,
   getAllForService,
   getOne,
   createOne,
