@@ -1,16 +1,15 @@
 import {
   ListStateMachinesCommand,
+  SendTaskSuccessCommand,
   SFNClient,
   StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
 import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
 import { SfnInputSchema, Stage } from '../schemas/step-function-schema';
-import { AWS_ACCOUNT_ID, AWS_REGION } from '../utils/config';
-import pipelinesService from './pipelines';
-import runsService from './runs';
-import servicesService from './services';
-import stagesService from './stages';
+import { AWS_ACCOUNT_ID, AWS_REGION, STEP_FUNCTION_ARN } from '../utils/config';
+import prisma from '../utils/prisma-client';
+import { getStepFunctionArn } from '../utils/retrieve-env-vars';
 
 const stageEnumToId = {
   [StageType.PREPARE]: 'prepare',
@@ -20,26 +19,36 @@ const stageEnumToId = {
   [StageType.INTEGRATION_TEST]: 'integrationTest',
   [StageType.DEPLOY_STAGING]: 'deployStaging',
   [StageType.DEPLOY_PROD]: 'deployProduction',
-  [StageType.OTHER]: 'deployProduction',
+  [StageType.OTHER]: 'other',
 };
 
-// Assumes a new Run and associated Stage have already been created
+// Gather data required for Step Function to run
 async function gatherInput(runId: string) {
   try {
-    // Query db for all associated entities
-    const run = await runsService.getOne(runId);
-    if (!run || !run?.serviceId) throw new Error('failed to get run data');
+    // Query db for all entities associated with the run
+    const data = await prisma.run.findUnique({
+      where: { id: runId },
+      include: {
+        stages: true,
+        Service: {
+          include: {
+            Pipeline: true,
+          },
+        },
+      },
+    });
 
-    const stages = await stagesService.getAllForRun(runId);
-    if (!stages) throw new Error('failed to get stages associated with run');
+    // Split data into entities
+    const pipeline = data?.Service?.Pipeline;
+    const service = data?.Service
+      ? { ...data.Service, Pipeline: undefined }
+      : undefined;
+    const stages = data?.stages;
+    const run = { ...data, Service: undefined, stages: undefined };
 
-    const service = await servicesService.getOne(run.serviceId);
-    if (!service || !service?.pipelineId)
-      throw new Error('failed to get service associated with run');
-
-    const pipeline = await pipelinesService.getOne(service.pipelineId);
-    if (!pipeline)
-      throw new Error('failed to get pipeline associated with service');
+    if (!pipeline || !service || !run || !stages) {
+      throw new Error('failed to get step function input data');
+    }
 
     // Assemble the Step Function input object
     const stageIds: Record<string, string> = {};
@@ -100,8 +109,13 @@ async function gatherInput(runId: string) {
   }
 }
 
+// Start Step Function
 async function start(runId: string) {
   try {
+    let { STEP_FUNCTION_ARN } = process.env;
+    if (!STEP_FUNCTION_ARN) {
+      STEP_FUNCTION_ARN = await getStepFunctionArn();
+    }
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
@@ -109,26 +123,8 @@ async function start(runId: string) {
       region: AWS_REGION,
     });
 
-    // Retrieve Step Function ARN
-    const { stateMachines } = await sfnClient.send(
-      new ListStateMachinesCommand({}),
-    );
-    if (!stateMachines || stateMachines.length === 0) {
-      throw new Error('failed to get step function arn');
-    }
-
-    const stateMachineArn = stateMachines
-      .filter((stateMachine) =>
-        /^SeamlessStateMachine/.test(stateMachine.name || ''),
-      )
-      .map((stateMachine) => stateMachine.stateMachineArn)[0];
-
-    // Debugging
-    // console.log(sfnInput);
-    // console.log(stateMachineArn);
-
     const sfnCommand = new StartExecutionCommand({
-      stateMachineArn,
+      stateMachineArn: STEP_FUNCTION_ARN,
       input: JSON.stringify(sfnInput),
     });
 
@@ -141,6 +137,39 @@ async function start(runId: string) {
       );
     }
   }
+}
+
+export async function sendTaskToken(taskToken: string) {
+  const sfnClient = new SFNClient({
+    region: AWS_REGION,
+  });
+
+  const sfnCommand = new SendTaskSuccessCommand({
+    taskToken,
+    output: '{}',
+  });
+
+  const response = await sfnClient.send(sfnCommand);
+  return response;
+}
+
+// Retrieve a step function's ARN
+async function retrieveStepFunctionArn(sfnClient: SFNClient) {
+  const { stateMachines } = await sfnClient.send(
+    new ListStateMachinesCommand({}),
+  );
+
+  if (!stateMachines || stateMachines.length === 0) {
+    throw new Error('failed to get step function arn');
+  }
+
+  const stateMachineArn = stateMachines
+    .filter((stateMachine) =>
+      /^SeamlessStateMachine/.test(stateMachine.name || ''),
+    )
+    .map((stateMachine) => stateMachine.stateMachineArn)[0];
+
+  return stateMachineArn;
 }
 
 export default { gatherInput, start };

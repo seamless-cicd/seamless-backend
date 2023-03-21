@@ -30,7 +30,7 @@ authRouter.get('/access-token', async (req: Request, res: Response) => {
   if (pipeline) await githubService.storeToken(token, pipeline.id);
 
   // Pass access token back to frontend
-  return res.json({ token }).send();
+  return res.json({ token });
 });
 
 export default authRouter;

@@ -12,7 +12,7 @@ websocketsRouter.post('/connect', async (req: Request, res: Response) => {
     throw new Error('No connection ID passed');
   }
 
-  console.log(`Client with ${connectionId} connected to Websockets`);
+  console.log(`Client with id ${connectionId} connected to Websockets`);
 
   webSocketsConnectionManager.addConnection(connectionId);
 
@@ -27,7 +27,7 @@ websocketsRouter.delete('/disconnect', async (req: Request, res: Response) => {
     throw new Error('No connection ID passed');
   }
 
-  console.log(`Client with ${connectionId} disconnected from Websockets`);
+  console.log(`Client with id ${connectionId} disconnected from Websockets`);
 
   webSocketsConnectionManager.deleteConnection(connectionId);
 

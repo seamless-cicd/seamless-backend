@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { Redis } from 'ioredis';
-import { LogDataSchema } from '../../schemas/log-schema';
+import { LogData, LogDataSchema } from '../../schemas/log-schema';
 import logsService from '../../services/logs';
 import { webSocketsConnectionManager } from '../../utils/websockets';
 
@@ -9,7 +9,10 @@ const logUpdatesRouter = express.Router();
 // Websockets for log streaming
 const streamLogsToClients = async (redisClient: Redis, stageId: string) => {
   // Always re-fetch all logs for the stage
-  const logsData = await logsService.getAllForStage(redisClient, stageId);
+  const logsData: LogData[] = await logsService.getAllForStage(
+    redisClient,
+    stageId,
+  );
   // Send logs to clients through websockets
   await webSocketsConnectionManager.postDataToConnections({
     type: 'log',
