@@ -1,9 +1,14 @@
 import express, { Request, Response } from 'express';
-import { BACKEND_URL } from '../../utils/config';
+import { getApiGatewayUrl } from '../../utils/retrieve-env-vars';
 
 const webhooksConfigRouter = express.Router();
 
 webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
+  let { BACKEND_URL } = process.env;
+  if (!BACKEND_URL) {
+    BACKEND_URL = await getApiGatewayUrl('SeamlessHttpApi');
+  }
+
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;
   const urlSections = githubRepoUrl.split('/');
@@ -42,9 +47,10 @@ webhooksConfigRouter.post('/create', async (req: Request, res: Response) => {
 });
 
 webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
-  // const BACKEND_URL = await apiGatewaysService.getApiGatewayUrl(
-  //   'SeamlessHttpApi',
-  // );
+  let { BACKEND_URL } = process.env;
+  if (!BACKEND_URL) {
+    BACKEND_URL = await getApiGatewayUrl('SeamlessHttpApi');
+  }
 
   const { triggerOnMain, triggerOnPrSync, triggerOnPrOpen, githubRepoUrl } =
     req.body;

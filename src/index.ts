@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import 'express-async-errors';
 import path from 'path';
+import './utils/retrieve-env-vars';
 
 import authRouter from './routers/public/authentication';
 // import dashboardRouter from './routers/public/dashboard';

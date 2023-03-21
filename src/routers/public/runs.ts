@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import runsService from '../../services/runs';
 import stagesService from '../../services/stages';
 import stepFunctionsService from '../../services/step-functions';
-import deploymentApprovalManager from '../../utils/deployment-approval';
+import { deploymentApprovalManager } from '../../utils/deployment-approval';
 
 const runsRouter = express.Router();
 
@@ -83,8 +83,13 @@ runsRouter.post(
   async (req: Request, res: Response) => {
     const { runId } = req.params;
     try {
+      console.log(
+        'looking for runId to approve. existing tokens:',
+        deploymentApprovalManager.taskTokens,
+      );
       deploymentApprovalManager.approve(runId);
-      return res.status(200);
+      console.log('after approval:', deploymentApprovalManager.taskTokens);
+      return res.status(200).send();
     } catch (e) {
       if (e instanceof Error) {
         res.status(400).json({ error: e.message });

@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { RunStatusSchema } from '../../schemas/step-function-schema';
 import runsService from '../../services/runs';
 import stagesService from '../../services/stages';
-import deploymentApprovalManager from '../../utils/deployment-approval';
+import { deploymentApprovalManager } from '../../utils/deployment-approval';
 import { webSocketsConnectionManager } from '../../utils/websockets';
 
 const statusUpdatesRouter = express.Router();
@@ -57,6 +57,10 @@ statusUpdatesRouter.post(
     }
 
     deploymentApprovalManager.setTaskToken(runId, taskToken);
+    console.log(
+      'stored new token (outside manager):',
+      deploymentApprovalManager.taskTokens,
+    );
 
     // Post data to the frontend to wait for approval
     webSocketsConnectionManager.postDataToConnections({

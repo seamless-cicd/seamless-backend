@@ -13,6 +13,7 @@ class DeploymentApprovalManager {
 
   setTaskToken(runId: string, token: string) {
     this.taskTokens[runId] = token;
+    console.log('stored new token (inside manager):', this.taskTokens);
   }
 
   removeTaskToken(runId: string) {
@@ -29,6 +30,4 @@ class DeploymentApprovalManager {
   }
 }
 
-const deploymentApprovalManager = new DeploymentApprovalManager();
-
-export default deploymentApprovalManager;
+export const deploymentApprovalManager = new DeploymentApprovalManager();
