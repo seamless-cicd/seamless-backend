@@ -100,6 +100,7 @@ servicesRouter.get(
         rollbacks.push({ runs: associatedRuns, image });
       }
     });
+
     res.status(200).json(rollbacks);
   },
 );
