@@ -13,7 +13,7 @@ import {
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
     data: {
-      id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
+      id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e0',
       name: 'Demo Pipeline',
       awsEcsCluster: 'SeamlessProdCluster',
       awsEcsClusterStaging: 'SeamlessStagingCluster',
@@ -23,7 +23,7 @@ export const seedPipelines = async () => {
       services: {
         create: [
           {
-            id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
+            id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
             name: 'Demo Service',
             awsEcsService: 'SeamlessProdPaymentService',
             awsEcsServiceStaging: 'SeamlessStagingPaymentService',
@@ -45,7 +45,7 @@ export const seedPipelines = async () => {
             runs: {
               create: [
                 {
-                  id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
+                  id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
                   commitHash: 'f6d6abe94d5bc3010666635c67bc43213aff85bd',
                   commitMessage: 'feat: add payment feature',
                   committer: 'Jason Wang',
@@ -53,23 +53,28 @@ export const seedPipelines = async () => {
                   stages: {
                     create: [
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
                         type: StageType.PREPARE,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
                         type: StageType.CODE_QUALITY,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
                         type: StageType.UNIT_TEST,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
                         type: StageType.BUILD,
+                        startedAt: new Date(),
+                      },
+                      {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
+                        type: StageType.INTEGRATION_TEST,
                         startedAt: new Date(),
                       },
                       {
