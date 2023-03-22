@@ -89,7 +89,7 @@ async function updateStageStatus(id: string, status: Status) {
 
     let updatedStage;
 
-    // If Stage hasn't started, record the current time
+    // If stage hasn't started, record the current time
     if (!stage.startedAt) {
       updatedStage = await prisma.stage.update({
         where: {
@@ -100,12 +100,13 @@ async function updateStageStatus(id: string, status: Status) {
           startedAt: new Date(),
         },
       });
+      // If stage has ended, record the end time
     } else {
       const endedAt = new Date();
       const stageEnded = status === Status.FAILURE || status === Status.SUCCESS;
 
       const duration = Math.ceil(
-        (endedAt.getTime() - stage.startedAt.getTime()) / 1000 / 60,
+        (endedAt.getTime() - stage.startedAt.getTime()) / 1000,
       );
 
       updatedStage = await prisma.stage.update({
