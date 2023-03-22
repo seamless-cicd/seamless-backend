@@ -128,7 +128,7 @@ async function updateRunStatus(id: string, status: Status) {
     const runEnded = status === Status.FAILURE || status === Status.SUCCESS;
 
     const duration = Math.ceil(
-      (endedAt.getTime() - run.startedAt.getTime()) / 1000 / 60,
+      (endedAt.getTime() - run.startedAt.getTime()) / 1000,
     );
 
     const updatedRun = await prisma.run.update({
