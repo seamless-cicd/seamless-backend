@@ -18,6 +18,7 @@ const StatusSchema = z.enum([
   Status.FAILURE,
   Status.IN_PROGRESS,
   Status.IDLE,
+  Status.AWAITING_APPROVAL,
 ]);
 
 const StageSchema = z.object({

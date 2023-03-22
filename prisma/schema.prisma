@@ -87,7 +87,7 @@ model Run {
   updatedAt     DateTime    @updatedAt
   startedAt     DateTime    @default(now())
   endedAt       DateTime?
-  duration      Int? // Seconds
+  duration      Int? // Minutes
   commitHash    String?
   commitMessage String?
   committer     String?
