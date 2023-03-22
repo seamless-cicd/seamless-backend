@@ -54,27 +54,29 @@ model Pipeline {
 }
 
 model Service {
-  id                     String    @id @default(uuid())
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  name                   String?
-  lastRunAt              DateTime?
-  awsEcsService          String
-  awsEcsServiceStaging   String?
-  triggerOnMain          Boolean   @default(true)
-  triggerOnPrOpen        Boolean   @default(false)
-  triggerOnPrSync        Boolean   @default(false)
-  useStaging             Boolean   @default(false)
-  autoDeploy             Boolean   @default(false)
-  githubRepoUrl          String
-  unitTestCommand        String?
-  integrationTestCommand String?
-  codeQualityCommand     String?
-  dockerfilePath         String    @default(".")
-  dockerComposeFilePath  String?
-  Pipeline               Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
-  pipelineId             String?
-  runs                   Run[]
+  id                                      String    @id @default(uuid())
+  createdAt                               DateTime  @default(now())
+  updatedAt                               DateTime  @updatedAt
+  name                                    String?
+  lastRunAt                               DateTime?
+  triggerOnMain                           Boolean   @default(true)
+  triggerOnPrOpen                         Boolean   @default(false)
+  triggerOnPrSync                         Boolean   @default(false)
+  useStaging                              Boolean   @default(false)
+  autoDeploy                              Boolean   @default(false)
+  githubRepoUrl                           String
+  codeQualityCommand                      String?
+  unitTestCommand                         String?
+  dockerfilePath                          String    @default(".")
+  githubIntegrationTestRepoUrl            String?
+  dockerComposeFilePath                   String?
+  dockerComposeServiceName                String?
+  dockerComposeIntegrationTestServiceName String?
+  awsEcsServiceStaging                    String?
+  awsEcsService                           String
+  Pipeline                                Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  pipelineId                              String?
+  runs                                    Run[]
 
   @@index([pipelineId])
 }

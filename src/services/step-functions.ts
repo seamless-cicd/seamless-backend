@@ -1,5 +1,4 @@
 import {
-  ListStateMachinesCommand,
   SendTaskSuccessCommand,
   SFNClient,
   StartExecutionCommand,
@@ -78,6 +77,7 @@ async function gatherInput(runId: string) {
       runFull: run.triggerType === TriggerType.MAIN,
       useStaging: service.useStaging,
       autoDeploy: service.autoDeploy,
+      runIntegrationTest: !!service.githubIntegrationTestRepoUrl,
       containerVariables: {
         awsRegion: AWS_REGION,
         awsAccountId: AWS_ACCOUNT_ID,
@@ -89,6 +89,11 @@ async function gatherInput(runId: string) {
         codeQualityCommand: service.codeQualityCommand,
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
+        githubIntegrationTestRepoUrl: service.githubIntegrationTestRepoUrl,
+        dockerComposeFilePath: service.dockerComposeFilePath,
+        dockerComposeServiceName: service.dockerComposeServiceName,
+        dockerComposeIntegrationTestServiceName:
+          service.dockerComposeIntegrationTestServiceName,
         awsEcsClusterStaging: pipeline.awsEcsClusterStaging,
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
@@ -114,6 +119,7 @@ async function start(runId: string) {
   try {
     const STEP_FUNCTION_ARN =
       process.env.STEP_FUNCTION_ARN || (await getStepFunctionArn());
+
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
@@ -149,25 +155,6 @@ export async function sendTaskToken(taskToken: string) {
 
   const response = await sfnClient.send(sfnCommand);
   return response;
-}
-
-// Retrieve a step function's ARN
-async function retrieveStepFunctionArn(sfnClient: SFNClient) {
-  const { stateMachines } = await sfnClient.send(
-    new ListStateMachinesCommand({}),
-  );
-
-  if (!stateMachines || stateMachines.length === 0) {
-    throw new Error('failed to get step function arn');
-  }
-
-  const stateMachineArn = stateMachines
-    .filter((stateMachine) =>
-      /^SeamlessStateMachine/.test(stateMachine.name || ''),
-    )
-    .map((stateMachine) => stateMachine.stateMachineArn)[0];
-
-  return stateMachineArn;
 }
 
 export default { gatherInput, start };

@@ -25,24 +25,29 @@ export const seedPipelines = async () => {
           {
             id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
             name: 'Demo Service',
-            awsEcsService: 'SeamlessProdNotificationService',
-            awsEcsServiceStaging: 'SeamlessStagingNotificationService',
+            awsEcsService: 'SeamlessProdPaymentService',
+            awsEcsServiceStaging: 'SeamlessStagingPaymentService',
             triggerOnMain: true,
             triggerOnPrOpen: true,
             triggerOnPrSync: true,
             useStaging: true,
             autoDeploy: false,
             githubRepoUrl:
-              'https://github.com/seamless-cicd/seamless-demo-notification',
+              'https://github.com/seamless-cicd/seamless-demo-payment',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
+            githubIntegrationTestRepoUrl:
+              'https://github.com/seamless-cicd/seamless-demo-payment-integration-test',
+            dockerComposeFilePath: '.',
+            dockerComposeServiceName: 'payment',
+            dockerComposeIntegrationTestServiceName: 'integration-test',
             runs: {
               create: [
                 {
                   id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
-                  commitHash: 'abc123',
-                  commitMessage: 'feat: add notification feature',
+                  commitHash: 'f6d6abe94d5bc3010666635c67bc43213aff85bd',
+                  commitMessage: 'feat: add payment feature',
                   committer: 'Jason Wang',
                   triggerType: TriggerType.MAIN,
                   stages: {

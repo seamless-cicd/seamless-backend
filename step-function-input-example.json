@@ -42,21 +42,27 @@
     }
   },
   "runFull": true,
-  "useStaging": false,
-  "autoDeploy": true,
+  "useStaging": true,
+  "autoDeploy": false,
+  "runIntegrationTest": true,
   "containerVariables": {
     "awsRegion": "us-east-1",
     "awsAccountId": "01234567912",
     "githubClientId": "abc123",
     "githubClientSecret": "abc123",
     "githubOauthToken": "gho_abc123",
-    "githubRepoUrl": "https://github.com/user-org/repo-name",
+    "githubRepoUrl": "https://github.com/seamless-cicd/seamless-demo-payment",
+    "commitHash": "f6d6abe94d5bc3010666635c67bc43213aff85bd",
     "codeQualityCommand": "npm run lint",
     "unitTestCommand": "npm run test",
     "dockerfilePath": ".",
-    "awsEcsClusterStaging": "my-staging-ecs-cluster-name",
-    "awsEcsServiceStaging": "my-staging-ecs-service-name",
-    "awsEcsCluster": "my-ecs-cluster-name",
-    "awsEcsService": "my-ecs-service-name"
+    "githubIntegrationTestRepoUrl": "https://github.com/seamless-cicd/seamless-demo-payment-integration-test",
+    "dockerComposeFilePath": ".",
+    "dockerComposeServiceName": "payment",
+    "dockerComposeIntegrationTestServiceName": "integration-test",
+    "awsEcsClusterStaging": "SeamlessStagingCluster",
+    "awsEcsServiceStaging": "SeamlessStagingPaymentService",
+    "awsEcsCluster": "SeamlessProdCluster",
+    "awsEcsService": "SeamlessProdPaymentService"
   }
 }

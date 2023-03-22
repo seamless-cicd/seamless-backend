@@ -51,9 +51,15 @@ const ContainerVariablesSchema = z.object({
   githubOauthToken: z.string(),
   githubRepoUrl: z.string(),
   commitHash: z.string(),
-  codeQualityCommand: z.string().optional(),
-  unitTestCommand: z.string().optional(),
+  codeQualityCommand: z.string(),
+  unitTestCommand: z.string(),
   dockerfilePath: z.string(),
+  // Integration testing is optional
+  githubIntegrationTestRepoUrl: z.string().optional(),
+  dockerComposeFilePath: z.string().optional(),
+  dockerComposeServiceName: z.string().optional(),
+  dockerComposeIntegrationTestServiceName: z.string().optional(),
+  // Staging environment is optional
   awsEcsClusterStaging: z.string().optional(),
   awsEcsServiceStaging: z.string().optional(),
   awsEcsCluster: z.string(),
@@ -71,6 +77,7 @@ const SfnInputSchema = z.object({
   runFull: z.boolean(),
   useStaging: z.boolean(),
   autoDeploy: z.boolean(),
+  runIntegrationTest: z.boolean(),
   containerVariables: ContainerVariablesSchema,
 });
 
