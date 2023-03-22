@@ -13,7 +13,7 @@ import {
 export const seedPipelines = async () => {
   await prisma.pipeline.create({
     data: {
-      id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
+      id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e0',
       name: 'Demo Pipeline',
       awsEcsCluster: 'SeamlessProdCluster',
       awsEcsClusterStaging: 'SeamlessStagingCluster',
@@ -23,48 +23,58 @@ export const seedPipelines = async () => {
       services: {
         create: [
           {
-            id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
+            id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e1',
             name: 'Demo Service',
-            awsEcsService: 'SeamlessProdNotificationService',
-            awsEcsServiceStaging: 'SeamlessStagingNotificationService',
+            awsEcsService: 'SeamlessProdPaymentService',
+            awsEcsServiceStaging: 'SeamlessStagingPaymentService',
             triggerOnMain: true,
             triggerOnPrOpen: true,
             triggerOnPrSync: true,
             useStaging: true,
             autoDeploy: false,
             githubRepoUrl:
-              'https://github.com/seamless-cicd/seamless-demo-notification',
+              'https://github.com/seamless-cicd/seamless-demo-payment',
             unitTestCommand: 'npm run test',
             codeQualityCommand: 'npm run lint',
             dockerfilePath: '.',
+            githubIntegrationTestRepoUrl:
+              'https://github.com/seamless-cicd/seamless-demo-payment-integration-test',
+            dockerComposeFilePath: '.',
+            dockerComposeServiceName: 'payment',
+            dockerComposeIntegrationTestServiceName: 'integration-test',
             runs: {
               create: [
                 {
-                  id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
-                  commitHash: 'abc123',
-                  commitMessage: 'feat: add notification feature',
+                  id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e2',
+                  commitHash: 'f6d6abe94d5bc3010666635c67bc43213aff85bd',
+                  commitMessage: 'feat: add payment feature',
                   committer: 'Jason Wang',
                   triggerType: TriggerType.MAIN,
                   stages: {
                     create: [
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
                         type: StageType.PREPARE,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
                         type: StageType.CODE_QUALITY,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
                         type: StageType.UNIT_TEST,
                         startedAt: new Date(),
                       },
                       {
-                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
                         type: StageType.BUILD,
+                        startedAt: new Date(),
+                      },
+                      {
+                        id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
+                        type: StageType.INTEGRATION_TEST,
                         startedAt: new Date(),
                       },
                       {

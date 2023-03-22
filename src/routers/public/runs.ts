@@ -42,6 +42,13 @@ runsRouter.delete('/:runId', async (req: Request, res: Response) => {
   res.status(200).json(deleteData);
 });
 
+// Stop Step Function executions for this Run
+runsRouter.post('/:runId/stop', async (req: Request, res: Response) => {
+  const { runId } = req.params;
+  const stoppedExecutions = await stepFunctionsService.stop(runId);
+  res.status(200).json(stoppedExecutions);
+});
+
 // Start a Re-Run for this Service
 runsRouter.post('/:runId/rerun', async (req: Request, res: Response) => {
   const run = req.body.data;

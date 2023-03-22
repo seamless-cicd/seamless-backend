@@ -1,8 +1,10 @@
 import {
-  ListStateMachinesCommand,
+  DescribeExecutionCommand,
+  ListExecutionsCommand,
   SendTaskSuccessCommand,
   SFNClient,
   StartExecutionCommand,
+  StopExecutionCommand,
 } from '@aws-sdk/client-sfn';
 import { StageType, Status, TriggerType } from '@prisma/client';
 import { z } from 'zod';
@@ -78,6 +80,7 @@ async function gatherInput(runId: string) {
       runFull: run.triggerType === TriggerType.MAIN,
       useStaging: service.useStaging,
       autoDeploy: service.autoDeploy,
+      runIntegrationTest: !!service.githubIntegrationTestRepoUrl,
       containerVariables: {
         awsRegion: AWS_REGION,
         awsAccountId: AWS_ACCOUNT_ID,
@@ -89,6 +92,11 @@ async function gatherInput(runId: string) {
         codeQualityCommand: service.codeQualityCommand,
         unitTestCommand: service.unitTestCommand,
         dockerfilePath: service.dockerfilePath,
+        githubIntegrationTestRepoUrl: service.githubIntegrationTestRepoUrl,
+        dockerComposeFilePath: service.dockerComposeFilePath,
+        dockerComposeServiceName: service.dockerComposeServiceName,
+        dockerComposeIntegrationTestServiceName:
+          service.dockerComposeIntegrationTestServiceName,
         awsEcsClusterStaging: pipeline.awsEcsClusterStaging,
         awsEcsServiceStaging: service.awsEcsServiceStaging,
         awsEcsCluster: pipeline.awsEcsCluster,
@@ -114,6 +122,7 @@ async function start(runId: string) {
   try {
     const STEP_FUNCTION_ARN =
       process.env.STEP_FUNCTION_ARN || (await getStepFunctionArn());
+
     const sfnInput = await gatherInput(runId);
     if (!sfnInput) throw new Error('failed to get step function input data');
 
@@ -121,18 +130,69 @@ async function start(runId: string) {
       region: AWS_REGION,
     });
 
-    const sfnCommand = new StartExecutionCommand({
+    const startCommand = new StartExecutionCommand({
       stateMachineArn: STEP_FUNCTION_ARN,
       input: JSON.stringify(sfnInput),
     });
 
-    const response = await sfnClient.send(sfnCommand);
+    const response = await sfnClient.send(startCommand);
     return response;
   } catch (error) {
     if (error instanceof Error) {
       console.error(
         error.message || 'failed to start step function; check input data',
       );
+    }
+  }
+}
+
+// Stop Step Function execution
+async function stop(runId: string) {
+  try {
+    const STEP_FUNCTION_ARN =
+      process.env.STEP_FUNCTION_ARN || (await getStepFunctionArn());
+
+    const sfnClient = new SFNClient({
+      region: AWS_REGION,
+    });
+
+    // Find all Step Function executions
+    const listCommand = new ListExecutionsCommand({
+      stateMachineArn: STEP_FUNCTION_ARN,
+    });
+    const allExecutions = (await sfnClient.send(listCommand)).executions;
+    if (!allExecutions || allExecutions.length === 0) {
+      throw new Error('no executions linked to that run id');
+    }
+
+    // Stop executions for the run ID
+    const responses = await Promise.all(
+      allExecutions.map(async (execution) => {
+        const getDetailCommand = new DescribeExecutionCommand({
+          executionArn: execution.executionArn,
+        });
+
+        const executionDetails = await sfnClient.send(getDetailCommand);
+        if (!executionDetails || !executionDetails.input) {
+          return;
+        } else {
+          if (JSON.parse(executionDetails.input).runId === runId) {
+            const stopCommand = new StopExecutionCommand({
+              executionArn: STEP_FUNCTION_ARN,
+            });
+            return await sfnClient.send(stopCommand);
+          }
+        }
+      }),
+    );
+
+    // Return a list of all executions stopped
+    return {
+      executionsStopped: responses.filter((response) => response !== undefined),
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message || 'failed to stop step function');
     }
   }
 }
@@ -151,23 +211,4 @@ export async function sendTaskToken(taskToken: string) {
   return response;
 }
 
-// Retrieve a step function's ARN
-async function retrieveStepFunctionArn(sfnClient: SFNClient) {
-  const { stateMachines } = await sfnClient.send(
-    new ListStateMachinesCommand({}),
-  );
-
-  if (!stateMachines || stateMachines.length === 0) {
-    throw new Error('failed to get step function arn');
-  }
-
-  const stateMachineArn = stateMachines
-    .filter((stateMachine) =>
-      /^SeamlessStateMachine/.test(stateMachine.name || ''),
-    )
-    .map((stateMachine) => stateMachine.stateMachineArn)[0];
-
-  return stateMachineArn;
-}
-
-export default { gatherInput, start };
+export default { gatherInput, start, stop };

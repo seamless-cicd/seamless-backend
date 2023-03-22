@@ -102,10 +102,10 @@ async function updateStageStatus(id: string, status: Status) {
       });
     } else {
       const endedAt = new Date();
-      const stageEnded = status === Status.FAILURE || Status.SUCCESS;
+      const stageEnded = status === Status.FAILURE || status === Status.SUCCESS;
 
-      const duration = Math.floor(
-        (endedAt.getTime() - stage.startedAt.getTime()) / 1000,
+      const duration = Math.ceil(
+        (endedAt.getTime() - stage.startedAt.getTime()) / 1000 / 60,
       );
 
       updatedStage = await prisma.stage.update({
