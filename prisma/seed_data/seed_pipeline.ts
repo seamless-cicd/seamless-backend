@@ -40,8 +40,9 @@ export const seedPipelines = async () => {
             githubIntegrationTestRepoUrl:
               'https://github.com/seamless-cicd/seamless-demo-payment-integration-test',
             dockerComposeFilePath: '.',
-            dockerComposeServiceName: 'payment',
-            dockerComposeIntegrationTestServiceName: 'integration-test',
+            dockerComposeServiceName: 'seamless-demo-payment',
+            dockerComposeIntegrationTestServiceName:
+              'seamless-demo-integration-test',
             runs: {
               create: [
                 {

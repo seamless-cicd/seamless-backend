@@ -79,6 +79,9 @@ webhooksConfigRouter.patch('/patch', async (req: Request, res: Response) => {
     return webhook.config.url === BACKEND_URL + '/api/webhooks';
   })[0];
 
+  if (!webhook)
+    return res.status(400).send('no webhook exists for this service');
+
   // Update webhook
   const { data } = await req.octokit.request(
     'PATCH /repos/{owner}/{repo}/hooks/{hook_id}',

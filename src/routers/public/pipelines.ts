@@ -9,6 +9,20 @@ pipelinesRouter.get('/', async (_req: Request, res: Response) => {
   res.status(200).json(pipelines);
 });
 
+pipelinesRouter.get(
+  '/pipelinesWithRecentRuns',
+  async (req: Request, res: Response) => {
+    const pipelines = await pipelinesService.getAllRecent();
+    res.status(200).json(pipelines);
+  },
+);
+
+// Get first Pipeline
+pipelinesRouter.get('/first', async (_req: Request, res: Response) => {
+  const pipeline = await pipelinesService.getFirst();
+  res.status(200).json(pipeline);
+});
+
 // Get a Pipeline
 pipelinesRouter.get('/:pipelineId', async (req: Request, res: Response) => {
   const { pipelineId } = req.params;

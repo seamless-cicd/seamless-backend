@@ -5,7 +5,6 @@ import path from 'path';
 import './utils/retrieve-env-vars';
 
 import authRouter from './routers/public/authentication';
-import dashboardRouter from './routers/public/dashboard';
 import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
@@ -48,7 +47,7 @@ publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
-// publicRouter.use('/websockets-url', authMiddleware, websocketsUrlRouter);
+publicRouter.use('/websockets-url', authMiddleware, websocketsUrlRouter);
 publicRouter.use('/dashboard', authMiddleware, dashboardRouter);
 
 app.use('/api', publicRouter);
