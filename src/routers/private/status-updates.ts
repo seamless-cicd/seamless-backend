@@ -1,6 +1,9 @@
+import { Status } from '@prisma/client';
 import express, { Request, Response } from 'express';
 import { RunStatusSchema } from '../../schemas/step-function-schema';
+import { mergePullRequest } from '../../services/github';
 import runsService from '../../services/runs';
+import servicesService from '../../services/services';
 import stagesService from '../../services/stages';
 import { deploymentApprovalManager } from '../../utils/deployment-approval';
 import { webSocketsConnectionManager } from '../../utils/websockets';
@@ -16,28 +19,68 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   }
 
   try {
-    const parsedData = RunStatusSchema.safeParse(data);
-    if (!parsedData.success) {
+    const parsedRunStatus = RunStatusSchema.safeParse(data);
+    if (!parsedRunStatus.success) {
       throw new Error('invalid status data');
     }
-    const { run, stages } = parsedData.data;
+    const { run, stages } = parsedRunStatus.data;
 
     // Send data to clients through websockets
     webSocketsConnectionManager.postDataToConnections({
       type: 'status_update',
-      data: parsedData.data,
+      data: parsedRunStatus.data,
     });
 
     // Update run
     await runsService.updateRunStatus(run.id, run.status);
 
-    // Update stage
+    // Update stages
     await Promise.all(
       Object.values(stages).map(({ id, status }) =>
         stagesService.updateStageStatus(id, status),
       ),
     );
-    res.sendStatus(200);
+
+    // Only auto-merge if run was successful and service enables auto-merging
+    if (parsedRunStatus.data.run.status !== Status.SUCCESS) {
+      return res.sendStatus(200);
+    }
+
+    if (parsedRunStatus.data.run.status !== Status.SUCCESS) {
+      return res.sendStatus(200);
+    }
+
+    // Determine whether a run is associated with a PR
+    const relatedRun = await runsService.getOne(parsedRunStatus.data.run.id);
+
+    const pullNumber = relatedRun?.pullNumber;
+
+    if (!pullNumber) {
+      return res.sendStatus(200);
+    }
+
+    if (!relatedRun.serviceId) {
+      throw new Error(
+        'Run is not associated with a service. Could not auto-merge.',
+      );
+    }
+
+    const service = await servicesService.getOne(relatedRun.serviceId);
+
+    if (!service) {
+      throw new Error('No service associated with the run.');
+    }
+
+    console.log('got here');
+
+    if (!service.autoMerge) {
+      return res.sendStatus(200);
+    }
+
+    console.log('automerging...');
+
+    // If all the above conditions are met, auto-merge
+    await mergePullRequest(pullNumber, service.githubRepoUrl);
   } catch (e) {
     if (e instanceof Error) {
       console.error(e);
