@@ -30,7 +30,12 @@ const createLogUpdatesRouter = (redisClient: Redis) => {
       }
 
       let logData = req.body;
-      if (typeof logData === 'string') logData = JSON.parse(logData);
+      if (typeof logData === 'string') {
+        logData = JSON.parse(logData);
+      } else {
+        // Escape characters to prevent "bad control character" error
+        logData = JSON.parse(JSON.stringify(logData));
+      }
 
       const validatedLogData = LogDataSchema.safeParse(logData);
 
