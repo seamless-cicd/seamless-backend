@@ -57,10 +57,6 @@ statusUpdatesRouter.post(
     }
 
     deploymentApprovalManager.setTaskToken(runId, taskToken);
-    console.log(
-      'stored new token (outside manager):',
-      deploymentApprovalManager.taskTokens,
-    );
 
     // Post data to the frontend to wait for approval
     webSocketsConnectionManager.postDataToConnections({
