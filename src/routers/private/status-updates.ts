@@ -12,7 +12,8 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   if (typeof data === 'string') {
     data = JSON.parse(data);
   } else {
-    data = JSON.parse(JSON.stringify(data)); // Remove bad control chars ("\n")
+    // Escape characters to prevent "bad control character" error
+    data = JSON.parse(JSON.stringify(data));
   }
 
   try {
@@ -57,10 +58,6 @@ statusUpdatesRouter.post(
     }
 
     deploymentApprovalManager.setTaskToken(runId, taskToken);
-    console.log(
-      'stored new token (outside manager):',
-      deploymentApprovalManager.taskTokens,
-    );
 
     // Post data to the frontend to wait for approval
     webSocketsConnectionManager.postDataToConnections({
