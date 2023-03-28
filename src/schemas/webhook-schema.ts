@@ -18,6 +18,7 @@ type MainWebhook = z.infer<typeof MainWebhookSchema>;
 
 const PullRequestWebhookSchema = z.object({
   action: z.union([z.literal('opened'), z.literal('synchronize')]),
+  number: z.number(), // Pull request number
   pull_request: z.object({
     head: z.object({
       repo: z.object({
@@ -32,7 +33,7 @@ const PullRequestWebhookSchema = z.object({
   }),
 });
 
-type PullRequestWebhook = z.infer<typeof MainWebhookSchema>;
+type PullRequestWebhook = z.infer<typeof PullRequestWebhookSchema>;
 
 const WebhookSchema = z.union([MainWebhookSchema, PullRequestWebhookSchema]);
 type Webhook = z.infer<typeof WebhookSchema>;

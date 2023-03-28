@@ -64,6 +64,7 @@ model Service {
   triggerOnPrSync                         Boolean   @default(false)
   useStaging                              Boolean   @default(false)
   autoDeploy                              Boolean   @default(false)
+  autoMerge                               Boolean   @default(false)
   githubRepoUrl                           String
   codeQualityCommand                      String?
   unitTestCommand                         String?
@@ -91,6 +92,7 @@ model Run {
   commitHash    String?
   commitMessage String?
   committer     String?
+  pullNumber    Int?
   status        Status      @default(IDLE)
   triggerType   TriggerType
   Service       Service?    @relation(fields: [serviceId], references: [id], onDelete: Cascade)

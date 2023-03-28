@@ -119,6 +119,7 @@ const processWebhook = async (webhook: Webhook) => {
         sha,
       },
     },
+    number,
   } = webhook;
 
   // Retrieve full commit data
@@ -139,10 +140,48 @@ const processWebhook = async (webhook: Webhook) => {
     commitHash: sha,
     commitMessage,
     committer,
+    pullNumber: number,
     triggerType:
       webhook.action === 'opened' ? TriggerType.PR_OPEN : TriggerType.PR_SYNC,
     githubRepoUrl: html_url.split('/commit/')[0],
   };
+};
+
+export const mergePullRequest = async (
+  pullNumber: number,
+  githubRepoUrl: string,
+) => {
+  try {
+    const splitUrl = githubRepoUrl.split('/');
+    const [owner, repo] = [splitUrl[3], splitUrl[4]];
+
+    const pipeline = await pipelinesService.getFirst();
+    if (!pipeline) throw new Error('no pipeline found');
+
+    const token = await getToken(pipeline.id);
+    if (!token) throw new Error('authentication error');
+
+    const octokit = new Octokit({
+      authStrategy: createOAuthUserAuth,
+      auth: {
+        token,
+      },
+    });
+
+    await octokit.request(
+      'PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge',
+      {
+        owner,
+        repo,
+        pull_number: pullNumber,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+    );
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export default { storeToken, getToken, processWebhook, getCommit };

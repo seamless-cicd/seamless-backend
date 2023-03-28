@@ -32,6 +32,7 @@ export const seedPipelines = async () => {
             triggerOnPrSync: true,
             useStaging: true,
             autoDeploy: false,
+            autoMerge: true,
             githubRepoUrl:
               'https://github.com/seamless-cicd/seamless-demo-payment',
             unitTestCommand: 'npm run test',

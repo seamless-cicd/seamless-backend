@@ -26,7 +26,14 @@ pipelinesRouter.get('/first', async (_req: Request, res: Response) => {
 // Get a Pipeline
 pipelinesRouter.get('/:pipelineId', async (req: Request, res: Response) => {
   const { pipelineId } = req.params;
-  const pipeline = await pipelinesService.getOne(pipelineId);
+  let pipeline;
+
+  if (pipelineId === 'first') {
+    pipeline = await pipelinesService.getFirst();
+  } else {
+    pipeline = await pipelinesService.getOne(pipelineId);
+  }
+
   res.status(200).json(pipeline);
 });
 
