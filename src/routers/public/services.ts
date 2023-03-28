@@ -38,7 +38,7 @@ servicesRouter.delete('/:serviceId', async (req: Request, res: Response) => {
 servicesRouter.patch('/:serviceId', async (req: Request, res: Response) => {
   const { serviceId } = req.params;
   const serviceEditFormData = req.body;
-  const updatedService = servicesService.updateOne(
+  const updatedService = await servicesService.updateOne(
     serviceId,
     serviceEditFormData,
   );

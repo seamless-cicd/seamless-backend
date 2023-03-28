@@ -51,4 +51,12 @@ pipelinesRouter.delete('/:pipelineId', async (req: Request, res: Response) => {
   res.status(200).json(deletedPipeline);
 });
 
+// Update a Pipeline
+pipelinesRouter.patch('/:pipelineId', async (req: Request, res: Response) => {
+  const { pipelineId } = req.params;
+  const data = req.body;
+  const updatedPipeline = await pipelinesService.updateOne(pipelineId, data);
+  res.status(200).json(updatedPipeline);
+});
+
 export default pipelinesRouter;
