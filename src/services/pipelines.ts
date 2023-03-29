@@ -134,4 +134,29 @@ async function deleteOne(id: string) {
   }
 }
 
-export default { getAll, getAllRecent, getOne, getFirst, createOne, deleteOne };
+// Update a Pipeline
+async function updateOne(id: string, pipelineEditFormData: PipelineFormType) {
+  try {
+    const updatedPipeline = await prisma.pipeline.update({
+      where: {
+        id,
+      },
+      data: pipelineEditFormData,
+    });
+    await prisma.$disconnect();
+    return updatedPipeline;
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+  }
+}
+
+export default {
+  getAll,
+  getAllRecent,
+  getOne,
+  getFirst,
+  createOne,
+  deleteOne,
+  updateOne,
+};
