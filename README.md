@@ -1,4 +1,4 @@
-![logo_name](https://user-images.githubusercontent.com/74154385/228687757-cdbf61ff-8d35-4e37-bcda-8c0ac12bf0cb.jpg)
+![name](https://user-images.githubusercontent.com/74154385/228689679-1de28721-ca1d-4a6a-a7a9-dbcf26c54f59.png)
 
 # Seamless Backend
 
