@@ -1,5 +1,7 @@
 # Seamless Backend
 
+![logo](https://user-images.githubusercontent.com/74154385/228687096-b1ceeab4-566a-4606-9013-ab2db33caca6.png)
+
 Seamless's backend is comprised of an Express server connected to a Postgres database through the Prisma ORM.
 
 ## Developer Usage
