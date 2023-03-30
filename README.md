@@ -1,6 +1,8 @@
 ![name](https://user-images.githubusercontent.com/74154385/228689679-1de28721-ca1d-4a6a-a7a9-dbcf26c54f59.png)
 
-# Seamless Backend
+## Overview
+
+> _Seamless automates the deployment process from push to Prod_
 
 Seamless's backend is comprised of an Express server connected to a Postgres database through the Prisma ORM.
 
@@ -20,14 +22,25 @@ Run `./deploy.sh` as an authenticated user.
 
 ## Database
 
-### Deploying the Database
+### Commands to Deploy the Database
 
-Run `npx prisma migrate deploy` to setup the schema and perform subsequent schema migrations.
+```sh
+npx prisma migrate deploy
+```
+- To setup the schema and perform subsequent schema migrations.
 
-### Seeding the Database
+### Commands to Seed the Database
 
-Run `prisma db seed` to manually seed prisma.
+```sh
+prisma db seed
+```
+- To manually seed prisma.
 
-Running `prisma migrate dev` or `primsa migrate reset` automatically seeds the database. To skip seeding, pass the `--skip-seeed` flag.
-
-
+```sh
+prisma migrate dev
+```
+```sh
+primsa migrate reset
+```
+- Both of these commands automatically seed the database.
+- To skip seeding, pass the `--skip-seed` flag.
