@@ -72,13 +72,9 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
       throw new Error('No service associated with the run.');
     }
 
-    console.log('got here');
-
     if (!service.autoMerge) {
       return res.sendStatus(200);
     }
-
-    console.log('automerging...');
 
     // If all the above conditions are met, auto-merge
     await mergePullRequest(pullNumber, service.githubRepoUrl);
