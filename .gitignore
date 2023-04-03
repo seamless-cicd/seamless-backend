@@ -4,4 +4,6 @@ dist
 .env
 .vscode
 step-function-input.json
+
+# Built frontend app
 /public
