@@ -5,7 +5,6 @@ import path from 'path';
 import './utils/retrieve-env-vars';
 
 import authRouter from './routers/public/authentication';
-import homeRouter from './routers/public/home';
 import createLogsRouter from './routers/public/logs';
 import pipelinesRouter from './routers/public/pipelines';
 import runsRouter from './routers/public/runs';
@@ -14,7 +13,6 @@ import stagesRouter from './routers/public/stages';
 import { userRouter } from './routers/public/user';
 import webhooksConfigRouter from './routers/public/webhook-config';
 import webhooksRouter from './routers/public/webhooks';
-import websocketsUrlRouter from './routers/public/websockets-url';
 
 import createLogUpdatesRouter from './routers/private/log-updates';
 import statusUpdatesRouter from './routers/private/status-updates';
@@ -47,7 +45,6 @@ publicRouter.use('/services', authMiddleware, servicesRouter);
 publicRouter.use('/runs', authMiddleware, runsRouter);
 publicRouter.use('/stages', authMiddleware, stagesRouter);
 publicRouter.use('/user', authMiddleware, userRouter);
-publicRouter.use('/websockets-url', authMiddleware, websocketsUrlRouter);
 
 app.use('/api', publicRouter);
 
