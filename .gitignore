@@ -4,4 +4,4 @@ dist
 .env
 .vscode
 step-function-input.json
-public
+/public
