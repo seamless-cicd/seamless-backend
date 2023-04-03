@@ -57,37 +57,30 @@ export const seedPipelines = async () => {
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e3',
                         type: StageType.PREPARE,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e4',
                         type: StageType.CODE_QUALITY,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e5',
                         type: StageType.UNIT_TEST,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e6',
                         type: StageType.BUILD,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e7',
                         type: StageType.INTEGRATION_TEST,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e8',
                         type: StageType.DEPLOY_STAGING,
-                        startedAt: new Date(),
                       },
                       {
                         id: 'd8583d1c-ce63-4e0c-bd55-2088409bc7e9',
                         type: StageType.DEPLOY_PROD,
-                        startedAt: new Date(),
                       },
                     ],
                   },
