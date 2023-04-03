@@ -4,12 +4,13 @@ import { RunStatusSchema } from '../../schemas/step-function-schema';
 import { mergePullRequest } from '../../services/github';
 import runsService from '../../services/runs';
 import servicesService from '../../services/services';
-import stagesService from '../../services/stages';
 import { deploymentApprovalManager } from '../../utils/deployment-approval';
+import { updateRun, updateStages } from '../../utils/status-updates-helpers';
 import { webSocketsConnectionManager } from '../../utils/websockets';
 
 const statusUpdatesRouter = express.Router();
 
+// Receives all status updates from state machine
 statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   let data = req.body;
   if (typeof data === 'string') {
@@ -24,23 +25,15 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
     if (!parsedRunStatus.success) {
       throw new Error('invalid status data');
     }
-    const { run, stages } = parsedRunStatus.data;
+
+    await updateRun(parsedRunStatus.data);
+    await updateStages(parsedRunStatus.data);
 
     // Send data to clients through websockets
     webSocketsConnectionManager.postDataToConnections({
       type: 'status_update',
       data: parsedRunStatus.data,
     });
-
-    // Update run
-    await runsService.updateRunStatus(run.id, run.status);
-
-    // Update stages
-    await Promise.all(
-      Object.values(stages).map(({ id, status }) =>
-        stagesService.updateStageStatus(id, status),
-      ),
-    );
 
     // Only auto-merge if run was successful and service enables auto-merging
     if (parsedRunStatus.data.run.status !== Status.SUCCESS) {
@@ -86,6 +79,7 @@ statusUpdatesRouter.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// Receives a "wait for approval" status update
 statusUpdatesRouter.post(
   '/wait-for-approval',
   (req: Request, res: Response) => {
