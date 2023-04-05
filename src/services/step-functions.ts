@@ -165,9 +165,16 @@ async function stop(runId: string) {
       throw new Error('no executions linked to that run id');
     }
 
+    const runningExecutions = allExecutions.filter(
+      (execution) => execution.status === 'RUNNING',
+    );
+    if (!runningExecutions || runningExecutions.length === 0) {
+      throw new Error('no running executions');
+    }
+
     // Stop executions for the run ID
     const responses = await Promise.all(
-      allExecutions.map(async (execution) => {
+      runningExecutions.map(async (execution) => {
         const getDetailCommand = new DescribeExecutionCommand({
           executionArn: execution.executionArn,
         });
@@ -178,7 +185,7 @@ async function stop(runId: string) {
         } else {
           if (JSON.parse(executionDetails.input).runId === runId) {
             const stopCommand = new StopExecutionCommand({
-              executionArn: STEP_FUNCTION_ARN,
+              executionArn: execution.executionArn,
             });
             return await sfnClient.send(stopCommand);
           }
@@ -186,9 +193,10 @@ async function stop(runId: string) {
       }),
     );
 
-    // Return a list of all executions stopped
+    // Return the number of executions stopped
     return {
-      executionsStopped: responses.filter((response) => response !== undefined),
+      executionsStopped: responses.filter((response) => response !== undefined)
+        .length,
     };
   } catch (error) {
     if (error instanceof Error) {
