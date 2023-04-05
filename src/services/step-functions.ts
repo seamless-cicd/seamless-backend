@@ -193,9 +193,10 @@ async function stop(runId: string) {
       }),
     );
 
-    // Return a list of all executions stopped
+    // Return the number of executions stopped
     return {
-      executionsStopped: responses.filter((response) => response !== undefined),
+      executionsStopped: responses.filter((response) => response !== undefined)
+        .length,
     };
   } catch (error) {
     if (error instanceof Error) {
