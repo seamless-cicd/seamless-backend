@@ -3,13 +3,21 @@ import runsService from '../services/runs';
 import stagesService from '../services/stages';
 import prisma from './prisma-client';
 
+// Update status and duration of a Run, using status updates sent by the state machine
 const updateRun = async (runStatus: RunStatus) => {
   const { run } = runStatus;
 
   await runsService.updateOne(run.id, { status: run.status });
 
   if (run.status === 'SUCCESS' || run.status === 'FAILURE') {
-    await runsService.updateOne(run.id, { endedAt: new Date() });
+    const runData = await runsService.getOne(run.id);
+    if (!runData) throw new Error('run not found');
+
+    const endedAt = new Date();
+    const duration = Math.ceil(
+      (endedAt.getTime() - runData?.startedAt.getTime()) / 1000,
+    );
+    await runsService.updateOne(run.id, { endedAt, duration });
   }
 };
 
