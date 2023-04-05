@@ -165,20 +165,28 @@ async function stop(runId: string) {
       throw new Error('no executions linked to that run id');
     }
 
+    const runningExecutions = allExecutions.filter(
+      (execution) => execution.status === 'RUNNING',
+    );
+    if (!runningExecutions || runningExecutions.length === 0) {
+      throw new Error('no running executions');
+    }
+
     // Stop executions for the run ID
     const responses = await Promise.all(
-      allExecutions.map(async (execution) => {
+      runningExecutions.map(async (execution) => {
         const getDetailCommand = new DescribeExecutionCommand({
           executionArn: execution.executionArn,
         });
 
         const executionDetails = await sfnClient.send(getDetailCommand);
+        console.log(executionDetails);
         if (!executionDetails || !executionDetails.input) {
           return;
         } else {
           if (JSON.parse(executionDetails.input).runId === runId) {
             const stopCommand = new StopExecutionCommand({
-              executionArn: STEP_FUNCTION_ARN,
+              executionArn: execution.executionArn,
             });
             return await sfnClient.send(stopCommand);
           }
