@@ -7,8 +7,10 @@ import prisma from './prisma-client';
 const updateRun = async (runStatus: RunStatus) => {
   const { run } = runStatus;
 
+  // Always update with latest status
   await runsService.updateOne(run.id, { status: run.status });
 
+  // If run commplete, also update end time and duration
   if (run.status === 'SUCCESS' || run.status === 'FAILURE') {
     const runData = await runsService.getOne(run.id);
     if (!runData) throw new Error('run not found');
@@ -22,6 +24,7 @@ const updateRun = async (runStatus: RunStatus) => {
 };
 
 const updateStages = async (runStatus: RunStatus) => {
+  const { run } = runStatus;
   const { stages } = runStatus;
 
   const stageUpdates = Object.values(stages);
@@ -69,6 +72,31 @@ const updateStages = async (runStatus: RunStatus) => {
         // Set the start time of the new stage
         stagesService.updateOne(stageUpdate.id, {
           startedAt: currentDate,
+        });
+      } else if (run.status === 'SUCCESS' || run.status === 'FAILURE') {
+        // If run is complete, update the end time and duration of the final stage
+        const currentStage = await prisma.stage.findUnique({
+          where: {
+            id: stageUpdate.id,
+          },
+        });
+
+        if (!currentStage) {
+          throw new Error('current stage does not exist');
+        }
+
+        if (!currentStage.startedAt) {
+          throw new Error('current stage not initialized with a start time');
+        }
+
+        const currentDate = new Date();
+
+        const duration = Math.ceil(
+          (currentDate.getTime() - currentStage.startedAt.getTime()) / 1000,
+        );
+        stagesService.updateOne(stageUpdate.id, {
+          endedAt: currentDate,
+          duration,
         });
       }
     }),
