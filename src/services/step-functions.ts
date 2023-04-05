@@ -180,7 +180,6 @@ async function stop(runId: string) {
         });
 
         const executionDetails = await sfnClient.send(getDetailCommand);
-        console.log(executionDetails);
         if (!executionDetails || !executionDetails.input) {
           return;
         } else {

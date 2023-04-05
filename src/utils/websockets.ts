@@ -36,9 +36,8 @@ class WebSocketsConnectionManager {
     });
 
     const dataString = JSON.stringify(data);
-    const dataUint8Array = Uint8Array.from(
-      dataString.split('').map((x) => x.charCodeAt(0)),
-    );
+    const encoder = new TextEncoder();
+    const dataUint8Array = encoder.encode(dataString);
 
     const postToConnectionCalls = this.connectionIds.map(
       async (connectionId) => {
