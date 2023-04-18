@@ -4,7 +4,7 @@
 
 > _Seamless automates the deployment process from push to Prod_
 
-Seamless's backend is comprised of an Express server connected to a Postgres database through the Prisma ORM.
+Seamless's backend is comprised of an [Express](https://expressjs.com/) server connected to a [Postgres](https://www.postgresql.org/) database through the [Prisma](https://www.prisma.io/) ORM. It utilizes the Amazon Web Service's [Software Development Kit](https://aws.amazon.com/sdk-for-javascript/) (SDK) to communicate with select parts of Seamless' infrastructure, including the [Step Functions](https://aws.amazon.com/step-functions/).
 
 ## Developer Usage
 
